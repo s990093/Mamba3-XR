@@ -1,0 +1,15 @@
+....F....
+======================================================================
+FAIL: test_numerical_equivalence (__main__.TestParallelScan.test_numerical_equivalence)
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/hungwei/Desktop/Proj/Mamba-Orin-Nano-Custom-S6-CUDA/mamba3/test_suite.py", line 113, in test_numerical_equivalence
+    self.assertLess(diff, 1e-6, f"Chunk Scan Mismatch! Diff: {diff}")
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: 7.221675275559392e-05 not less than 1e-06 : Chunk Scan Mismatch! Diff: 7.221675275559392e-05
+
+----------------------------------------------------------------------
+Ran 9 tests in 1.571s
+
+FAILED (failures=1)
+Running Mamba-3 Test Suite on cpu

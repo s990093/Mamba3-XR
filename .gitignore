@@ -1,3 +1,15 @@
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# AI assistant / workspace files
+task.md
+memory.md
+distillation/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

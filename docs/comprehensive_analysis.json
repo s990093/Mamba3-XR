@@ -1,0 +1,351 @@
+{
+  "analysis_date": "2025-12-29",
+  "runs_analyzed": 3,
+  "runs": {
+    "Rank 1": {
+      "directory_structure": {
+        "total_files": 107,
+        "erf_plots": 100,
+        "dist_plots": 4,
+        "model_files": 2
+      },
+      "erf_analysis": {
+        "total_erfs": 100,
+        "key_epochs": {
+          "0": {
+            "file": "erf_epoch_000.png",
+            "size": [
+              640,
+              480
+            ],
+            "mode": "RGBA"
+          },
+          "9": {
+            "file": "erf_epoch_009.png",
+            "size": [
+              640,
+              480
+            ],
+            "mode": "RGBA"
+          },
+          "19": {
+            "file": "erf_epoch_019.png",
+            "size": [
+              640,
+              480
+            ],
+            "mode": "RGBA"
+          },
+          "49": {
+            "file": "erf_epoch_049.png",
+            "size": [
+              640,
+              480
+            ],
+            "mode": "RGBA"
+          },
+          "99": {
+            "file": "erf_epoch_099.png",
+            "size": [
+              640,
+              480
+            ],
+            "mode": "RGBA"
+          }
+        },
+        "first_erf": "erf_epoch_000.png",
+        "last_erf": "erf_epoch_099.png"
+      },
+      "dist_plots": {
+        "gradients": {
+          "exists": true,
+          "size": [
+            1500,
+            1000
+          ],
+          "file_size_kb": 249.2421875
+        },
+        "mamba_internals": {
+          "exists": true,
+          "size": [
+            1200,
+            500
+          ],
+          "file_size_kb": 76.896484375
+        },
+        "metrics": {
+          "exists": true,
+          "size": [
+            1500,
+            500
+          ],
+          "file_size_kb": 84.2255859375
+        },
+        "state_health": {
+          "exists": true,
+          "size": [
+            1500,
+            500
+          ],
+          "file_size_kb": 216.1845703125
+        }
+      },
+      "checkpoints": {
+        "best": {
+          "size_mb": 18.07032871246338,
+          "keys": [
+            "epoch",
+            "model_state_dict",
+            "optimizer_state_dict",
+            "scheduler_state_dict",
+            "loss",
+            "acc"
+          ],
+          "epoch": 94
+        },
+        "last": {
+          "size_mb": 18.07032871246338,
+          "keys": [
+            "epoch",
+            "model_state_dict",
+            "optimizer_state_dict",
+            "scheduler_state_dict",
+            "loss",
+            "acc"
+          ],
+          "epoch": 99
+        }
+      }
+    },
+    "Rank 4": {
+      "directory_structure": {
+        "total_files": 107,
+        "erf_plots": 100,
+        "dist_plots": 4,
+        "model_files": 2
+      },
+      "erf_analysis": {
+        "total_erfs": 100,
+        "key_epochs": {
+          "0": {
+            "file": "erf_epoch_000.png",
+            "size": [
+              640,
+              480
+            ],
+            "mode": "RGBA"
+          },
+          "9": {
+            "file": "erf_epoch_009.png",
+            "size": [
+              640,
+              480
+            ],
+            "mode": "RGBA"
+          },
+          "19": {
+            "file": "erf_epoch_019.png",
+            "size": [
+              640,
+              480
+            ],
+            "mode": "RGBA"
+          },
+          "49": {
+            "file": "erf_epoch_049.png",
+            "size": [
+              640,
+              480
+            ],
+            "mode": "RGBA"
+          },
+          "99": {
+            "file": "erf_epoch_099.png",
+            "size": [
+              640,
+              480
+            ],
+            "mode": "RGBA"
+          }
+        },
+        "first_erf": "erf_epoch_000.png",
+        "last_erf": "erf_epoch_099.png"
+      },
+      "dist_plots": {
+        "gradients": {
+          "exists": true,
+          "size": [
+            1500,
+            1000
+          ],
+          "file_size_kb": 232.6748046875
+        },
+        "mamba_internals": {
+          "exists": true,
+          "size": [
+            1200,
+            500
+          ],
+          "file_size_kb": 79.853515625
+        },
+        "metrics": {
+          "exists": true,
+          "size": [
+            1500,
+            500
+          ],
+          "file_size_kb": 85.427734375
+        },
+        "state_health": {
+          "exists": true,
+          "size": [
+            1500,
+            500
+          ],
+          "file_size_kb": 201.91796875
+        }
+      },
+      "checkpoints": {
+        "best": {
+          "size_mb": 39.29597568511963,
+          "keys": [
+            "epoch",
+            "model_state_dict",
+            "optimizer_state_dict",
+            "scheduler_state_dict",
+            "loss",
+            "acc"
+          ],
+          "epoch": 95
+        },
+        "last": {
+          "size_mb": 39.29597568511963,
+          "keys": [
+            "epoch",
+            "model_state_dict",
+            "optimizer_state_dict",
+            "scheduler_state_dict",
+            "loss",
+            "acc"
+          ],
+          "epoch": 99
+        }
+      }
+    },
+    "Rank 8": {
+      "directory_structure": {
+        "total_files": 107,
+        "erf_plots": 100,
+        "dist_plots": 4,
+        "model_files": 2
+      },
+      "erf_analysis": {
+        "total_erfs": 100,
+        "key_epochs": {
+          "0": {
+            "file": "erf_epoch_000.png",
+            "size": [
+              640,
+              480
+            ],
+            "mode": "RGBA"
+          },
+          "9": {
+            "file": "erf_epoch_009.png",
+            "size": [
+              640,
+              480
+            ],
+            "mode": "RGBA"
+          },
+          "19": {
+            "file": "erf_epoch_019.png",
+            "size": [
+              640,
+              480
+            ],
+            "mode": "RGBA"
+          },
+          "49": {
+            "file": "erf_epoch_049.png",
+            "size": [
+              640,
+              480
+            ],
+            "mode": "RGBA"
+          },
+          "99": {
+            "file": "erf_epoch_099.png",
+            "size": [
+              640,
+              480
+            ],
+            "mode": "RGBA"
+          }
+        },
+        "first_erf": "erf_epoch_000.png",
+        "last_erf": "erf_epoch_099.png"
+      },
+      "dist_plots": {
+        "gradients": {
+          "exists": true,
+          "size": [
+            1500,
+            1000
+          ],
+          "file_size_kb": 215.185546875
+        },
+        "mamba_internals": {
+          "exists": true,
+          "size": [
+            1200,
+            500
+          ],
+          "file_size_kb": 73.228515625
+        },
+        "metrics": {
+          "exists": true,
+          "size": [
+            1500,
+            500
+          ],
+          "file_size_kb": 85.984375
+        },
+        "state_health": {
+          "exists": true,
+          "size": [
+            1500,
+            500
+          ],
+          "file_size_kb": 177.22265625
+        }
+      },
+      "checkpoints": {
+        "best": {
+          "size_mb": 67.59712314605713,
+          "keys": [
+            "epoch",
+            "model_state_dict",
+            "optimizer_state_dict",
+            "scheduler_state_dict",
+            "loss",
+            "acc"
+          ],
+          "epoch": 92
+        },
+        "last": {
+          "size_mb": 67.59712314605713,
+          "keys": [
+            "epoch",
+            "model_state_dict",
+            "optimizer_state_dict",
+            "scheduler_state_dict",
+            "loss",
+            "acc"
+          ],
+          "epoch": 99
+        }
+      }
+    }
+  }
+}

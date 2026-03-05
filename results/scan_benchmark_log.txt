@@ -1,0 +1,68 @@
+2025-12-28 00:20:54.028 Python[9121:25407585] ApplePersistenceIgnoreState: Existing state will not be touched. New state will be written to /var/folders/sq/hg8np8js4x92j1nx8y_mlls80000gn/T/org.python.python.savedState
+============================================================
+Mamba-3 Parallel Scan Numerical Stability Benchmark
+Comparison: Parallel Scan (Variable Dtype) vs Sequential Scan (Float64)
+============================================================
+Testing on device: mps
+
+>> Testing Sequence Length: 128
+   [FP32] Rel Err: nan | Max Err: nan
+   [BF16] Rel Err: nan | Max Err: nan
+   [FP16] Rel Err: nan | Max Err: nan
+
+>> Testing Sequence Length: 1024
+   [FP32] Rel Err: nan | Max Err: nan
+   [BF16] Rel Err: nan | Max Err: nan
+   [FP16] Rel Err: nan | Max Err: nan
+
+>> Testing Sequence Length: 2048
+   [FP32] Rel Err: nan | Max Err: nan
+   [BF16] Rel Err: nan | Max Err: nan
+   [FP16] Rel Err: nan | Max Err: nan
+
+>> Testing Sequence Length: 4096
+   [FP32] Rel Err: nan | Max Err: nan
+   [BF16] Rel Err: nan | Max Err: nan
+   [FP16] Rel Err: nan | Max Err: nan
+
+>> Testing Sequence Length: 8192
+   [FP32] Rel Err: nan | Max Err: nan
+   [BF16] Rel Err: nan | Max Err: nan
+   [FP16] Rel Err: nan | Max Err: nan
+
+>> Testing Sequence Length: 16384
+   [FP32] Rel Err: nan | Max Err: nan
+   [BF16] Rel Err: nan | Max Err: nan
+   [FP16] Rel Err: nan | Max Err: nan
+
+>> Testing Sequence Length: 32768
+   [FP32] Rel Err: nan | Max Err: nan
+   [BF16] Rel Err: nan | Max Err: nan
+   [FP16] Rel Err: nan | Max Err: nan
+
+Summary Table:
+    Length Dtype  Rel_Error  Max_Error
+0      128  FP32        NaN        NaN
+1      128  BF16        NaN        NaN
+2      128  FP16        NaN        NaN
+3     1024  FP32        NaN        NaN
+4     1024  BF16        NaN        NaN
+5     1024  FP16        NaN        NaN
+6     2048  FP32        NaN        NaN
+7     2048  BF16        NaN        NaN
+8     2048  FP16        NaN        NaN
+9     4096  FP32        NaN        NaN
+10    4096  BF16        NaN        NaN
+11    4096  FP16        NaN        NaN
+12    8192  FP32        NaN        NaN
+13    8192  BF16        NaN        NaN
+14    8192  FP16        NaN        NaN
+15   16384  FP32        NaN        NaN
+16   16384  BF16        NaN        NaN
+17   16384  FP16        NaN        NaN
+18   32768  FP32        NaN        NaN
+19   32768  BF16        NaN        NaN
+20   32768  FP16        NaN        NaN
+Results saved to results/scan_precision_benchmark.csv
+
+Plot saved to results/scan_precision_benchmark.png

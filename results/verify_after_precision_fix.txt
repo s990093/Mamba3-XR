@@ -1,0 +1,16 @@
+
+==================== 實驗 1: 數學秩 (Mathematical Rank) 驗證 ====================
+目標: 證明 MIMO Rank R 真的讓進入 SSM 的輸入訊號矩陣 (N x P) 擁有更高的秩。
+理論: SISO (Rank=1) 的輸入是 Outer Product，秩必為 1。MIMO (Rank=R) 的秩應為 R。
+Using device: mps
+Traceback (most recent call last):
+  File "/Users/hungwei/Desktop/Proj/Mamba-Orin-Nano-Custom-S6-CUDA/mamba3/apps/verify_mamba3.py", line 202, in <module>
+    verify_mathematical_rank()
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/Users/hungwei/Desktop/Proj/Mamba-Orin-Nano-Custom-S6-CUDA/mamba3/apps/verify_mamba3.py", line 31, in verify_mathematical_rank
+    config = Mamba3Config(
+        d_model=D,
+    ...<5 lines>...
+        use_conv=False
+    )
+TypeError: Mamba3Config.__init__() got an unexpected keyword argument 'n_heads'. Did you mean 'd_head'?

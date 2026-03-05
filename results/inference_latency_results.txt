@@ -1,0 +1,4 @@
+  File "/Users/hungwei/Desktop/Proj/Mamba-Orin-Nano-Custom-S6-CUDA/mamba3/apps/benchmark_inference_latency.py", line 37
+    d_head=d_model,  # n_heads will be 1 (d_inner/d_head = d_model/d_model = 1)
+    ^^^^^^^^^^^^^^
+SyntaxError: keyword argument repeated: d_head

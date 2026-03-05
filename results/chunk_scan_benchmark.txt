@@ -1,0 +1,68 @@
+2025-12-28 00:32:37.536 Python[12356:25425024] ApplePersistenceIgnoreState: Existing state will not be touched. New state will be written to /var/folders/sq/hg8np8js4x92j1nx8y_mlls80000gn/T/org.python.python.savedState
+============================================================
+Mamba-3 Parallel Scan Numerical Stability Benchmark
+Comparison: Parallel Scan (Variable Dtype) vs Sequential Scan (Float64)
+============================================================
+Testing on device: cpu
+
+>> Testing Sequence Length: 128
+   [Chunk-FP32  ] Rel Err: 1.62e-07 | Max Err: 1.68e-05
+   [Chunk-BF16  ] Rel Err: 2.97e-03 | Max Err: 2.97e-01
+   [Chunk-FP16  ] Rel Err: 3.60e-04 | Max Err: 3.45e-02
+
+>> Testing Sequence Length: 1024
+   [Chunk-FP32  ] Rel Err: 1.45e-07 | Max Err: 1.60e-05
+   [Chunk-BF16  ] Rel Err: 2.94e-03 | Max Err: 2.55e-01
+   [Chunk-FP16  ] Rel Err: 3.87e-04 | Max Err: 4.40e-02
+
+>> Testing Sequence Length: 2048
+   [Chunk-FP32  ] Rel Err: 1.64e-07 | Max Err: 1.98e-05
+   [Chunk-BF16  ] Rel Err: 3.23e-03 | Max Err: 4.14e-01
+   [Chunk-FP16  ] Rel Err: 3.65e-04 | Max Err: 4.81e-02
+
+>> Testing Sequence Length: 4096
+   [Chunk-FP32  ] Rel Err: 1.63e-07 | Max Err: 1.92e-05
+   [Chunk-BF16  ] Rel Err: 3.31e-03 | Max Err: 4.41e-01
+   [Chunk-FP16  ] Rel Err: 3.62e-04 | Max Err: 4.48e-02
+
+>> Testing Sequence Length: 8192
+   [Chunk-FP32  ] Rel Err: 1.80e-07 | Max Err: 2.82e-05
+   [Chunk-BF16  ] Rel Err: 2.89e-03 | Max Err: 4.80e-01
+   [Chunk-FP16  ] Rel Err: 3.67e-04 | Max Err: 5.59e-02
+
+>> Testing Sequence Length: 16384
+   [Chunk-FP32  ] Rel Err: 1.80e-07 | Max Err: 3.24e-05
+   [Chunk-BF16  ] Rel Err: 3.82e-03 | Max Err: 5.96e-01
+   [Chunk-FP16  ] Rel Err: 3.79e-04 | Max Err: 6.14e-02
+
+>> Testing Sequence Length: 32768
+   [Chunk-FP32  ] Rel Err: 1.74e-07 | Max Err: 2.67e-05
+   [Chunk-BF16  ] Rel Err: 3.55e-03 | Max Err: 5.50e-01
+   [Chunk-FP16  ] Rel Err: 4.53e-04 | Max Err: 7.13e-02
+
+Summary Table:
+    Length       Dtype     Rel_Error  Max_Error
+0      128  Chunk-FP32  1.615431e-07   0.000017
+1      128  Chunk-BF16  2.974518e-03   0.296556
+2      128  Chunk-FP16  3.598505e-04   0.034479
+3     1024  Chunk-FP32  1.451372e-07   0.000016
+4     1024  Chunk-BF16  2.941577e-03   0.255342
+5     1024  Chunk-FP16  3.869857e-04   0.043955
+6     2048  Chunk-FP32  1.635895e-07   0.000020
+7     2048  Chunk-BF16  3.230623e-03   0.414326
+8     2048  Chunk-FP16  3.651764e-04   0.048075
+9     4096  Chunk-FP32  1.628541e-07   0.000019
+10    4096  Chunk-BF16  3.306790e-03   0.440824
+11    4096  Chunk-FP16  3.619385e-04   0.044833
+12    8192  Chunk-FP32  1.797754e-07   0.000028
+13    8192  Chunk-BF16  2.890421e-03   0.480100
+14    8192  Chunk-FP16  3.666895e-04   0.055879
+15   16384  Chunk-FP32  1.804349e-07   0.000032
+16   16384  Chunk-BF16  3.824400e-03   0.595830
+17   16384  Chunk-FP16  3.790055e-04   0.061414
+18   32768  Chunk-FP32  1.739031e-07   0.000027
+19   32768  Chunk-BF16  3.545551e-03   0.549579
+20   32768  Chunk-FP16  4.526254e-04   0.071313
+Results saved to results/chunk_scan_stability.csv
+
+Plot saved to results/chunk_scan_stability.png
