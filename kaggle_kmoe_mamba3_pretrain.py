@@ -1,4 +1,5 @@
 %%writefile train.py
+
 import os
 import glob
 import math
@@ -21,6 +22,10 @@ import multiprocessing
 
 # 減少 CUDA 記憶體碎片，允許 allocator 使用 expandable segments
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+
+# 把編譯快取存到 working 目錄，這樣下次開機就不會遺失了！
+os.environ["TORCHINDUCTOR_CACHE_DIR"] = "/kaggle/working/torch_compile_cache"
+os.environ["TRITON_CACHE_DIR"] = "/kaggle/working/triton_cache"
 
 # ==========================================
 # 1. K-MoE Mamba-3 Config
@@ -139,24 +144,51 @@ class KroneckerMoE(nn.Module):
         if self.training:
             expert_mask = torch.zeros(B_flat, self.num_experts, device=x.device, dtype=torch.float32)
             expert_mask.scatter_(1, top_k_indices, 1.0)
-            # Compute in float32 to avoid FP16 underflow (MoE training best practice)
             epoch_f_i = expert_mask.mean(dim=0)
             epoch_P_i = router_probs.float().mean(dim=0)
             aux_loss = self.num_experts * torch.sum(epoch_f_i * epoch_P_i)
-            aux_loss = aux_loss.to(x.dtype)  # cast back to input dtype
+            aux_loss = aux_loss.to(x.dtype)
         else:
             aux_loss = torch.tensor(0.0, device=x.device, dtype=x.dtype)
 
         x_sub = x_flat.reshape(B_flat, self.dim_in1, self.dim_in2)
+        
+        # ==========================================
+        # 🚀 效能優化區塊：Token-to-Expert Dispatching
+        # ==========================================
         output = torch.zeros(B_flat, self.dim_out1, self.dim_out2, device=x.device, dtype=x.dtype)
         
-        for k in range(self.top_k):
-            expert_idx = top_k_indices[:, k]
-            probs = top_k_probs[:, k].unsqueeze(1).unsqueeze(2)
-            A_k = self.A_experts[expert_idx]
-            B_k = self.B_experts[expert_idx]
-            Y_k = torch.bmm(torch.bmm(A_k, x_sub), B_k.transpose(1, 2))
-            output += probs * Y_k
+        # 找出這個 Batch 中，真正有被分配到 Token 的專家 (排除掉閒置的專家)
+        active_experts = torch.unique(top_k_indices)
+
+        for expert_idx in active_experts:
+            # 找出哪些 Token (batch_idx) 選擇了這位專家，以及是第幾個志願 (k_idx)
+            token_mask = (top_k_indices == expert_idx)
+            batch_idx, k_idx = torch.where(token_mask)
+            
+            # 如果剛好沒有 Token 選到，直接跳過
+            if len(batch_idx) == 0:
+                continue
+
+            # 1. 整理 Token 與對應的機率 (Gather)
+            tokens_e = x_sub[batch_idx]  # 形狀: (Tokens數量, dim_in1, dim_in2)
+            probs_e = top_k_probs[batch_idx, k_idx].unsqueeze(1).unsqueeze(2).to(x.dtype) # 形狀: (Tokens數量, 1, 1)
+
+            # 2. 取出該名專家的權重 (只發生一次，減少記憶體頻寬消耗)
+            A_e = self.A_experts[expert_idx]  # 形狀: (dim_out1, dim_in1)
+            B_e = self.B_experts[expert_idx]  # 形狀: (dim_out2, dim_in2)
+
+            # 3. 透過 Einsum 一次性對這批 Token 進行 Kronecker 乘法
+            # 這裡完美取代了原本的兩次 bmm 與 transpose 操作
+            # 'oi' 是 A矩陣, 'nij' 是 Token, 'pj' 是 B矩陣 -> 輸出 'nop'
+            Y_e = torch.einsum('oi, nij, pj -> nop', A_e, tokens_e, B_e)
+
+            # 4. 乘上 Router 權重並加回原本的 output (Scatter Add)
+            output[batch_idx] += Y_e * probs_e
+
+            # 🚀 新增這行：強制立刻釋放計算圖的暫存節點，把 VRAM 還給 GPU
+            del tokens_e, probs_e, A_e, B_e, Y_e
+        # ==========================================
             
         output = output.reshape(*orig_shape[:-1], -1)
         output = output * self.scale + self.bias
@@ -176,13 +208,11 @@ class Mamba3Block(nn.Module):
         self.dim_B = G * N * R
         self.dim_C = G * N * R
         self.dim_dt = G
+        self.dim_A = G
         self.dim_lambda = G
         
-        d_proj_total = self.dim_z + self.dim_x + self.dim_B + self.dim_C + self.dim_dt + self.dim_lambda
+        d_proj_total = self.dim_z + self.dim_x + self.dim_B + self.dim_C + self.dim_dt + self.dim_A + self.dim_lambda
         self.in_proj = nn.Linear(d_in, d_proj_total, bias=True)
-
-        if config.use_conv:
-            self.conv = nn.Conv1d(self.dim_x, self.dim_x, bias=True, kernel_size=config.d_conv, groups=self.dim_x, padding=config.d_conv-1)
         
         if config.use_kmoe:
             def get_factors(n):
@@ -197,9 +227,6 @@ class Mamba3Block(nn.Module):
             
         self.y_down_proj = nn.Linear(P * R, P, bias=False)
 
-        A_min, A_max = config.A_init_range
-        self.A_log = nn.Parameter(torch.empty(G).uniform_(A_min, A_max).log())
-        self.A_log._no_weight_decay = True
         self.theta_log = nn.Parameter(torch.randn(G, N // 2))
         self.D = nn.Parameter(torch.ones(H))
 
@@ -215,6 +242,7 @@ class Mamba3Block(nn.Module):
         else:
             self.out_proj = nn.Linear(config.d_inner, d_in, bias=False)
             
+        self.pre_gate_norm = RMSNorm(H * P)
         self.act = nn.SiLU()
         
         with torch.no_grad():
@@ -223,12 +251,15 @@ class Mamba3Block(nn.Module):
             nn.init.xavier_uniform_(self.y_down_proj.weight, gain=1.0 / math.sqrt(R) if R > 1 else 1.0)
             self.bias_B.fill_(1.0)
             self.bias_C.fill_(1.0)
+            A_min, A_max = config.A_init_range
             dt = torch.clamp(torch.exp(torch.rand(G) * (math.log(config.dt_max) - math.log(config.dt_min)) + math.log(config.dt_min)), min=config.dt_init_floor)
             inv_dt = dt + torch.log(-torch.expm1(-dt))
             dt_start = self.dim_z + self.dim_x + self.dim_B + self.dim_C
             dt_end = dt_start + self.dim_dt
+            A_end = dt_end + self.dim_A
             self.in_proj.bias[dt_start:dt_end].copy_(inv_dt)
-            self.in_proj.bias[dt_end:].fill_(-3.0)
+            self.in_proj.bias[dt_end:A_end].uniform_(A_min, A_max).log_()
+            self.in_proj.bias[A_end:].fill_(-3.0)
 
     def apply_rope(self, x, angles):
         N_half = angles.shape[-1]
@@ -256,7 +287,7 @@ class Mamba3Block(nn.Module):
             dt = F.pad(dt, (0, 0, 0, pad_len))
             C = F.pad(C, (0, 0, 0, 0, 0, 0, 0, pad_len))
             L = L + pad_len
-        log_alpha = dt * A.view(1, 1, H)
+        log_alpha = dt * A
         num_chunks = L // chunk_size
         u_chunk = u.view(B, num_chunks, chunk_size, H, N, P)
         dt_chunk = dt.view(B, num_chunks, chunk_size, H)
@@ -307,21 +338,17 @@ class Mamba3Block(nn.Module):
         ratio = self.ratio
 
         projected = self.in_proj(u)
-        z, x_prime, B_param, C_param, dt, lambda_param = torch.split(projected, [self.dim_z, self.dim_x, self.dim_B, self.dim_C, self.dim_dt, self.dim_lambda], dim=-1)
+        z, x_prime, B_param, C_param, dt, A_param, lambda_param = torch.split(projected, [self.dim_z, self.dim_x, self.dim_B, self.dim_C, self.dim_dt, self.dim_A, self.dim_lambda], dim=-1)
 
-        if self.config.use_conv:
-            x_prime_conv = self.conv(x_prime.transpose(1, 2))[:, :, :L]
-            x_prime = x_prime_conv.transpose(1, 2)
         x_prime = x_prime.view(B_sz, L, H, P)
         
         dt = F.softplus(dt)
-        if self.config.dt_limit != (0.0, float("inf")): dt = dt.clamp(*self.config.dt_limit)
-        A = -torch.exp(self.A_log)
+        A = -torch.exp(A_param)
         theta = torch.exp(self.theta_log)
         
         broadcast_group = lambda t, _: t.repeat_interleave(ratio, dim=2)
         dt = broadcast_group(dt.unsqueeze(-1), None).squeeze(-1)
-        A_broadcast, theta_broadcast = A.repeat_interleave(ratio, dim=0), theta.repeat_interleave(ratio, dim=0)
+        A_broadcast, theta_broadcast = broadcast_group(A.unsqueeze(-1), None).squeeze(-1), theta.repeat_interleave(ratio, dim=0)
         
         angles = torch.cumsum(torch.einsum('blh, hn -> blhn', dt, theta_broadcast), dim=1)
         B_param_normed = self.norm_B(B_param.reshape(B_sz, L, G, N * R)).view(B_sz, L, G, N, R) + self.bias_B
@@ -340,7 +367,7 @@ class Mamba3Block(nn.Module):
         input_signal = torch.einsum('blhnr, blhpr -> blhnp', B_rotated, x)
         lambda_view = F.sigmoid(broadcast_group(lambda_param.unsqueeze(-1), None).squeeze(-1)).view(B_sz, L, H, 1, 1)
         dt_view = dt.view(B_sz, L, H, 1, 1)
-        alpha_view = torch.exp(torch.einsum('blh, h -> blh', dt, A_broadcast)).view(B_sz, L, H, 1, 1)
+        alpha_view = torch.exp(dt * A_broadcast).view(B_sz, L, H, 1, 1)
 
         input_signal_prev = torch.roll(input_signal, shifts=1, dims=1)
         input_signal_prev[:, 0] = 0 
@@ -358,6 +385,9 @@ class Mamba3Block(nn.Module):
 
         y = self.y_down_proj(y_stack.view(B_sz, L, H, P * R)).view(B_sz, L, H * P)
         y = y + x_prime.reshape(B_sz, L, H * P) * self.D.repeat_interleave(P, dim=0)
+
+        # 🌟 論文強推的改進點：在乘上 act(z) 之前做 Norm
+        y = self.pre_gate_norm(y)
         y = y * self.act(z)
 
         if self.config.use_kmoe:
@@ -398,8 +428,15 @@ class TransformerBlock(nn.Module):
     def forward(self, x):
         B, L, D = x.shape
         # Causal attention
-        causal_mask = torch.triu(torch.ones(L, L, device=x.device, dtype=x.dtype) * float('-inf'), diagonal=1)
-        attn_out, _ = self.attn(self.norm_attn(x), self.norm_attn(x), self.norm_attn(x), attn_mask=causal_mask)
+        causal_mask = nn.Transformer.generate_square_subsequent_mask(L, device=x.device)
+        attn_out, _ = self.attn(
+            self.norm_attn(x), 
+            self.norm_attn(x), 
+            self.norm_attn(x), 
+            attn_mask=causal_mask,
+            is_causal=True,
+            need_weights=False  # 👈 這是觸發 FlashAttention 的關鍵
+        )
         x = x + attn_out
         
         # FFN
@@ -585,9 +622,9 @@ class Mamba3LanguageModel(nn.Module):
             # record detached scalars for logging
             try:
                 self._last_loss_terms = {
-                    "ce_loss": float(ce_loss.detach().cpu()),
-                    "aux_loss": float(aux_contrib.detach().cpu()),
-                    "raw_aux": float(raw_aux.detach().cpu()),
+                    "ce_loss": ce_loss.detach(),
+                    "aux_loss": aux_contrib.detach(),
+                    "raw_aux": raw_aux.detach(),
                 }
             except Exception:
                 self._last_loss_terms = None
@@ -706,12 +743,13 @@ def main():
     TOKENIZER_PATH = "/kaggle/input/datasets/s990093/tokenizer/fineweb_tokenizer.model"
     # 先用較小 batch 與較少累積步數，降低顯存壓力
     BATCH_SIZE = 1
-    GRADIENT_ACCUMULATION_STEPS = 8
+    # GRADIENT_ACCUMULATION_STEPS = 1
+    GRADIENT_ACCUMULATION_STEPS = 16
     
     SEQ_LEN = 512
     STEPS = 10000
     LR = 3e-4 
-    WARMUP = 1000
+    WARMUP = 500
     VOCAB_SIZE = 32000
 
     SUBSET_FILE = "/kaggle/input/datasets/s990093/train-sentencepiece/spm_train_subset.txt"
@@ -734,17 +772,24 @@ def main():
         d_model=1024,
         d_state=64,
         expand=4,           
-        num_layers=7,       # num_layers = num macro-blocks; each = 4 Mamba + 1 Transformer → 15 total blocks
+        num_layers=8,       # num_layers = num macro-blocks; each = 4 Mamba + 1 Transformer → 15 total blocks
         use_parallel_scan=True,
         chunk_size=64,
         use_kmoe=True,
         kmoe_num_experts=256,
         mimo_rank=4,
-        kmoe_top_k=8
+        kmoe_top_k=4
     )
     
     print("Initializing Model...")
     model = Mamba3LanguageModel(config, vocab_size=actual_vocab_size)
+    
+    # 🚀 新增這段：啟用計算圖編譯
+    if hasattr(torch, "compile"):
+        print("🔥 Compiling model with torch.compile for extra speed...")
+        # 這裡不影響 state_dict，Checkpoint 依然能無縫讀取！
+        model = torch.compile(model)
+        
     print("=== Model Architecture ===")
     total_params = sum(p.numel() for p in model.parameters())
     moe_params = sum(p.numel() for m in model.modules() if isinstance(m, KroneckerMoE) for p in m.parameters(recurse=False))
@@ -815,10 +860,23 @@ def main():
     scheduler = LambdaLR(optimizer, lr_lambda)
     
     start_step = 0
-    checkpoint_path = "mamba3_kmoe_checkpoint.pt"
-    if os.path.exists(checkpoint_path):
-        print(f"🔄 Found checkpoint: {checkpoint_path} — Resuming training...")
-        ckpt = torch.load(checkpoint_path, map_location="cpu")
+    checkpoint_load_path = "/kaggle/input/datasets/s990093/checkpoint/mamba3_kmoe_checkpoint.pt"
+    checkpoint_save_path = "mamba3_kmoe_checkpoint.pt"
+    
+    if os.path.exists(checkpoint_load_path):
+        print(f"🔄 Found checkpoint in Kaggle Input: {checkpoint_load_path} — Resuming training...")
+        ckpt = torch.load(checkpoint_load_path, map_location="cpu")
+        model.load_state_dict(ckpt["model"])
+        optimizer.load_state_dict(ckpt["optimizer"])
+        scheduler.load_state_dict(ckpt["scheduler"])
+        start_step = ckpt["step"]
+        print(
+            f"✅ Resumed from Step {start_step} / {ckpt.get('total_steps', '?')} | "
+            f"Last Loss: {ckpt.get('last_loss', 'N/A')}"
+        )
+    elif os.path.exists(checkpoint_save_path):
+        print(f"🔄 Found checkpoint in local working dir: {checkpoint_save_path} — Resuming training...")
+        ckpt = torch.load(checkpoint_save_path, map_location="cpu")
         model.load_state_dict(ckpt["model"])
         optimizer.load_state_dict(ckpt["optimizer"])
         scheduler.load_state_dict(ckpt["scheduler"])
@@ -852,11 +910,12 @@ def main():
     batch_idx = 0
     running_loss = 0.0
     running_aux = 0.0
+    running_raw_aux = 0.0  
     
     LOG_FILE = "training_log.csv"
     if accelerator.is_main_process and not os.path.exists(LOG_FILE):
         with open(LOG_FILE, "w") as f:
-            f.write("step,loss,aux_loss,ppl,lr,mem_gb_0,mem_gb_1\n")
+            f.write("step,loss,aux_loss,raw_aux,ppl,lr,mem_gb_0,mem_gb_1,step_time\n")
     
     world_size = num_gpus
     if accelerator.is_main_process:
@@ -865,6 +924,9 @@ def main():
             f"({BATCH_SIZE}/GPU × {GRADIENT_ACCUMULATION_STEPS} accum × {world_size} GPUs)"
         )
 
+    if accelerator.is_main_process:
+        step_start_time = time.time()
+        
     while global_step < STEPS:
         try:
             x, y = next(data_iter)
@@ -882,13 +944,28 @@ def main():
             # 訓練時只需要 loss，避免把巨量 logits gather 回單卡
             loss, raw_aux = model(x, labels=y)
             # 轉成 CPU scalar 做 logging；多卡時各進程各自記錄本地平均
+            
+            # 從模型中取出剛才存下來的 scalar 字典
+            if hasattr(model, "module") and getattr(model.module, "_last_loss_terms", None) is not None:
+                loss_terms = model.module._last_loss_terms
+            elif getattr(model, "_last_loss_terms", None) is not None:
+                loss_terms = model._last_loss_terms
+            else:
+                loss_terms = {"ce_loss": 0.0, "aux_loss": 0.0, "raw_aux": raw_aux.detach()}
+                
             loss_for_log = loss.detach().float().mean().item()
-            aux_for_log = raw_aux.detach().float().mean().item()
+            def get_float(val):
+                return val.float().mean().item() if isinstance(val, torch.Tensor) else val
+
+            aux_for_log = get_float(loss_terms.get("aux_loss", 0.0))
+            raw_aux_log = get_float(loss_terms.get("raw_aux", raw_aux.detach()))
+
             loss = loss / GRADIENT_ACCUMULATION_STEPS 
         
         accelerator.backward(loss)
         running_loss += loss_for_log  # track pre-scaled loss for accurate reporting
         running_aux += aux_for_log
+        running_raw_aux += raw_aux_log
         batch_idx += 1
         
         # Show batch-level progress within each accumulation window
@@ -906,8 +983,10 @@ def main():
             global_step += 1
             loss_val = running_loss / GRADIENT_ACCUMULATION_STEPS
             aux_val = running_aux / GRADIENT_ACCUMULATION_STEPS
+            raw_aux_val = running_raw_aux / GRADIENT_ACCUMULATION_STEPS
             running_loss = 0.0
             running_aux = 0.0
+            running_raw_aux = 0.0
             ppl = math.exp(min(loss_val, 20)) 
             lr_val = scheduler.get_last_lr()[0]
             # GPU memory usage (in GB) on當前進程的 device
@@ -919,9 +998,10 @@ def main():
                 mem_gb_1 = 0.0
             
             if accelerator.is_main_process:
+                step_time = time.time() - step_start_time
                 log_line = (
-                    f"Step {global_step:05d}/{STEPS} | "
-                    f"Loss: {loss_val:.4f} (aux {aux_val:.4f}) | "
+                    f"Step {global_step:05d}/{STEPS} | Time {step_time:.2f}s | "
+                    f"Loss: {loss_val:.4f} (aux_scaled {aux_val:.4f}, aux_raw {raw_aux_val:.4f}) | "
                     f"PPL: {ppl:.2f} | LR: {lr_val:.2e} | "
                     f"Mem[GB] GPU={mem_gb_0:.2f}"
                 )
@@ -929,7 +1009,9 @@ def main():
                 
                 # Save every step to CSV file
                 with open(LOG_FILE, "a") as f:
-                    f.write(f"{global_step},{loss_val:.6f},{aux_val:.6f},{ppl:.4f},{lr_val:.2e},{mem_gb_0:.3f},{mem_gb_1:.3f}\n")
+                    f.write(f"{global_step},{loss_val:.6f},{aux_val:.6f},{raw_aux_val:.6f},{ppl:.4f},{lr_val:.2e},{mem_gb_0:.3f},{mem_gb_1:.3f},{step_time:.3f}\n")
+                
+                step_start_time = time.time()
                 
                 if global_step % 200 == 0:
                     unwrapped = accelerator.unwrap_model(model)
@@ -941,7 +1023,7 @@ def main():
                         'model': state_dict,
                         'optimizer': optimizer.state_dict(),
                         'scheduler': scheduler.state_dict(),
-                    }, checkpoint_path)
+                    }, checkpoint_save_path)
                     print(f"💾 Checkpoint saved  →  Step {global_step}/{STEPS} | Loss: {loss_val:.4f}")
                 
     if accelerator.is_main_process:
