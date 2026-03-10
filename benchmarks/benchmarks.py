@@ -6,17 +6,16 @@ def generate_parity_data(batch_size, seq_len):
     Parity Task
     Tests model's long-term precise discrete state memory & ability to avoid decay.
     """
-    X_raw = torch.randint(0, 2, (batch_size, seq_len))
-    Y = torch.zeros_like(X_raw)
+    X = torch.randint(0, 2, (batch_size, seq_len))
+    Y = torch.zeros_like(X)
     
     # Calculate cumulative XOR
-    Y[:, 0] = X_raw[:, 0]
+    Y[:, 0] = X[:, 0]
     for t in range(1, seq_len):
-        Y[:, t] = (Y[:, t-1] ^ X_raw[:, t])
+        Y[:, t] = (Y[:, t-1] ^ X[:, t])
 
-    # In Parity for sequence length generalization, we feed {-1, 1} as floats and predict parity.
-    X = (X_raw.float() * 2.0) - 1.0
-    return X.unsqueeze(-1), Y.long()
+    # In Parity for sequence length generalization, we feed {0, 1} as floats and predict parity.
+    return X.float().unsqueeze(-1), Y.long()
 
 def generate_modular_arithmetic_data(batch_size, seq_len, with_brackets=False, modulo=5):
     """

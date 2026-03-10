@@ -45,7 +45,11 @@ BLOCK_SIZE = 64        # Each Mamba chunk size
 SEQ_LEN    = 256       # Total sequence length = 4 blocks
 BATCH_SIZE = 32
 TOTAL_STEPS = 3000
-DEVICE = 'mps' if (hasattr(torch.backends, 'mps') and torch.backends.mps.is_available()) else 'cpu'
+
+
+# DEVICE = 'mps' if (hasattr(torch.backends, 'mps') and torch.backends.mps.is_available()) else 'cpu'
+DEVICE = 'cuda'
+
 print(f"Using device: {DEVICE}")
 
 # ─────────────────────────────────────────────────────────────────────────────

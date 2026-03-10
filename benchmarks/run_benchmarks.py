@@ -3,16 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 from models.mamba2 import Mamba2Config, Mamba2Block
 from models.mamba3 import Mamba3Config, Mamba3Block
-from benchmarks import data_generators as benchmarks
-import time
-import matplotlib.pyplot as plt
-import os
-
-import torch
-import torch.nn as nn
-import torch.optim as optim
-from models.mamba2 import Mamba2Config, Mamba2Block
-from models.mamba3 import Mamba3Config, Mamba3Block
+from models.block_recurrent_mamba3 import HybridBlockRecurrentMamba
 from benchmarks import data_generators as benchmarks
 import time
 import matplotlib.pyplot as plt
@@ -40,6 +31,21 @@ class MambaBenchModel(nn.Module):
             h = layer(h)
         h = self.norm(h)
         return self.head(h)
+
+class HybridBenchModel(nn.Module):
+    def __init__(self, config, block_size=16, is_discrete=True, vocab_size=10, d_out=10):
+        super().__init__()
+        self.model = HybridBlockRecurrentMamba(config, block_size=block_size, vocab_size=vocab_size, d_out=d_out)
+        self.is_discrete = is_discrete
+        if not is_discrete:
+            # Add non-linearity to scalar inputs to help trigger SSM state shifts for Parity
+            self.model.embed = nn.Sequential(
+                nn.Linear(1, config.d_model),
+                nn.Tanh()
+            )
+
+    def forward(self, x):
+        return self.model(x)
 
 def train_and_eval(model_name, model, dataloader_fn, total_steps=10000, lr=1e-3, device='cpu', eval_fn=None, print_every=50):
     optimizer = optim.AdamW(model.parameters(), lr=lr)
@@ -69,21 +75,29 @@ def train_and_eval(model_name, model, dataloader_fn, total_steps=10000, lr=1e-3,
         
         # Flatten for CrossEntropy (-100 gets ignored automatically)
         loss = criterion(logits.view(-1, logits.size(-1)), Y.view(-1))
-        loss.backward()
         
-        # Gradient clipping for stability
-        torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
-        optimizer.step()
-        
-        with torch.no_grad():
-            preds = logits.argmax(dim=-1)
-            mask = (Y != -100)
-            if mask.sum() > 0:
-                acc = (preds[mask] == Y[mask]).float().mean().item()
-            else:
-                acc = 0.0
+        if torch.isnan(loss):
+            print("Detected NaN loss, skipping step...")
+            optimizer.zero_grad()
+            loss_val = 0.0
+            acc = 0.0
+        else:
+            loss.backward()
+            
+            # Gradient clipping for stability
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+            optimizer.step()
+            loss_val = loss.item()
+            
+            with torch.no_grad():
+                preds = logits.argmax(dim=-1)
+                mask = (Y != -100)
+                if mask.sum() > 0:
+                    acc = (preds[mask] == Y[mask]).float().mean().item()
+                else:
+                    acc = 0.0
                 
-        total_loss += loss.item()
+        total_loss += loss_val
         total_acc += acc
         
         if step % print_every == 0 or step == total_steps:
@@ -101,16 +115,17 @@ def train_and_eval(model_name, model, dataloader_fn, total_steps=10000, lr=1e-3,
     final_acc = history['acc'][-1] if history['acc'] else 0.0
     return model, history, final_acc, train_time
 
-def plot_results(task_name, hist2, hist3, save_dir="results"):
+def plot_results(task_name, hist2, hist3, hist_h=None, save_dir="results"):
     os.makedirs(save_dir, exist_ok=True)
-    steps = range(1, len(hist2['loss']) + 1)
     
     plt.figure(figsize=(12, 5))
     
     # Loss Plot
     plt.subplot(1, 2, 1)
-    plt.plot(steps, hist2['loss'], label='Mamba-2', color='blue', linewidth=2)
-    plt.plot(steps, hist3['loss'], label='Mamba-3', color='red', linewidth=2, linestyle='--')
+    plt.plot(range(1, len(hist2['loss']) + 1), hist2['loss'], label='Mamba-2', color='blue', linewidth=2)
+    plt.plot(range(1, len(hist3['loss']) + 1), hist3['loss'], label='Mamba-3', color='red', linewidth=2, linestyle='--')
+    if hist_h:
+        plt.plot(range(1, len(hist_h['loss']) + 1), hist_h['loss'], label='Hybrid Mamba', color='green', linewidth=2, linestyle='-.')
     plt.title(f"{task_name} - Training Loss")
     plt.xlabel("Evaluation Step")
     plt.ylabel("Loss")
@@ -119,8 +134,10 @@ def plot_results(task_name, hist2, hist3, save_dir="results"):
     
     # Accuracy Plot
     plt.subplot(1, 2, 2)
-    plt.plot(steps, hist2['acc'], label='Mamba-2', color='blue', linewidth=2)
-    plt.plot(steps, hist3['acc'], label='Mamba-3', color='red', linewidth=2, linestyle='--')
+    plt.plot(range(1, len(hist2['acc']) + 1), hist2['acc'], label='Mamba-2', color='blue', linewidth=2)
+    plt.plot(range(1, len(hist3['acc']) + 1), hist3['acc'], label='Mamba-3', color='red', linewidth=2, linestyle='--')
+    if hist_h:
+        plt.plot(range(1, len(hist_h['acc']) + 1), hist_h['acc'], label='Hybrid Mamba', color='green', linewidth=2, linestyle='-.')
     plt.title(f"{task_name} - Training Accuracy")
     plt.xlabel("Evaluation Step")
     plt.ylabel("Accuracy")
@@ -152,34 +169,47 @@ def run_parity_benchmark(device='cpu', batch_size=128, total_steps=5000):
     config3 = Mamba3Config(d_model=64, d_state=64, d_head=32, mimo_rank=2) 
     model3 = MambaBenchModel(config3, Mamba3Block, is_discrete=False, d_out=2, n_layers=1)
     
-    model2, hist2, acc2_train, t2 = train_and_eval("Mamba-2 (Parity)", model2, get_train_data, total_steps=total_steps, device=device)
-    model3, hist3, acc3_train, t3 = train_and_eval("Mamba-3 (Parity)", model3, get_train_data, total_steps=total_steps, device=device)
+    # Hybrid config (using slightly smaller state to compensate for memory bank param overhead)
+    config_h = Mamba3Config(d_model=64, d_state=32, d_head=32, mimo_rank=2)
+    model_h = HybridBenchModel(config_h, block_size=32, is_discrete=False, d_out=2)
     
-    plot_results("Parity", hist2, hist3)
+    # Paper uses learning rates around 5e-3 to 1e-2 for state tracking and 10k steps
+    # However, to avoid gradient explosions and NaN loss initially, we start with 5e-4.
+    lr = 5e-4
+    model_h, hist_h, acc_h_train, t_h = train_and_eval("Hybrid Mamba (Parity)", model_h, get_train_data, total_steps=total_steps, lr=lr, device=device)
+    model2, hist2, acc2_train, t2 = train_and_eval("Mamba-2 (Parity)", model2, get_train_data, total_steps=total_steps, lr=lr, device=device)
+    model3, hist3, acc3_train, t3 = train_and_eval("Mamba-3 (Parity)", model3, get_train_data, total_steps=total_steps, lr=lr, device=device)
+    
+    plot_results("Parity", hist2, hist3, hist_h)
     
     # Extrapolation (Generalization to 256)
     test_seq_len = 256
+    
     with torch.no_grad():
         X_test, Y_test = benchmarks.generate_parity_data(batch_size, test_seq_len)
         X_test, Y_test = X_test.to(device), Y_test.to(device)
         
         out2 = model2(X_test).argmax(dim=-1)
         out3 = model3(X_test).argmax(dim=-1)
+        out_h = model_h(X_test).argmax(dim=-1)
         
         acc2_gen = (out2 == Y_test).float().mean().item()
         acc3_gen = (out3 == Y_test).float().mean().item()
+        acc_h_gen = (out_h == Y_test).float().mean().item()
         
         print(f"[Generalization to L={test_seq_len}]")
         print(f"Mamba-2 Acc: {acc2_gen*100:.1f}%")
         print(f"Mamba-3 Acc: {acc3_gen*100:.1f}%")
+        print(f"Hybrid Acc:  {acc_h_gen*100:.1f}%")
         print("\n")
         
     return {
-        "m2_train_acc": acc2_train, "m3_train_acc": acc3_train,
-        "m2_gen_acc": acc2_gen, "m3_gen_acc": acc3_gen,
-        "m2_time": t2, "m3_time": t3,
+        "m2_train_acc": acc2_train, "m3_train_acc": acc3_train, "mh_train_acc": acc_h_train,
+        "m2_gen_acc": acc2_gen, "m3_gen_acc": acc3_gen, "mh_gen_acc": acc_h_gen,
+        "m2_time": t2, "m3_time": t3, "mh_time": t_h,
         "m2_params": sum(p.numel() for p in model2.parameters()),
-        "m3_params": sum(p.numel() for p in model3.parameters())
+        "m3_params": sum(p.numel() for p in model3.parameters()),
+        "mh_params": sum(p.numel() for p in model_h.parameters())
     }
 
 def run_modular_arithmetic_benchmark(device='cpu', batch_size=128, total_steps=5000, with_brackets=False):
@@ -200,37 +230,48 @@ def run_modular_arithmetic_benchmark(device='cpu', batch_size=128, total_steps=5
     config2 = Mamba2Config(d_model=64, d_state=64, d_head=32)
     model2 = MambaBenchModel(config2, Mamba2Block, is_discrete=True, vocab_size=vocab_size, d_out=modulo, n_layers=3)
     
-    config3 = Mamba3Config(d_model=64, d_state=64, d_head=32, mimo_rank=2) 
+    config3 = Mamba3Config(d_model=64, d_state=64, d_head=32, mimo_rank=4) 
     model3 = MambaBenchModel(config3, Mamba3Block, is_discrete=True, vocab_size=vocab_size, d_out=modulo, n_layers=3)
+    
+    config_h = Mamba3Config(d_model=64, d_state=32, d_head=32, mimo_rank=4)
+    model_h = HybridBenchModel(config_h, block_size=32, is_discrete=True, vocab_size=vocab_size, d_out=modulo)
+
+
+       
+    title_h = f"Hybrid MA {prefix}"
+    model_h, hist_h, acc_h_train, t_h = train_and_eval(title_h, model_h, get_train_data, total_steps=total_steps, device=device)
+    
     
     title = f"Mamba-2 MA {prefix}"
     model2, hist2, acc2_train, t2 = train_and_eval(title, model2, get_train_data, total_steps=total_steps, device=device)
     
     title3 = f"Mamba-3 MA {prefix}"
     model3, hist3, acc3_train, t3 = train_and_eval(title3, model3, get_train_data, total_steps=total_steps, device=device)
-    
-    plot_results(f"Modular_Arithmetic_{prefix.replace(' ', '_').strip('()')}", hist2, hist3)
+ 
+    plot_results(f"Modular_Arithmetic_{prefix.replace(' ', '_').strip('()')}", hist2, hist3, hist_h)
     
     return {
-        "m2_acc": acc2_train, "m3_acc": acc3_train,
-        "m2_time": t2, "m3_time": t3
+        "m2_acc": acc2_train, "m3_acc": acc3_train, "mh_acc": acc_h_train,
+        "m2_time": t2, "m3_time": t3, "mh_time": t_h
     }
     
 def generate_markdown_report(res_parity, res_mod_no_b, res_mod_b, save_path="results/benchmark_report.md"):
     report = f"""# Mamba-3 Paper Replication Benchmark Report
 
-This document summarizes the results of training **Mamba-2** and **Mamba-3** Baseline architectures under the exact evaluation constraints highlighted by the paper (Chomsky Hierarchy tests).
+This document summarizes the results of training **Mamba-2**, **Mamba-3 Baseline**, and **Hybrid Block-Recurrent Mamba** architectures under the exact evaluation constraints highlighted by the paper (Chomsky Hierarchy tests).
 
 ## 1. Parity Task (Sequence Generalization)
 Tests the model's ability to retain discrete state logic over time without decay, and to generalize to much longer sequences than seen during training. Uses **Length Curriculum** training (3 to 160 dynamically) and validates on length 256. 1 Layer used.
 
 * **Mamba-2 Total Params:** {res_parity['m2_params']:,}
 * **Mamba-3 Total Params:** {res_parity['m3_params']:,}
+* **Hybrid Mamba Total Params:** {res_parity['mh_params']:,}
 
 | Model | Training Accuracy | Extrapolation Accuracy (Test L=256) | Training Time |
 |-------|------------------|-------------------------------|---------------|
 | Mamba-2 | {res_parity['m2_train_acc']*100:.1f}% | {res_parity['m2_gen_acc']*100:.1f}% | {res_parity['m2_time']:.2f}s |
 | Mamba-3 | {res_parity['m3_train_acc']*100:.1f}% | {res_parity['m3_gen_acc']*100:.1f}% | {res_parity['m3_time']:.2f}s |
+| Hybrid Mamba | {res_parity['mh_train_acc']*100:.1f}% | {res_parity['mh_gen_acc']*100:.1f}% | {res_parity['mh_time']:.2f}s |
 
 **Analysis:** Mamba-3's **generalized trapezoidal rule ($\lambda$)** is required to perfectly track the rotational state tracking of parity, overcoming Mamba-2's limitations with strictly non-negative decay paths.
 
@@ -243,6 +284,7 @@ Evaluates dynamic semantic tracking using standard math operators without hierar
 |-------|----------------|---------------|
 | Mamba-2 | {res_mod_no_b['m2_acc']*100:.1f}% | {res_mod_no_b['m2_time']:.2f}s |
 | Mamba-3 | {res_mod_no_b['m3_acc']*100:.1f}% | {res_mod_no_b['m3_time']:.2f}s |
+| Hybrid Mamba | {res_mod_no_b['mh_acc']*100:.1f}% | {res_mod_no_b['mh_time']:.2f}s |
 
 ---
 
@@ -253,6 +295,7 @@ Evaluates deep hierarchical semantic tracking (Chomsky context-free language tra
 |-------|----------------|---------------|
 | Mamba-2 | {res_mod_b['m2_acc']*100:.1f}% | {res_mod_b['m2_time']:.2f}s |
 | Mamba-3 | {res_mod_b['m3_acc']*100:.1f}% | {res_mod_b['m3_time']:.2f}s |
+| Hybrid Mamba | {res_mod_b['mh_acc']*100:.1f}% | {res_mod_b['mh_time']:.2f}s |
 
 **Analysis:** Mamba-3 utilizes **Multi-Input Multi-Output (MIMO)** to maintain sparse attention heads across the discrete semantic paths of modular trees, handling dynamic state branching far better than generic real-space state-spaces.
 
@@ -275,10 +318,11 @@ if __name__ == "__main__":
         
     print(f"Running Mamba-3 Paper Exact Benchmarks on: {device}\n")
     
-    # We use 1_000 steps to ensure the benchmark finishes within 1 hour locally
-    res_parity = run_parity_benchmark(device, batch_size=16, total_steps=1000)
-    res_mod_no_b = run_modular_arithmetic_benchmark(device, batch_size=16, total_steps=1000, with_brackets=False)
-    res_mod_b = run_modular_arithmetic_benchmark(device, batch_size=16, total_steps=1000, with_brackets=True)
+    # We use 10_000 steps to ensure the model hits the "grokking" threshold for Parity
+    # Batch size is lowered to 16/32 to ensure higher gradient variance
+    res_parity = run_parity_benchmark(device, batch_size=32, total_steps=10000)
+    res_mod_no_b = run_modular_arithmetic_benchmark(device, batch_size=32, total_steps=1000, with_brackets=False)
+    res_mod_b = run_modular_arithmetic_benchmark(device, batch_size=32, total_steps=1000, with_brackets=True)
     
     generate_markdown_report(res_parity, res_mod_no_b, res_mod_b)
 

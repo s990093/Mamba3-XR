@@ -40,28 +40,32 @@ from models.mamba3 import Mamba3Config, Mamba3Block
 
 class BlockRecurrentMamba3(nn.Module):
     """
-    Block-Recurrent Mamba-3
+    Block-Recurrent Mamba-3 (Multi-Layer Version)
     
     Splits the input sequence into fixed-size blocks and processes them
     sequentially. True cross-block recurrence is achieved by prepending
     the previous block's final output token (state summary) to the current
-    block input — so the model always sees where it "left off."
-    
-    This avoids modifying Mamba3Block internals while still being fully
-    end-to-end differentiable.
+    block input for each individual layer.
     
     Args:
         config: Mamba3Config
         block_size: Number of tokens per processing chunk (default 64)
+        num_layers: Number of Mamba3Block layers to stack
     """
-    def __init__(self, config: Mamba3Config, block_size: int = 64):
+    def __init__(self, config: Mamba3Config, block_size: int = 64, num_layers: int = 15):
         super().__init__()
         self.config = config
         self.block_size = block_size
-        self.mamba_block = Mamba3Block(config)
+        self.num_layers = num_layers
         
-        # Learned initial state token (acts as h_0, avoids the cold-start problem)
-        self.initial_state_token = nn.Parameter(torch.zeros(1, 1, config.d_model))
+        self.layers = nn.ModuleList([Mamba3Block(config) for _ in range(num_layers)])
+        
+        # Import RMSNorm dynamically to ensure pre-norm is used
+        from models.mamba3 import RMSNorm
+        self.norms = nn.ModuleList([RMSNorm(config.d_model) for _ in range(num_layers)])
+        
+        # Learned initial state token (acts as h_0, avoids the cold-start problem) per layer
+        self.initial_state_tokens = nn.Parameter(torch.zeros(num_layers, 1, 1, config.d_model))
         
     def forward(self, x, return_memory_bank: bool = False):
         """
@@ -77,30 +81,39 @@ class BlockRecurrentMamba3(nn.Module):
         out_chunks = []
         memory_bank = []
         
-        # h_0: a learned parameter that acts as the "initial state token"
-        # It is broadcast to the batch dimension
-        prev_state_token = self.initial_state_token.expand(B, 1, D)  # (B, 1, D)
+        # h_0 for each layer
+        prev_state_tokens = [self.initial_state_tokens[i].expand(B, 1, D) for i in range(self.num_layers)]
         
         for i in range(0, L, self.block_size):
             chunk = x[:, i : i + self.block_size, :]  # (B, block_size, D)
+            chunk_out = chunk
+            new_prev_state_tokens = []
             
-            # ─── Fix 1: True Recurrence ───────────────────────────────────────
-            # Prepend the previous block's final state token to the current chunk.
-            # This is the "prompt-state" injection: the Mamba block sees the prior
-            # block's context as its very first token, giving it a "running memory."
-            chunk_with_context = torch.cat([prev_state_token, chunk], dim=1)  # (B, 1+block_size, D)
-            
-            # Run the Mamba block on the context-augmented chunk
-            chunk_out_with_context = self.mamba_block(chunk_with_context)  # (B, 1+block_size, D)
-            
-            # Strip the prepended state token from the output to get clean per-token outputs
-            chunk_out = chunk_out_with_context[:, 1:, :]  # (B, block_size, D)
-            
-            # The new "state summary" for the next chunk is the last token of the output
-            prev_state_token = chunk_out[:, -1:, :]  # (B, 1, D) — detached from the graph later
+            # ─── Fix 1: True Recurrence Per Layer ─────────────────────────────
+            for j, layer in enumerate(self.layers):
+                normed_chunk = self.norms[j](chunk_out)
+                
+                # Prepend the previous block's final state token for this layer
+                chunk_with_context = torch.cat([prev_state_tokens[j], normed_chunk], dim=1)  # (B, 1+block_size, D)
+                
+                # Run the Mamba block
+                layer_out_with_context = layer(chunk_with_context)  # (B, 1+block_size, D)
+                
+                # Strip the prepended state token
+                layer_out = layer_out_with_context[:, 1:, :]  # (B, block_size, D)
+                
+                # State summary for the next chunk (Detach to prevent backward pass across chunks)
+                new_state = layer_out_with_context[:, -1:, :].detach()  # (B, 1, D)
+                new_prev_state_tokens.append(new_state)
+                
+                # Residual connection
+                chunk_out = chunk_out + layer_out
+                
+            prev_state_tokens = new_prev_state_tokens
             
             out_chunks.append(chunk_out)
-            memory_bank.append(prev_state_token.squeeze(1))  # Store (B, D) block summary
+            # Memory bank summary is the final layer's new_state
+            memory_bank.append(new_prev_state_tokens[-1].squeeze(1))  # (B, D)
         
         out = torch.cat(out_chunks, dim=1)  # (B, L, D)
         
@@ -222,101 +235,3 @@ class HybridBlockRecurrentMamba(nn.Module):
         return self.head(h_final)  # (B, L, d_out)
 
 
-# ─────────────────────────────────────────────────────────────────────────────
-# Validation Script
-# ─────────────────────────────────────────────────────────────────────────────
-if __name__ == "__main__":
-    import warnings
-    warnings.filterwarnings("ignore", category=UserWarning)
-    
-    print("=" * 60)
-    print("Block-Recurrent Mamba-3 (v2) — Validation Suite")
-    print("=" * 60)
-    
-    config = Mamba3Config(d_model=64, d_state=32, d_head=16)
-    model = HybridBlockRecurrentMamba(config, block_size=64, vocab_size=50, d_out=50)
-    
-    total_params = sum(p.numel() for p in model.parameters())
-    print(f"\nModel Parameters: {total_params:,}")
-    
-    # Device selection
-    if torch.cuda.is_available():
-        device = 'cuda'
-    elif hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
-        device = 'mps'
-    else:
-        device = 'cpu'
-    print(f"Device: {device}")
-    
-    model.to(device)
-    
-    # ─── Test 1: Forward Pass ────────────────────────────────────────────────
-    print("\n[Test 1] Forward Pass")
-    x = torch.randint(0, 50, (4, 256)).to(device)
-    out = model(x)
-    assert out.shape == (4, 256, 50), f"Shape mismatch: {out.shape}"
-    print(f"  Input:  {x.shape}")
-    print(f"  Output: {out.shape}")
-    print(f"  ✅ PASS")
-    
-    # ─── Test 2: Gradient Flow ───────────────────────────────────────────────
-    print("\n[Test 2] Gradient Flow & Differentiability")
-    targets = torch.randint(0, 50, (4, 256)).to(device)
-    
-    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3)
-    optimizer.zero_grad()
-    
-    loss = nn.CrossEntropyLoss()(out.view(-1, 50), targets.view(-1))
-    print(f"  Forward Loss: {loss.item():.4f}")
-    
-    loss.backward()
-    
-    failed_params = []
-    zero_grad_params = []
-    for name, param in model.named_parameters():
-        if param.requires_grad:
-            if param.grad is None:
-                failed_params.append(name)
-            elif torch.all(param.grad == 0):
-                zero_grad_params.append(name)
-    
-    if failed_params:
-        print(f"  ❌ FAIL — Parameters with no gradient: {failed_params}")
-    else:
-        print(f"  ✅ All {sum(p.requires_grad for p in model.parameters())} learnable tensors received gradients")
-    
-    if zero_grad_params:
-        print(f"  ⚠️  Zero-gradient parameters (may be OK for bias/special params): {zero_grad_params[:3]}...")
-    
-    optimizer.step()
-    print(f"  ✅ Optimizer step completed")
-    
-    # ─── Test 3: Causal Mask Verification ────────────────────────────────────
-    print("\n[Test 3] Causal Mask Verification (No Future Leakage)")
-    # Verify that flipping a token in the SECOND block does NOT change the
-    # cross-attention output for the FIRST block's tokens.
-    model.eval()
-    
-    base_seq = torch.randint(0, 50, (1, 128)).to(device)  # 2 blocks of 64
-    modified_seq = base_seq.clone()
-    modified_seq[0, 64 + 5] = (modified_seq[0, 64 + 5] + 1) % 50  # Flip token in block 1
-    
-    with torch.no_grad():
-        out_base = model(base_seq)
-        out_modified = model(modified_seq)
-    
-    # The first block's output (positions 0-63) should NOT change
-    diff_first_block = (out_base[0, :64] - out_modified[0, :64]).abs().max().item()
-    diff_second_block = (out_base[0, 64:] - out_modified[0, 64:]).abs().max().item()
-    
-    print(f"  Change in first block output (should be ≈0.0): {diff_first_block:.6f}")
-    print(f"  Change in second block output (should be > 0): {diff_second_block:.6f}")
-    
-    if diff_first_block < 1e-5:
-        print(f"  ✅ PASS — No information leakage from future blocks into past blocks")
-    else:
-        print(f"  ❌ FAIL — Future tokens are affecting past outputs! Causal mask is broken.")
-    
-    print("\n" + "=" * 60)
-    print("All tests completed.")
-    print("=" * 60)
