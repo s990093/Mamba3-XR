@@ -90,7 +90,23 @@ target/
 # Jupyter Notebook
 .ipynb_checkpoints
 
-# IPython
+# Project specific
+data/
+hw/
+photo_merger_tool/
+presentation/
+*.csv
+*.pt
+*.bin
+*.model
+*.docx
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.docx
+
+# pyenvIPython
 profile_default/
 ipython_config.py
 

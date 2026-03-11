@@ -1,12 +1,8 @@
 # Mamba-3
 
-![Mamba Architecture Comparison](assets/mamba_comparison.png)
-
 > **Mamba-3: Enhanced State Space Models with Trapezoidal Discretization and MIMO Projections**\
 > Research Implementation\
 > Technical Report: [Internal Documentation](docs/)
-
-![Mamba-3 Data Flow](assets/mamba3_dataflow.png)
 
 > **Detailed Data Flow**: Single Mamba-3 block architecture showing Trapezoidal SSM with MIMO projections
 
