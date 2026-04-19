@@ -51,6 +51,11 @@ venv.bak/
 # Jupyter
 .ipynb_checkpoints
 
+# Testing / tooling caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
 # React / Frontend (td-moe-simulator-react)
 node_modules/
 /paper/td-moe-iclr2026/td-moe-simulator-react/node_modules/
@@ -63,10 +68,11 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Models & Data
+# Models & Data (weights, checkpoints, numpy archives)
 *.pt
 *.pth
 *.ckpt
+*.npz
 *.model
 *.bin
 *.onnx
@@ -79,11 +85,20 @@ hw/
 hw2/
 photo_merger_tool/
 history/
+3090/
+# Local homework / submission archives (also covered by *.zip)
+*作業*.zip
+*_homework*.zip
 _report.json
 *.csv
 *.zip
 *.pdf
 *.docx
+
+# LaTeX / latexmk build artifacts (keep .tex sources; ignore outputs)
+*.fdb_latexmk
+*.fls
+*.synctex.gz
 
 # AI Agent logs
 task.md

@@ -4,11 +4,14 @@
 > **TD-MoE: Tensor Decomposition Mixture of Experts**
 > Research Implementation & Presentation Assets
 
+![Architecture overview](assets/architecture.png)
+
 ## Overview
 
-This repository contains the training code, inference implementation, and interactive 3D paper assets for **Mamba-3** and **TD-MoE (Tensor Decomposition Mixture of Experts)**. 
+This repository contains the training code, inference implementation, and interactive 3D paper assets for **Mamba-3** and **TD-MoE (Tensor Decomposition Mixture of Experts)**.
 
 ### Key Innovations:
+
 1. **Mamba-3 (Trapezoidal Discretization)**: Replaces standard Euler methods with a higher-order trapezoidal integration scheme and MIMO projections, pushing sequence lengths up to 32K tokens efficiently.
 2. **TD-MoE (Tensor Decomposition MoE)**: A novel architecture that compresses massive MoE parameter matrices by up to 94% using Tucker Decomposition. It eliminates memory bandwidth bottlenecks via an **On-the-fly Inference Pipeline** without needing to reconstruct the full weight matrices.
 
@@ -31,14 +34,16 @@ Mamba3-XR/
 
 ## 🖥 TD-MoE 3D Interactive Simulator
 
-As part of the ICLR 2026 paper submission, we provide an interactive 3D web-based presentation simulator. 
+As part of the ICLR 2026 paper submission, we provide an interactive 3D web-based presentation simulator.
 It visually demonstrates:
+
 - **Tucker Matrix Decomposition** compressing the state space from $134\text{MB}$ to $8.4\text{MB}$.
 - **On-the-fly Inference Pipeline**, comparing native block latency against our specialized micro-tensor flow.
 
 ### Running the Simulator (Development)
 
 The simulator is built with React, Vite, and Tailwind CSS.
+
 ```bash
 # 1. Navigate to the simulator directory
 cd paper/td-moe-iclr2026/td-moe-simulator-react
@@ -67,7 +72,7 @@ Mamba-3 is an advanced iteration of the Selective State Space Model architecture
 
 ```bash
 # Clone repository
-git clone <repo-url>
+git clone https://github.com/s990093/Mamba3-XR.git
 cd Mamba3-XR
 
 # Install core dependencies
@@ -97,12 +102,14 @@ y = model(x)
 ## 📈 Training
 
 For easy deployment, use the standalone `train.py` which includes all dependencies:
+
 ```bash
 # Single-file training (no external dependencies needed)
 python train.py
 ```
 
 It includes:
+
 - Mixed Precision Training (AMP)
 - Exponential Moving Average (EMA)
 - Auto-scaling Chunk-wise Parallel Scan (SSD)
@@ -110,6 +117,7 @@ It includes:
 ## 📎 Citation
 
 If you use Mamba-3 or TD-MoE in your research, please cite:
+
 ```bibtex
 @article{mamba3_td_moe_2026,
   title={Mamba-3: Enhanced State Space Models with Trapezoidal Discretization and TD-MoE},
