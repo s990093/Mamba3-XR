@@ -1,0 +1,2456 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Hybrid Mamba — Architecture Diagram</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [
+            ["$", "$"],
+            ["\\(", "\\)"],
+          ],
+        },
+        svg: {
+          fontCache: "global",
+        },
+      };
+    </script>
+    <script
+      type="text/javascript"
+      id="MathJax-script"
+      async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"
+    ></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        background: #fff;
+        font-family: "Inter", system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 1.5rem;
+      }
+      .diagram-wrap {
+        width: 100%;
+        max-width: 1940px;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+      }
+      svg {
+        width: 100%;
+        min-width: 1880px;
+        height: auto;
+        display: block;
+      }
+      .math-box {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        white-space: nowrap;
+        font-family: "Inter", system-ui, sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 1940 960" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker
+            id="arrow"
+            markerWidth="8"
+            markerHeight="8"
+            refX="7.5"
+            refY="4"
+            orient="auto"
+          >
+            <path d="M0,1 L8,4 L0,7 L2,4 Z" fill="#475569" />
+          </marker>
+
+          <g id="mulSymNode">
+            <circle r="11" fill="#F8FAFC" stroke="#64748B" stroke-width="1.8" />
+            <line
+              x1="-5"
+              y1="-5"
+              x2="5"
+              y2="5"
+              stroke="#64748B"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
+            <line
+              x1="5"
+              y1="-5"
+              x2="-5"
+              y2="5"
+              stroke="#64748B"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
+          </g>
+
+          <g id="addSymNode">
+            <circle r="11" fill="#F8FAFC" stroke="#64748B" stroke-width="1.8" />
+            <line
+              x1="-5"
+              y1="0"
+              x2="5"
+              y2="0"
+              stroke="#64748B"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
+            <line
+              x1="0"
+              y1="-5"
+              x2="0"
+              y2="5"
+              stroke="#64748B"
+              stroke-width="2"
+              stroke-linecap="round"
+            />
+          </g>
+        </defs>
+
+        <text
+          x="970"
+          y="40"
+          font-size="24"
+          fill="#0F172A"
+          text-anchor="middle"
+          font-weight="700"
+          letter-spacing="-0.3"
+        >
+          Hybrid Mamba-TuckerMoE Architecture
+        </text>
+
+        <g transform="translate(0, 80)">
+          <rect
+            x="20"
+            y="0"
+            width="440"
+            height="800"
+            rx="8"
+            fill="#F8FAFC"
+            stroke="#3B82F6"
+            stroke-width="2"
+            stroke-dasharray="4 4"
+          />
+          <rect x="22" y="2" width="436" height="32" rx="6" fill="#EFF6FF" />
+          <text
+            x="240"
+            y="24"
+            font-size="16"
+            fill="#1D4ED8"
+            text-anchor="middle"
+            font-weight="700"
+          >
+            Mamba-3 Block
+          </text>
+
+          <g transform="translate(0, 30)">
+            <path
+              d="M 240 775 L 240 720"
+              fill="none"
+              stroke="#475569"
+              stroke-width="2"
+              marker-end="url(#arrow)"
+            />
+            <path
+              d="M 240 745 L 80 745 Q 60 745 60 725 L 60 175 Q 60 155 80 155 L 225 155"
+              fill="none"
+              stroke="#475569"
+              stroke-width="1.5"
+              stroke-dasharray="6 4"
+              marker-end="url(#arrow)"
+            />
+            <path
+              d="M 240 140 L 100 140 Q 80 140 80 120 L 80 55 Q 80 35 100 35 L 225 35"
+              fill="none"
+              stroke="#475569"
+              stroke-width="1.5"
+              stroke-dasharray="6 4"
+              marker-end="url(#arrow)"
+            />
+            <path
+              d="M 200 705 L 140 705 Q 120 705 120 685 L 120 276"
+              fill="none"
+              stroke="#475569"
+              stroke-width="1.5"
+              stroke-dasharray="6 4"
+              marker-end="url(#arrow)"
+            />
+            <path
+              d="M 220 705 L 180 705 Q 160 705 160 685 L 160 365 Q 160 345 180 345 L 225 345"
+              fill="none"
+              stroke="#475569"
+              stroke-width="1.5"
+              stroke-dasharray="6 4"
+              marker-end="url(#arrow)"
+            />
+            <path
+              d="M 280 705 L 360 705 Q 380 705 380 685 L 380 665"
+              fill="none"
+              stroke="#475569"
+              stroke-width="1.5"
+              stroke-dasharray="6 4"
+              marker-end="url(#arrow)"
+            />
+            <path
+              d="M 380 607 L 380 595 Q 380 575 360 575 L 255 575"
+              fill="none"
+              stroke="#475569"
+              stroke-width="1.5"
+              marker-end="url(#arrow)"
+            />
+            <path
+              d="M 390 607 L 390 445 Q 390 425 370 425 L 255 425"
+              fill="none"
+              stroke="#475569"
+              stroke-width="1.5"
+              marker-end="url(#arrow)"
+            />
+            <path
+              d="M 260 705 L 320 705 Q 320 705 320 685 L 320 536"
+              fill="none"
+              stroke="#475569"
+              stroke-width="1.5"
+              stroke-dasharray="6 4"
+              marker-end="url(#arrow)"
+            />
+            <path
+              d="M 320 514 L 320 495 Q 320 475 300 475 L 305 475"
+              fill="none"
+              stroke="#475569"
+              stroke-width="1.5"
+              marker-end="url(#arrow)"
+            />
+            <path
+              d="M 131 265 L 225 265"
+              fill="none"
+              stroke="#475569"
+              stroke-width="1.5"
+              marker-end="url(#arrow)"
+            />
+            <path
+              d="M 240 690 L 240 665"
+              fill="none"
+              stroke="#475569"
+              stroke-width="1.5"
+              marker-end="url(#arrow)"
+            />
+            <path
+              d="M 240 635 L 240 586"
+              fill="none"
+              stroke="#475569"
+              stroke-width="1.5"
+              marker-end="url(#arrow)"
+            />
+            <path
+              d="M 240 564 L 240 475"
+              fill="none"
+              stroke="#475569"
+              stroke-width="1.5"
+              marker-end="url(#arrow)"
+            />
+            <path
+              d="M 240 455 L 240 436"
+              fill="none"
+              stroke="#475569"
+              stroke-width="1.5"
+              marker-end="url(#arrow)"
+            />
+            <path
+              d="M 240 414 L 240 399"
+              fill="none"
+              stroke="#475569"
+              stroke-width="1.5"
+              marker-end="url(#arrow)"
+            />
+            <path
+              d="M 240 371 L 240 356"
+              fill="none"
+              stroke="#475569"
+              stroke-width="1.5"
+              marker-end="url(#arrow)"
+            />
+            <path
+              d="M 240 334 L 240 305"
+              fill="none"
+              stroke="#475569"
+              stroke-width="1.5"
+              marker-end="url(#arrow)"
+            />
+            <path
+              d="M 240 293 L 240 276"
+              fill="none"
+              stroke="#475569"
+              stroke-width="1.5"
+              marker-end="url(#arrow)"
+            />
+            <path
+              d="M 240 254 L 240 239"
+              fill="none"
+              stroke="#475569"
+              stroke-width="1.5"
+              marker-end="url(#arrow)"
+            />
+            <path
+              d="M 240 211 L 240 195"
+              fill="none"
+              stroke="#475569"
+              stroke-width="1.5"
+              marker-end="url(#arrow)"
+            />
+            <path
+              d="M 240 175 L 240 166"
+              fill="none"
+              stroke="#475569"
+              stroke-width="1.5"
+              marker-end="url(#arrow)"
+            />
+            <path
+              d="M 240 144 L 240 125"
+              fill="none"
+              stroke="#475569"
+              stroke-width="1.5"
+              marker-end="url(#arrow)"
+            />
+            <path
+              d="M 240 114 L 240 104"
+              fill="none"
+              stroke="#475569"
+              stroke-width="1.5"
+              marker-end="url(#arrow)"
+            />
+            <path
+              d="M 240 76 L 240 64"
+              fill="none"
+              stroke="#475569"
+              stroke-width="1.5"
+              marker-end="url(#arrow)"
+            />
+            <path
+              d="M 240 24 L 240 10"
+              fill="none"
+              stroke="#475569"
+              stroke-width="1.5"
+              marker-end="url(#arrow)"
+            />
+
+            <path
+              d="M 150 720 L 330 720 L 310 690 L 170 690 Z"
+              fill="#DBEAFE"
+              stroke="#60A5FA"
+              stroke-width="1.5"
+            />
+            <text
+              x="240"
+              y="709"
+              font-size="11"
+              fill="#1E3A8A"
+              text-anchor="middle"
+              font-weight="600"
+            >
+              in_proj
+            </text>
+            <foreignObject x="90" y="668" width="300" height="24">
+              <div class="math-box" style="font-size: 11px; color: #475569">
+                $\rightarrow z, x', B, C, \Delta, A, \lambda$
+              </div>
+            </foreignObject>
+            <rect
+              x="194"
+              y="635"
+              width="92"
+              height="30"
+              rx="5"
+              fill="#F3E8FF"
+              stroke="#A855F7"
+              stroke-width="1.5"
+            />
+            <foreignObject x="194" y="635" width="92" height="30">
+              <div
+                class="math-box"
+                style="font-size: 11px; font-weight: 600; color: #581c87"
+              >
+                $x_{\text{up\_proj}}$
+              </div>
+            </foreignObject>
+            <text
+              x="240"
+              y="627"
+              font-size="9"
+              fill="#7E22CE"
+              text-anchor="middle"
+              font-weight="600"
+            >
+              TuckerMoE
+            </text>
+
+            <rect
+              x="339"
+              y="641"
+              width="82"
+              height="24"
+              rx="4"
+              fill="#F1F5F9"
+              stroke="#94A3B8"
+              stroke-width="1.2"
+            />
+            <text
+              x="380"
+              y="657"
+              font-size="10"
+              fill="#334155"
+              text-anchor="middle"
+              font-weight="600"
+            >
+              RMSNorm
+            </text>
+            <rect
+              x="339"
+              y="607"
+              width="82"
+              height="26"
+              rx="4"
+              fill="#E0F2FE"
+              stroke="#38BDF8"
+              stroke-width="1.5"
+            />
+            <text
+              x="380"
+              y="625"
+              font-size="10"
+              fill="#0369A1"
+              text-anchor="middle"
+              font-weight="600"
+            >
+              RoPE
+            </text>
+            <foreignObject x="330" y="583" width="100" height="24">
+              <div class="math-box" style="font-size: 10px; color: #475569">
+                $B_{\text{rot}}, C_{\text{rot}}$
+              </div>
+            </foreignObject>
+            <use href="#mulSymNode" x="240" y="575" />
+            <foreignObject x="190" y="563" width="40" height="24">
+              <div class="math-box" style="font-size: 10px; color: #334155">
+                $B \otimes x$
+              </div>
+            </foreignObject>
+            <circle
+              cx="320"
+              cy="525"
+              r="11"
+              fill="#DCFCE7"
+              stroke="#22C55E"
+              stroke-width="1.8"
+            />
+            <foreignObject x="309" y="514" width="22" height="22">
+              <div
+                class="math-box"
+                style="font-size: 14px; font-weight: bold; color: #166534"
+              >
+                $\sigma$
+              </div>
+            </foreignObject>
+            <foreignObject x="270" y="513" width="45" height="24">
+              <div class="math-box" style="font-size: 10px; color: #334155">
+                $\lambda$ gate
+              </div>
+            </foreignObject>
+
+            <rect
+              x="175"
+              y="435"
+              width="130"
+              height="40"
+              rx="6"
+              fill="#DBEAFE"
+              stroke="#3B82F6"
+              stroke-width="1.5"
+            />
+            <text
+              x="240"
+              y="451"
+              font-size="11"
+              fill="#1E3A8A"
+              text-anchor="middle"
+              font-weight="700"
+            >
+              Chunk Parallel
+            </text>
+            <text
+              x="240"
+              y="467"
+              font-size="11"
+              fill="#1E3A8A"
+              text-anchor="middle"
+              font-weight="700"
+            >
+              Scan (Triton)
+            </text>
+            <use href="#mulSymNode" x="240" y="425" />
+            <foreignObject x="196" y="413" width="30" height="24">
+              <div class="math-box" style="font-size: 10px; color: #334155">
+                $C \cdot h$
+              </div>
+            </foreignObject>
+            <rect
+              x="189"
+              y="371"
+              width="102"
+              height="28"
+              rx="5"
+              fill="#DBEAFE"
+              stroke="#60A5FA"
+              stroke-width="1.5"
+            />
+            <foreignObject x="189" y="371" width="102" height="28">
+              <div
+                class="math-box"
+                style="font-size: 11px; font-weight: 600; color: #1e3a8a"
+              >
+                $y_{\text{down\_proj}}$
+              </div>
+            </foreignObject>
+
+            <use href="#addSymNode" x="240" y="345" />
+            <foreignObject x="256" y="333" width="50" height="24">
+              <div class="math-box" style="font-size: 10px; color: #334155">
+                $+ D \cdot x'$
+              </div>
+            </foreignObject>
+            <rect
+              x="193"
+              y="293"
+              width="94"
+              height="24"
+              rx="4"
+              fill="#F1F5F9"
+              stroke="#94A3B8"
+              stroke-width="1.2"
+            />
+            <text
+              x="240"
+              y="309"
+              font-size="10"
+              fill="#334155"
+              text-anchor="middle"
+              font-weight="600"
+            >
+              RMSNorm
+            </text>
+            <circle
+              cx="120"
+              cy="265"
+              r="11"
+              fill="#DCFCE7"
+              stroke="#22C55E"
+              stroke-width="1.8"
+            />
+            <foreignObject x="109" y="254" width="22" height="22">
+              <div
+                class="math-box"
+                style="font-size: 14px; font-weight: bold; color: #166534"
+              >
+                $\sigma$
+              </div>
+            </foreignObject>
+            <text
+              x="95"
+              y="268"
+              font-size="10"
+              fill="#334155"
+              text-anchor="end"
+            >
+              SiLU
+            </text>
+            <use href="#mulSymNode" x="240" y="265" />
+            <text
+              x="240"
+              y="245"
+              font-size="10"
+              fill="#334155"
+              text-anchor="middle"
+            >
+              gate
+            </text>
+
+            <rect
+              x="185"
+              y="211"
+              width="110"
+              height="28"
+              rx="5"
+              fill="#DBEAFE"
+              stroke="#60A5FA"
+              stroke-width="1.5"
+            />
+            <text
+              x="240"
+              y="229"
+              font-size="11"
+              fill="#1E3A8A"
+              text-anchor="middle"
+              font-weight="600"
+            >
+              mamba_dense
+            </text>
+            <rect
+              x="200"
+              y="175"
+              width="80"
+              height="20"
+              rx="4"
+              fill="#FFEDD5"
+              stroke="#FDBA74"
+              stroke-width="1.2"
+            />
+            <text
+              x="240"
+              y="189"
+              font-size="9"
+              fill="#C2410C"
+              text-anchor="middle"
+              font-weight="600"
+            >
+              LayerScale
+            </text>
+            <use href="#addSymNode" x="240" y="155" />
+            <rect
+              x="200"
+              y="114"
+              width="80"
+              height="22"
+              rx="4"
+              fill="#F1F5F9"
+              stroke="#94A3B8"
+              stroke-width="1.2"
+            />
+            <text
+              x="240"
+              y="129"
+              font-size="10"
+              fill="#334155"
+              text-anchor="middle"
+              font-weight="600"
+            >
+              RMSNorm
+            </text>
+
+            <rect
+              x="194"
+              y="76"
+              width="92"
+              height="28"
+              rx="5"
+              fill="#F3E8FF"
+              stroke="#A855F7"
+              stroke-width="1.5"
+            />
+            <foreignObject x="194" y="76" width="92" height="28">
+              <div
+                class="math-box"
+                style="font-size: 11px; font-weight: 600; color: #581c87"
+              >
+                $out_{\text{proj}}$
+              </div>
+            </foreignObject>
+            <text
+              x="290"
+              y="94"
+              font-size="9"
+              fill="#7E22CE"
+              text-anchor="start"
+              font-weight="600"
+            >
+              TuckerMoE
+            </text>
+            <rect
+              x="200"
+              y="46"
+              width="80"
+              height="18"
+              rx="4"
+              fill="#FFEDD5"
+              stroke="#FDBA74"
+              stroke-width="1.2"
+            />
+            <text
+              x="240"
+              y="59"
+              font-size="9"
+              fill="#C2410C"
+              text-anchor="middle"
+              font-weight="600"
+            >
+              LayerScale
+            </text>
+            <use href="#addSymNode" x="240" y="35" />
+          </g>
+
+          <text
+            x="240"
+            y="825"
+            font-size="11"
+            fill="#64748B"
+            text-anchor="middle"
+          >
+            SSM + Tucker Decomposition
+          </text>
+          <text
+            x="240"
+            y="845"
+            font-size="16"
+            fill="#1D4ED8"
+            text-anchor="middle"
+            font-weight="700"
+          >
+            (a) Mamba-3 Block
+          </text>
+          <text
+            x="240"
+            y="786"
+            font-size="12"
+            fill="#475569"
+            text-anchor="middle"
+            font-weight="600"
+          >
+            Input Tokens
+          </text>
+
+          <g transform="translate(80, 0)">
+            <rect
+              x="420"
+              y="0"
+              width="360"
+              height="800"
+              rx="8"
+              fill="#F8FAFC"
+              stroke="#10B981"
+              stroke-width="2"
+              stroke-dasharray="4 4"
+            />
+            <rect x="422" y="2" width="356" height="32" rx="6" fill="#ECFDF5" />
+            <text
+              x="600"
+              y="24"
+              font-size="16"
+              fill="#047857"
+              text-anchor="middle"
+              font-weight="700"
+            >
+              Transformer Block
+            </text>
+
+            <g transform="translate(0, 30)">
+              <line
+                x1="600"
+                y1="745"
+                x2="600"
+                y2="682"
+                stroke="#475569"
+                stroke-width="1.5"
+                marker-end="url(#arrow)"
+              />
+              <path
+                d="M 600 720 L 460 720 Q 440 720 440 700 L 440 420 Q 440 400 460 400 L 589 400"
+                fill="none"
+                stroke="#475569"
+                stroke-width="1.5"
+                stroke-dasharray="6 4"
+                marker-end="url(#arrow)"
+              />
+
+              <rect
+                x="550"
+                y="658"
+                width="100"
+                height="24"
+                rx="4"
+                fill="#F1F5F9"
+                stroke="#94A3B8"
+                stroke-width="1.2"
+              />
+              <text
+                x="600"
+                y="674"
+                font-size="10"
+                fill="#334155"
+                text-anchor="middle"
+                font-weight="600"
+              >
+                RMSNorm
+              </text>
+              <line
+                x1="600"
+                y1="658"
+                x2="600"
+                y2="640"
+                stroke="#475569"
+                stroke-width="1.5"
+              />
+              <line
+                x1="520"
+                y1="640"
+                x2="680"
+                y2="640"
+                stroke="#475569"
+                stroke-width="1.5"
+              />
+              <line
+                x1="520"
+                y1="640"
+                x2="520"
+                y2="624"
+                stroke="#475569"
+                stroke-width="1.5"
+                marker-end="url(#arrow)"
+              />
+              <line
+                x1="600"
+                y1="640"
+                x2="600"
+                y2="624"
+                stroke="#475569"
+                stroke-width="1.5"
+                marker-end="url(#arrow)"
+              />
+              <line
+                x1="680"
+                y1="640"
+                x2="680"
+                y2="624"
+                stroke="#475569"
+                stroke-width="1.5"
+                marker-end="url(#arrow)"
+              />
+
+              <rect
+                x="486"
+                y="596"
+                width="68"
+                height="28"
+                rx="5"
+                fill="#DBEAFE"
+                stroke="#60A5FA"
+                stroke-width="1.5"
+              />
+              <text
+                x="520"
+                y="614"
+                font-size="11"
+                fill="#1E3A8A"
+                text-anchor="middle"
+                font-weight="600"
+              >
+                Q proj
+              </text>
+              <rect
+                x="566"
+                y="596"
+                width="68"
+                height="28"
+                rx="5"
+                fill="#DBEAFE"
+                stroke="#60A5FA"
+                stroke-width="1.5"
+              />
+              <text
+                x="600"
+                y="614"
+                font-size="11"
+                fill="#1E3A8A"
+                text-anchor="middle"
+                font-weight="600"
+              >
+                K proj
+              </text>
+              <rect
+                x="646"
+                y="596"
+                width="68"
+                height="28"
+                rx="5"
+                fill="#DBEAFE"
+                stroke="#60A5FA"
+                stroke-width="1.5"
+              />
+              <text
+                x="680"
+                y="614"
+                font-size="11"
+                fill="#1E3A8A"
+                text-anchor="middle"
+                font-weight="600"
+              >
+                V proj
+              </text>
+
+              <line
+                x1="520"
+                y1="596"
+                x2="520"
+                y2="580"
+                stroke="#475569"
+                stroke-width="1.2"
+                marker-end="url(#arrow)"
+              />
+              <line
+                x1="600"
+                y1="596"
+                x2="600"
+                y2="580"
+                stroke="#475569"
+                stroke-width="1.2"
+                marker-end="url(#arrow)"
+              />
+              <line
+                x1="680"
+                y1="596"
+                x2="680"
+                y2="580"
+                stroke="#475569"
+                stroke-width="1.2"
+                marker-end="url(#arrow)"
+              />
+
+              <rect
+                x="510"
+                y="538"
+                width="180"
+                height="42"
+                rx="6"
+                fill="#D1FAE5"
+                stroke="#34D399"
+                stroke-width="1.5"
+              />
+              <text
+                x="600"
+                y="557"
+                font-size="11"
+                fill="#065F46"
+                text-anchor="middle"
+                font-weight="700"
+              >
+                Grouped Query
+              </text>
+              <text
+                x="600"
+                y="572"
+                font-size="11"
+                fill="#065F46"
+                text-anchor="middle"
+                font-weight="700"
+              >
+                Attention (GQA)
+              </text>
+
+              <line
+                x1="600"
+                y1="538"
+                x2="600"
+                y2="522"
+                stroke="#475569"
+                stroke-width="1.5"
+                marker-end="url(#arrow)"
+              />
+              <rect
+                x="560"
+                y="494"
+                width="80"
+                height="28"
+                rx="5"
+                fill="#DBEAFE"
+                stroke="#60A5FA"
+                stroke-width="1.5"
+              />
+              <text
+                x="600"
+                y="512"
+                font-size="11"
+                fill="#1E3A8A"
+                text-anchor="middle"
+                font-weight="600"
+              >
+                o_proj
+              </text>
+              <line
+                x1="600"
+                y1="494"
+                x2="600"
+                y2="475"
+                stroke="#475569"
+                stroke-width="1.5"
+                marker-end="url(#arrow)"
+              />
+              <rect
+                x="560"
+                y="457"
+                width="80"
+                height="18"
+                rx="4"
+                fill="#FFEDD5"
+                stroke="#FDBA74"
+                stroke-width="1.2"
+              />
+              <text
+                x="600"
+                y="470"
+                font-size="9"
+                fill="#C2410C"
+                text-anchor="middle"
+                font-weight="600"
+              >
+                LayerScale
+              </text>
+              <line
+                x1="600"
+                y1="457"
+                x2="600"
+                y2="411"
+                stroke="#475569"
+                stroke-width="1.5"
+                marker-end="url(#arrow)"
+              />
+              <use href="#addSymNode" x="600" y="400" />
+              <line
+                x1="600"
+                y1="389"
+                x2="600"
+                y2="342"
+                stroke="#475569"
+                stroke-width="1.5"
+                marker-end="url(#arrow)"
+              />
+
+              <path
+                d="M 600 370 L 460 370 Q 440 370 440 350 L 440 110 Q 440 90 460 90 L 589 90"
+                fill="none"
+                stroke="#475569"
+                stroke-width="1.5"
+                stroke-dasharray="6 4"
+                marker-end="url(#arrow)"
+              />
+              <rect
+                x="550"
+                y="318"
+                width="100"
+                height="24"
+                rx="4"
+                fill="#F1F5F9"
+                stroke="#94A3B8"
+                stroke-width="1.2"
+              />
+              <text
+                x="600"
+                y="334"
+                font-size="10"
+                fill="#334155"
+                text-anchor="middle"
+                font-weight="600"
+              >
+                RMSNorm
+              </text>
+              <line
+                x1="600"
+                y1="318"
+                x2="600"
+                y2="304"
+                stroke="#475569"
+                stroke-width="1.5"
+              />
+              <line
+                x1="520"
+                y1="304"
+                x2="680"
+                y2="304"
+                stroke="#475569"
+                stroke-width="1.5"
+              />
+              <line
+                x1="520"
+                y1="304"
+                x2="520"
+                y2="288"
+                stroke="#475569"
+                stroke-width="1.5"
+                marker-end="url(#arrow)"
+              />
+              <line
+                x1="680"
+                y1="304"
+                x2="680"
+                y2="288"
+                stroke="#475569"
+                stroke-width="1.5"
+                marker-end="url(#arrow)"
+              />
+
+              <rect
+                x="470"
+                y="260"
+                width="100"
+                height="28"
+                rx="5"
+                fill="#F3E8FF"
+                stroke="#A855F7"
+                stroke-width="1.5"
+              />
+              <text
+                x="520"
+                y="278"
+                font-size="10"
+                fill="#581C87"
+                text-anchor="middle"
+                font-weight="600"
+              >
+                gate_proj
+              </text>
+              <rect
+                x="630"
+                y="260"
+                width="100"
+                height="28"
+                rx="5"
+                fill="#F3E8FF"
+                stroke="#A855F7"
+                stroke-width="1.5"
+              />
+              <text
+                x="680"
+                y="278"
+                font-size="10"
+                fill="#581C87"
+                text-anchor="middle"
+                font-weight="600"
+              >
+                up_proj
+              </text>
+              <text
+                x="735"
+                y="278"
+                font-size="9"
+                fill="#7E22CE"
+                text-anchor="start"
+                font-weight="600"
+              >
+                TuckerMoE
+              </text>
+
+              <circle
+                cx="520"
+                cy="220"
+                r="11"
+                fill="#DCFCE7"
+                stroke="#22C55E"
+                stroke-width="1.8"
+              />
+              <foreignObject x="509" y="209" width="22" height="22">
+                <div
+                  class="math-box"
+                  style="font-size: 14px; font-weight: bold; color: #166534"
+                >
+                  $\sigma$
+                </div>
+              </foreignObject>
+              <text
+                x="495"
+                y="224"
+                font-size="10"
+                fill="#334155"
+                text-anchor="end"
+              >
+                SiLU
+              </text>
+              <line
+                x1="520"
+                y1="260"
+                x2="520"
+                y2="231"
+                stroke="#475569"
+                stroke-width="1.2"
+                marker-end="url(#arrow)"
+              />
+
+              <use href="#mulSymNode" x="600" y="190" />
+              <line
+                x1="520"
+                y1="209"
+                x2="520"
+                y2="190"
+                stroke="#475569"
+                stroke-width="1.2"
+              />
+              <line
+                x1="520"
+                y1="190"
+                x2="589"
+                y2="190"
+                stroke="#475569"
+                stroke-width="1.2"
+                marker-end="url(#arrow)"
+              />
+              <line
+                x1="680"
+                y1="260"
+                x2="680"
+                y2="190"
+                stroke="#475569"
+                stroke-width="1.2"
+              />
+              <line
+                x1="680"
+                y1="190"
+                x2="611"
+                y2="190"
+                stroke="#475569"
+                stroke-width="1.2"
+                marker-end="url(#arrow)"
+              />
+
+              <line
+                x1="600"
+                y1="179"
+                x2="600"
+                y2="166"
+                stroke="#475569"
+                stroke-width="1.5"
+                marker-end="url(#arrow)"
+              />
+              <rect
+                x="550"
+                y="138"
+                width="100"
+                height="28"
+                rx="5"
+                fill="#F3E8FF"
+                stroke="#A855F7"
+                stroke-width="1.5"
+              />
+              <text
+                x="600"
+                y="156"
+                font-size="10"
+                fill="#581C87"
+                text-anchor="middle"
+                font-weight="600"
+              >
+                down_proj
+              </text>
+              <text
+                x="655"
+                y="156"
+                font-size="9"
+                fill="#7E22CE"
+                text-anchor="start"
+                font-weight="600"
+              >
+                TuckerMoE
+              </text>
+              <line
+                x1="600"
+                y1="138"
+                x2="600"
+                y2="125"
+                stroke="#475569"
+                stroke-width="1.5"
+                marker-end="url(#arrow)"
+              />
+
+              <rect
+                x="560"
+                y="107"
+                width="80"
+                height="18"
+                rx="4"
+                fill="#FFEDD5"
+                stroke="#FDBA74"
+                stroke-width="1.2"
+              />
+              <text
+                x="600"
+                y="120"
+                font-size="9"
+                fill="#C2410C"
+                text-anchor="middle"
+                font-weight="600"
+              >
+                LayerScale
+              </text>
+              <line
+                x1="600"
+                y1="107"
+                x2="600"
+                y2="101"
+                stroke="#475569"
+                stroke-width="1.5"
+                marker-end="url(#arrow)"
+              />
+              <use href="#addSymNode" x="600" y="90" />
+              <line
+                x1="600"
+                y1="79"
+                x2="600"
+                y2="20"
+                stroke="#475569"
+                stroke-width="1.5"
+                marker-end="url(#arrow)"
+              />
+            </g>
+
+            <text
+              x="600"
+              y="825"
+              font-size="11"
+              fill="#64748B"
+              text-anchor="middle"
+            >
+              GQA + MoE FFN
+            </text>
+            <text
+              x="600"
+              y="845"
+              font-size="16"
+              fill="#047857"
+              text-anchor="middle"
+              font-weight="700"
+            >
+              (b) Transformer Block
+            </text>
+            <text
+              x="600"
+              y="786"
+              font-size="12"
+              fill="#475569"
+              text-anchor="middle"
+              font-weight="600"
+            >
+              Input Tokens
+            </text>
+
+            <rect
+              x="820"
+              y="0"
+              width="360"
+              height="800"
+              rx="8"
+              fill="#F8FAFC"
+              stroke="#A855F7"
+              stroke-width="2"
+              stroke-dasharray="4 4"
+            />
+            <rect x="822" y="2" width="356" height="32" rx="6" fill="#F3E8FF" />
+            <text
+              x="1000"
+              y="24"
+              font-size="16"
+              fill="#6B21A8"
+              text-anchor="middle"
+              font-weight="700"
+            >
+              TuckerMoE Block
+            </text>
+
+            <g transform="translate(0, 30)">
+              <line
+                x1="1000"
+                y1="775"
+                x2="1000"
+                y2="680"
+                stroke="#475569"
+                stroke-width="2"
+                marker-end="url(#arrow)"
+              />
+              <line
+                x1="1000"
+                y1="680"
+                x2="1000"
+                y2="630"
+                stroke="#475569"
+                stroke-width="1.5"
+              />
+              <line
+                x1="900"
+                y1="630"
+                x2="1085"
+                y2="630"
+                stroke="#475569"
+                stroke-width="1.5"
+              />
+              <line
+                x1="900"
+                y1="630"
+                x2="900"
+                y2="600"
+                stroke="#475569"
+                stroke-width="1.5"
+                marker-end="url(#arrow)"
+              />
+              <line
+                x1="1085"
+                y1="630"
+                x2="1085"
+                y2="600"
+                stroke="#475569"
+                stroke-width="1.5"
+                marker-end="url(#arrow)"
+              />
+
+              <rect
+                x="850"
+                y="576"
+                width="100"
+                height="24"
+                rx="4"
+                fill="#F1F5F9"
+                stroke="#94A3B8"
+                stroke-width="1.2"
+              />
+              <text
+                x="900"
+                y="592"
+                font-size="10"
+                fill="#334155"
+                text-anchor="middle"
+                font-weight="600"
+              >
+                LayerNorm
+              </text>
+              <text
+                x="960"
+                y="592"
+                font-size="8"
+                fill="#64748B"
+                text-anchor="start"
+              >
+                (Router input)
+              </text>
+              <line
+                x1="900"
+                y1="576"
+                x2="900"
+                y2="550"
+                stroke="#475569"
+                stroke-width="1.2"
+                marker-end="url(#arrow)"
+              />
+
+              <rect
+                x="850"
+                y="526"
+                width="100"
+                height="24"
+                rx="5"
+                fill="#DBEAFE"
+                stroke="#60A5FA"
+                stroke-width="1.5"
+              />
+              <text
+                x="900"
+                y="542"
+                font-size="10"
+                fill="#1E3A8A"
+                text-anchor="middle"
+                font-weight="600"
+              >
+                Gate Proj
+              </text>
+              <line
+                x1="900"
+                y1="526"
+                x2="900"
+                y2="500"
+                stroke="#475569"
+                stroke-width="1.2"
+                marker-end="url(#arrow)"
+              />
+
+              <rect
+                x="850"
+                y="470"
+                width="100"
+                height="30"
+                rx="5"
+                fill="#ECFDF5"
+                stroke="#10B981"
+                stroke-width="1.5"
+              />
+              <text
+                x="900"
+                y="485"
+                font-size="10"
+                fill="#065F46"
+                text-anchor="middle"
+                font-weight="600"
+              >
+                Softmax &amp;
+              </text>
+              <text
+                x="900"
+                y="496"
+                font-size="10"
+                fill="#065F46"
+                text-anchor="middle"
+                font-weight="600"
+              >
+                Top-K Routing
+              </text>
+              <line
+                x1="900"
+                y1="470"
+                x2="900"
+                y2="280"
+                stroke="#475569"
+                stroke-width="1.5"
+              />
+              <line
+                x1="900"
+                y1="280"
+                x2="989"
+                y2="280"
+                stroke="#475569"
+                stroke-width="1.5"
+                marker-end="url(#arrow)"
+              />
+
+              <rect
+                x="1019"
+                y="572"
+                width="132"
+                height="28"
+                rx="5"
+                fill="#F3E8FF"
+                stroke="#A855F7"
+                stroke-width="1.5"
+              />
+              <text
+                x="1085"
+                y="590"
+                font-size="11"
+                fill="#581C87"
+                text-anchor="middle"
+                font-weight="600"
+              >
+                Shared Mode-1 Proj
+              </text>
+              <line
+                x1="1085"
+                y1="572"
+                x2="1085"
+                y2="550"
+                stroke="#475569"
+                stroke-width="1.2"
+                marker-end="url(#arrow)"
+              />
+
+              <rect
+                x="1010"
+                y="420"
+                width="150"
+                height="130"
+                rx="6"
+                fill="#F8FAFC"
+                stroke="#A855F7"
+                stroke-width="1.5"
+                stroke-dasharray="4 2"
+              />
+              <text
+                x="1085"
+                y="435"
+                font-size="10"
+                fill="#6B21A8"
+                text-anchor="middle"
+                font-weight="600"
+              >
+                Tucker Core Experts
+              </text>
+              <rect
+                x="1019"
+                y="516"
+                width="132"
+                height="22"
+                rx="4"
+                fill="#F3E8FF"
+                stroke="#A855F7"
+                stroke-width="1"
+              />
+              <text
+                x="1085"
+                y="531"
+                font-size="10"
+                fill="#581C87"
+                text-anchor="middle"
+              >
+                Core Tensor 1
+              </text>
+              <rect
+                x="1019"
+                y="484"
+                width="132"
+                height="22"
+                rx="4"
+                fill="#F3E8FF"
+                stroke="#A855F7"
+                stroke-width="1"
+              />
+              <text
+                x="1085"
+                y="499"
+                font-size="10"
+                fill="#581C87"
+                text-anchor="middle"
+              >
+                Core Tensor 2
+              </text>
+              <text
+                x="1085"
+                y="475"
+                font-size="14"
+                fill="#6B21A8"
+                text-anchor="middle"
+                font-weight="700"
+              >
+                ⋮
+              </text>
+              <rect
+                x="1019"
+                y="444"
+                width="132"
+                height="22"
+                rx="4"
+                fill="#F3E8FF"
+                stroke="#A855F7"
+                stroke-width="1"
+              />
+              <text
+                x="1085"
+                y="459"
+                font-size="10"
+                fill="#581C87"
+                text-anchor="middle"
+              >
+                Core Tensor E
+              </text>
+
+              <line
+                x1="1085"
+                y1="420"
+                x2="1085"
+                y2="396"
+                stroke="#475569"
+                stroke-width="1.2"
+                marker-end="url(#arrow)"
+              />
+              <rect
+                x="1019"
+                y="368"
+                width="132"
+                height="28"
+                rx="5"
+                fill="#F3E8FF"
+                stroke="#A855F7"
+                stroke-width="1.5"
+              />
+              <text
+                x="1085"
+                y="386"
+                font-size="11"
+                fill="#581C87"
+                text-anchor="middle"
+                font-weight="600"
+              >
+                Shared Mode-2 Proj
+              </text>
+              <line
+                x1="1085"
+                y1="368"
+                x2="1085"
+                y2="280"
+                stroke="#475569"
+                stroke-width="1.5"
+              />
+              <line
+                x1="1085"
+                y1="280"
+                x2="1011"
+                y2="280"
+                stroke="#475569"
+                stroke-width="1.5"
+                marker-end="url(#arrow)"
+              />
+
+              <use href="#mulSymNode" x="1000" y="280" />
+              <foreignObject x="940" y="250" width="120" height="24">
+                <div class="math-box" style="font-size: 10px; color: #334155">
+                  Gate $\otimes$ Expert
+                </div>
+              </foreignObject>
+              <line
+                x1="1000"
+                y1="269"
+                x2="1000"
+                y2="8"
+                stroke="#475569"
+                stroke-width="1.5"
+                marker-end="url(#arrow)"
+              />
+            </g>
+
+            <rect
+              x="1220"
+              y="0"
+              width="360"
+              height="800"
+              rx="8"
+              fill="#F8FAFC"
+              stroke="#64748B"
+              stroke-width="2"
+              stroke-dasharray="4 4"
+            />
+            <rect
+              x="1222"
+              y="2"
+              width="356"
+              height="32"
+              rx="6"
+              fill="#F1F5F9"
+            />
+            <foreignObject x="1224" y="2" width="352" height="32">
+              <div
+                class="math-box"
+                style="font-size: 16px; font-weight: 700; color: #334155"
+              >
+                $\large\text{ Hybrid Mamba (Overall)}$
+              </div>
+            </foreignObject>
+
+            <g transform="translate(0, 30)">
+              <line
+                x1="1400"
+                y1="775"
+                x2="1400"
+                y2="680"
+                stroke="#475569"
+                stroke-width="2"
+                marker-end="url(#arrow)"
+              />
+              <rect
+                x="1330"
+                y="644"
+                width="140"
+                height="30"
+                rx="5"
+                fill="#DBEAFE"
+                stroke="#60A5FA"
+                stroke-width="1.5"
+              />
+              <text
+                x="1400"
+                y="663"
+                font-size="12"
+                fill="#1E3A8A"
+                text-anchor="middle"
+                font-weight="700"
+              >
+                Embedding
+              </text>
+              <foreignObject x="1330" y="626" width="140" height="16">
+                <div class="math-box" style="font-size: 10px; color: #64748b">
+                  $d = 768 , V = 32,007$
+                </div>
+              </foreignObject>
+              <line
+                x1="1400"
+                y1="644"
+                x2="1400"
+                y2="620"
+                stroke="#475569"
+                stroke-width="2"
+                marker-end="url(#arrow)"
+              />
+
+              <rect
+                x="1250"
+                y="232"
+                width="300"
+                height="378"
+                rx="8"
+                fill="none"
+                stroke="#3B82F6"
+                stroke-width="2"
+                stroke-dasharray="8 4"
+              />
+              <foreignObject x="1300" y="214" width="200" height="24">
+                <div
+                  class="math-box"
+                  style="font-size: 12px; font-weight: 700; color: #1d4ed8"
+                >
+                  Macro Block $\times N_{\text{macro}}$
+                </div>
+              </foreignObject>
+
+              <g transform="translate(400, 0)">
+                <rect
+                  x="878"
+                  y="554"
+                  width="244"
+                  height="42"
+                  rx="6"
+                  fill="#EFF6FF"
+                  stroke="#3B82F6"
+                  stroke-width="1.5"
+                />
+                <text
+                  x="1000"
+                  y="574"
+                  font-size="11"
+                  fill="#1E3A8A"
+                  text-anchor="middle"
+                  font-weight="700"
+                >
+                  Mamba-3 Block
+                </text>
+                <text
+                  x="1000"
+                  y="588"
+                  font-size="9"
+                  fill="#3B82F6"
+                  text-anchor="middle"
+                >
+                  + TuckerMoE (x_up, out_proj)
+                </text>
+                <line
+                  x1="1000"
+                  y1="618"
+                  x2="1000"
+                  y2="596"
+                  stroke="#475569"
+                  stroke-width="1.5"
+                  marker-end="url(#arrow)"
+                />
+              </g>
+              <g transform="translate(400, -56)">
+                <rect
+                  x="878"
+                  y="554"
+                  width="244"
+                  height="42"
+                  rx="6"
+                  fill="#EFF6FF"
+                  stroke="#3B82F6"
+                  stroke-width="1.5"
+                />
+                <text
+                  x="1000"
+                  y="574"
+                  font-size="11"
+                  fill="#1E3A8A"
+                  text-anchor="middle"
+                  font-weight="700"
+                >
+                  Mamba-3 Block
+                </text>
+                <text
+                  x="1000"
+                  y="588"
+                  font-size="9"
+                  fill="#3B82F6"
+                  text-anchor="middle"
+                >
+                  + TuckerMoE (x_up, out_proj)
+                </text>
+                <line
+                  x1="1000"
+                  y1="610"
+                  x2="1000"
+                  y2="596"
+                  stroke="#475569"
+                  stroke-width="1.5"
+                  marker-end="url(#arrow)"
+                />
+              </g>
+              <g transform="translate(400, -112)">
+                <rect
+                  x="878"
+                  y="554"
+                  width="244"
+                  height="42"
+                  rx="6"
+                  fill="#EFF6FF"
+                  stroke="#3B82F6"
+                  stroke-width="1.5"
+                />
+                <text
+                  x="1000"
+                  y="574"
+                  font-size="11"
+                  fill="#1E3A8A"
+                  text-anchor="middle"
+                  font-weight="700"
+                >
+                  Mamba-3 Block
+                </text>
+                <text
+                  x="1000"
+                  y="588"
+                  font-size="9"
+                  fill="#3B82F6"
+                  text-anchor="middle"
+                >
+                  + TuckerMoE (x_up, out_proj)
+                </text>
+                <line
+                  x1="1000"
+                  y1="610"
+                  x2="1000"
+                  y2="596"
+                  stroke="#475569"
+                  stroke-width="1.5"
+                  marker-end="url(#arrow)"
+                />
+              </g>
+              <g transform="translate(400, -168)">
+                <rect
+                  x="878"
+                  y="554"
+                  width="244"
+                  height="42"
+                  rx="6"
+                  fill="#EFF6FF"
+                  stroke="#3B82F6"
+                  stroke-width="1.5"
+                />
+                <text
+                  x="1000"
+                  y="574"
+                  font-size="11"
+                  fill="#1E3A8A"
+                  text-anchor="middle"
+                  font-weight="700"
+                >
+                  Mamba-3 Block
+                </text>
+                <text
+                  x="1000"
+                  y="588"
+                  font-size="9"
+                  fill="#3B82F6"
+                  text-anchor="middle"
+                >
+                  + TuckerMoE (x_up, out_proj)
+                </text>
+                <line
+                  x1="1000"
+                  y1="610"
+                  x2="1000"
+                  y2="596"
+                  stroke="#475569"
+                  stroke-width="1.5"
+                  marker-end="url(#arrow)"
+                />
+              </g>
+
+              <rect
+                x="1278"
+                y="296"
+                width="244"
+                height="58"
+                rx="6"
+                fill="#ECFDF5"
+                stroke="#10B981"
+                stroke-width="1.5"
+              />
+              <text
+                x="1400"
+                y="318"
+                font-size="11"
+                fill="#065F46"
+                text-anchor="middle"
+                font-weight="700"
+              >
+                Transformer Block
+              </text>
+              <text
+                x="1400"
+                y="333"
+                font-size="9"
+                fill="#059669"
+                text-anchor="middle"
+              >
+                GQA Attention
+              </text>
+              <text
+                x="1400"
+                y="346"
+                font-size="9"
+                fill="#059669"
+                text-anchor="middle"
+                dy="0.2em"
+              >
+                + MoE FFN (3× TuckerMoE)
+              </text>
+              <line
+                x1="1400"
+                y1="386"
+                x2="1400"
+                y2="354"
+                stroke="#475569"
+                stroke-width="1.5"
+                marker-end="url(#arrow)"
+              />
+
+              <line
+                x1="1262"
+                y1="382"
+                x2="1262"
+                y2="604"
+                stroke="#3B82F6"
+                stroke-width="2"
+              />
+              <line
+                x1="1256"
+                y1="382"
+                x2="1268"
+                y2="382"
+                stroke="#3B82F6"
+                stroke-width="2"
+              />
+              <line
+                x1="1256"
+                y1="604"
+                x2="1268"
+                y2="604"
+                stroke="#3B82F6"
+                stroke-width="2"
+              />
+              <g transform="translate(1240 493) rotate(-90)">
+                <foreignObject x="-88" y="-14" width="176" height="28">
+                  <div
+                    class="math-box"
+                    style="font-size: 11px; color: #000; font-weight: 600"
+                  >
+                    $\times 4~\text{SSM layers}$
+                  </div>
+                </foreignObject>
+              </g>
+
+              <line
+                x1="1262"
+                y1="292"
+                x2="1262"
+                y2="356"
+                stroke="#10B981"
+                stroke-width="2"
+              />
+              <line
+                x1="1256"
+                y1="292"
+                x2="1268"
+                y2="292"
+                stroke="#10B981"
+                stroke-width="2"
+              />
+              <line
+                x1="1256"
+                y1="356"
+                x2="1268"
+                y2="356"
+                stroke="#10B981"
+                stroke-width="2"
+              />
+              <g transform="translate(1240 324) rotate(-90)">
+                <foreignObject x="-72" y="-14" width="144" height="28">
+                  <div
+                    class="math-box"
+                    style="font-size: 11px; color: #000; font-weight: 600"
+                  >
+                    $\times 1~\text{Attn}$
+                  </div>
+                </foreignObject>
+              </g>
+
+              <line
+                x1="1400"
+                y1="296"
+                x2="1400"
+                y2="276"
+                stroke="#475569"
+                stroke-width="2"
+                marker-end="url(#arrow)"
+              />
+              <text
+                x="1400"
+                y="264"
+                font-size="20"
+                fill="#64748B"
+                text-anchor="middle"
+                font-weight="700"
+              >
+                ⋮
+              </text>
+
+              <rect
+                x="1345"
+                y="165"
+                width="110"
+                height="26"
+                rx="4"
+                fill="#F1F5F9"
+                stroke="#94A3B8"
+                stroke-width="1.2"
+              />
+              <text
+                x="1400"
+                y="182"
+                font-size="11"
+                fill="#334155"
+                text-anchor="middle"
+                font-weight="600"
+              >
+                RMSNorm
+              </text>
+              <line
+                x1="1400"
+                y1="232"
+                x2="1400"
+                y2="191"
+                stroke="#475569"
+                stroke-width="2"
+                marker-end="url(#arrow)"
+              />
+
+              <path
+                d="M 1340,152 L 1460,152 L 1440,122 L 1360,122 Z"
+                fill="#DBEAFE"
+                stroke="#60A5FA"
+                stroke-width="1.5"
+              />
+              <text
+                x="1400"
+                y="141"
+                font-size="11"
+                fill="#1E3A8A"
+                text-anchor="middle"
+                font-weight="600"
+              >
+                LM Head
+              </text>
+
+              <line
+                x1="1400"
+                y1="165"
+                x2="1400"
+                y2="152"
+                stroke="#475569"
+                stroke-width="1.5"
+                marker-end="url(#arrow)"
+              />
+
+              <line
+                x1="1400"
+                y1="122"
+                x2="1400"
+                y2="24"
+                stroke="#475569"
+                stroke-width="1.5"
+                marker-end="url(#arrow)"
+              />
+              <text
+                x="1400"
+                y="18"
+                font-size="10"
+                fill="#64748B"
+                text-anchor="middle"
+                font-weight="600"
+              >
+                Logits
+              </text>
+            </g>
+
+            <g transform="translate(0, 30)">
+              <rect
+                x="1640"
+                y="60"
+                width="185"
+                height="332"
+                rx="8"
+                fill="#F8FAFC"
+                stroke="#CBD5E1"
+                stroke-width="1.5"
+              />
+              <text
+                x="1732"
+                y="84"
+                font-size="13"
+                fill="#0F172A"
+                text-anchor="middle"
+                font-weight="700"
+              >
+                Legend
+              </text>
+
+              <rect
+                x="1656"
+                y="98"
+                width="50"
+                height="24"
+                rx="4"
+                fill="#DBEAFE"
+                stroke="#60A5FA"
+                stroke-width="1.5"
+              />
+              <text
+                x="1720"
+                y="114"
+                font-size="10"
+                fill="#334155"
+                text-anchor="start"
+                font-weight="600"
+              >
+                Linear projection
+              </text>
+
+              <rect
+                x="1656"
+                y="132"
+                width="50"
+                height="24"
+                rx="4"
+                fill="#EFF6FF"
+                stroke="#3B82F6"
+                stroke-width="1.5"
+              />
+              <text
+                x="1720"
+                y="148"
+                font-size="10"
+                fill="#334155"
+                text-anchor="start"
+                font-weight="600"
+              >
+                SSM / Scan
+              </text>
+
+              <rect
+                x="1656"
+                y="166"
+                width="50"
+                height="24"
+                rx="4"
+                fill="#ECFDF5"
+                stroke="#10B981"
+                stroke-width="1.5"
+              />
+              <text
+                x="1720"
+                y="182"
+                font-size="10"
+                fill="#334155"
+                text-anchor="start"
+                font-weight="600"
+              >
+                GQA Attention
+              </text>
+
+              <rect
+                x="1656"
+                y="200"
+                width="50"
+                height="24"
+                rx="4"
+                fill="#F3E8FF"
+                stroke="#A855F7"
+                stroke-width="1.5"
+              />
+              <text
+                x="1720"
+                y="216"
+                font-size="10"
+                fill="#334155"
+                text-anchor="start"
+                font-weight="600"
+              >
+                TuckerMoE
+              </text>
+
+              <rect
+                x="1656"
+                y="234"
+                width="50"
+                height="24"
+                rx="4"
+                fill="#F1F5F9"
+                stroke="#94A3B8"
+                stroke-width="1.2"
+              />
+              <text
+                x="1720"
+                y="250"
+                font-size="10"
+                fill="#334155"
+                text-anchor="start"
+                font-weight="600"
+              >
+                Normalization
+              </text>
+
+              <use href="#mulSymNode" x="1681" y="278" />
+              <text
+                x="1720"
+                y="283"
+                font-size="10"
+                fill="#334155"
+                text-anchor="start"
+                font-weight="600"
+              >
+                Multiplication
+              </text>
+
+              <use href="#addSymNode" x="1681" y="310" />
+              <text
+                x="1720"
+                y="315"
+                font-size="10"
+                fill="#334155"
+                text-anchor="start"
+                font-weight="600"
+              >
+                Residual Add
+              </text>
+
+              <circle
+                cx="1681"
+                cy="342"
+                r="11"
+                fill="#DCFCE7"
+                stroke="#22C55E"
+                stroke-width="1.8"
+              />
+              <foreignObject x="1670" y="331" width="22" height="22">
+                <div
+                  class="math-box"
+                  style="font-size: 14px; font-weight: bold; color: #166534"
+                >
+                  $\sigma$
+                </div>
+              </foreignObject>
+              <text
+                x="1720"
+                y="347"
+                font-size="10"
+                fill="#334155"
+                text-anchor="start"
+                font-weight="600"
+              >
+                Activation
+              </text>
+
+              <line
+                x1="1660"
+                y1="370"
+                x2="1700"
+                y2="370"
+                stroke="#475569"
+                stroke-width="1.5"
+                stroke-dasharray="6 4"
+              />
+              <text
+                x="1720"
+                y="375"
+                font-size="10"
+                fill="#334155"
+                text-anchor="start"
+                font-weight="600"
+              >
+                Skip connection
+              </text>
+            </g>
+
+            <text
+              x="1000"
+              y="825"
+              font-size="11"
+              fill="#64748B"
+              text-anchor="middle"
+            >
+              Factorized Experts + Top-K Routing
+            </text>
+            <text
+              x="1400"
+              y="825"
+              font-size="11"
+              fill="#64748B"
+              text-anchor="middle"
+            >
+              4:1 Hybrid Architecture
+            </text>
+
+            <text
+              x="1000"
+              y="845"
+              font-size="16"
+              fill="#6B21A8"
+              text-anchor="middle"
+              font-weight="700"
+            >
+              (c) TuckerMoE Block
+            </text>
+            <text
+              x="1400"
+              y="845"
+              font-size="16"
+              fill="#0F172A"
+              text-anchor="middle"
+              font-weight="700"
+            >
+              (d) Overall Model
+            </text>
+
+            <text
+              x="1000"
+              y="786"
+              font-size="12"
+              fill="#475569"
+              text-anchor="middle"
+              font-weight="600"
+            >
+              Input Tokens
+            </text>
+            <text
+              x="1400"
+              y="786"
+              font-size="12"
+              fill="#475569"
+              text-anchor="middle"
+              font-weight="600"
+            >
+              Input Tokens
+            </text>
+          </g>
+        </g>
+      </svg>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,1872 @@
+{
+  "checkpoint": "/home/hungwei/llm/output/checkpoint.pt",
+  "eval_step": 38400,
+  "world_size": 2,
+  "num_batches": 24,
+  "batch_size": 3,
+  "seq_len": 512,
+  "thresholds": {
+    "min_entropy_ratio": 0.28,
+    "max_top1_share": 0.85,
+    "max_dead_expert_ratio": 0.5,
+    "dead_expert_threshold": 0.01
+  },
+  "summary": {
+    "worst_top1_share": 0.322049,
+    "worst_entropy_ratio": 0.294258,
+    "worst_dead_expert_ratio": 0.0,
+    "total_nan_count": 0,
+    "status": "PASS",
+    "reasons": []
+  },
+  "modules": [
+    {
+      "module": "backbone.layers.0.block.x_up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.144355,
+      "entropy_ratio": 0.994579,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.126275,
+        0.121311,
+        0.133748,
+        0.143623,
+        0.081272,
+        0.132324,
+        0.117093,
+        0.144355
+      ],
+      "topk_distribution": [
+        0.158149,
+        0.119236,
+        0.134684,
+        0.116781,
+        0.105876,
+        0.111966,
+        0.120036,
+        0.133274
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.0.block.out_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.174086,
+      "entropy_ratio": 0.84206,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.144789,
+        0.12557,
+        0.116835,
+        0.097548,
+        0.104546,
+        0.125312,
+        0.174086,
+        0.111315
+      ],
+      "topk_distribution": [
+        0.12911,
+        0.122253,
+        0.131626,
+        0.130954,
+        0.123108,
+        0.122742,
+        0.124491,
+        0.115716
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.1.block.x_up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.160617,
+      "entropy_ratio": 0.895949,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.130303,
+        0.146335,
+        0.087267,
+        0.104913,
+        0.150377,
+        0.160617,
+        0.0845,
+        0.135688
+      ],
+      "topk_distribution": [
+        0.12108,
+        0.112332,
+        0.123318,
+        0.126363,
+        0.122796,
+        0.127007,
+        0.140191,
+        0.126912
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.1.block.out_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.154256,
+      "entropy_ratio": 0.797962,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.154256,
+        0.107788,
+        0.136692,
+        0.08648,
+        0.117988,
+        0.117147,
+        0.126139,
+        0.15351
+      ],
+      "topk_distribution": [
+        0.125997,
+        0.131327,
+        0.120334,
+        0.126838,
+        0.124403,
+        0.121718,
+        0.123027,
+        0.126356
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.2.block.x_up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.170451,
+      "entropy_ratio": 0.384936,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.116279,
+        0.170451,
+        0.115872,
+        0.108453,
+        0.096354,
+        0.143012,
+        0.122165,
+        0.127414
+      ],
+      "topk_distribution": [
+        0.125258,
+        0.126173,
+        0.121318,
+        0.121928,
+        0.126261,
+        0.126546,
+        0.127387,
+        0.125129
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.2.block.out_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.146891,
+      "entropy_ratio": 0.780897,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.122301,
+        0.115546,
+        0.111952,
+        0.130832,
+        0.136475,
+        0.097697,
+        0.146891,
+        0.138306
+      ],
+      "topk_distribution": [
+        0.126194,
+        0.124878,
+        0.129049,
+        0.123962,
+        0.124552,
+        0.125583,
+        0.124763,
+        0.121019
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.3.block.x_up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.164781,
+      "entropy_ratio": 0.423887,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.113661,
+        0.115451,
+        0.108615,
+        0.13326,
+        0.12717,
+        0.108819,
+        0.128242,
+        0.164781
+      ],
+      "topk_distribution": [
+        0.126024,
+        0.121609,
+        0.125529,
+        0.12738,
+        0.126872,
+        0.126051,
+        0.122823,
+        0.123711
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.3.block.out_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.147434,
+      "entropy_ratio": 0.724971,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.109375,
+        0.110433,
+        0.123305,
+        0.120809,
+        0.120578,
+        0.147434,
+        0.13699,
+        0.131076
+      ],
+      "topk_distribution": [
+        0.125461,
+        0.128201,
+        0.125658,
+        0.124349,
+        0.117913,
+        0.129198,
+        0.123678,
+        0.125543
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.4.block.ffn.gate_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.140177,
+      "entropy_ratio": 0.996199,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.129883,
+        0.120266,
+        0.108168,
+        0.136773,
+        0.122355,
+        0.129856,
+        0.140177,
+        0.112522
+      ],
+      "topk_distribution": [
+        0.126431,
+        0.126512,
+        0.121121,
+        0.128323,
+        0.123718,
+        0.126492,
+        0.123142,
+        0.124261
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.4.block.ffn.up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.139676,
+      "entropy_ratio": 0.996026,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.129069,
+        0.108371,
+        0.12481,
+        0.120443,
+        0.134752,
+        0.139676,
+        0.119507,
+        0.123372
+      ],
+      "topk_distribution": [
+        0.122172,
+        0.120809,
+        0.12361,
+        0.129333,
+        0.122342,
+        0.127909,
+        0.120422,
+        0.133403
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.4.block.ffn.down_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.167019,
+      "entropy_ratio": 0.999902,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.126044,
+        0.081082,
+        0.09295,
+        0.15309,
+        0.166599,
+        0.084907,
+        0.128309,
+        0.167019
+      ],
+      "topk_distribution": [
+        0.120599,
+        0.110792,
+        0.121989,
+        0.126194,
+        0.125305,
+        0.124878,
+        0.132128,
+        0.138116
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.5.block.x_up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.140747,
+      "entropy_ratio": 0.294258,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.108086,
+        0.139608,
+        0.122518,
+        0.128432,
+        0.12538,
+        0.121311,
+        0.140747,
+        0.113919
+      ],
+      "topk_distribution": [
+        0.125231,
+        0.128282,
+        0.118564,
+        0.129395,
+        0.124837,
+        0.12875,
+        0.123739,
+        0.121202
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.5.block.out_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.149929,
+      "entropy_ratio": 0.683727,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.116414,
+        0.145033,
+        0.114638,
+        0.112495,
+        0.149929,
+        0.116482,
+        0.126329,
+        0.118679
+      ],
+      "topk_distribution": [
+        0.123054,
+        0.127374,
+        0.124274,
+        0.117967,
+        0.129924,
+        0.12816,
+        0.124695,
+        0.124552
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.6.block.x_up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.136407,
+      "entropy_ratio": 0.495155,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.133545,
+        0.125366,
+        0.112901,
+        0.123047,
+        0.136407,
+        0.122179,
+        0.124539,
+        0.122016
+      ],
+      "topk_distribution": [
+        0.12911,
+        0.122233,
+        0.125793,
+        0.127496,
+        0.126444,
+        0.128961,
+        0.120633,
+        0.119331
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.6.block.out_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.147149,
+      "entropy_ratio": 0.659487,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.122328,
+        0.101956,
+        0.131524,
+        0.147149,
+        0.120321,
+        0.146715,
+        0.106337,
+        0.123671
+      ],
+      "topk_distribution": [
+        0.126275,
+        0.119975,
+        0.125699,
+        0.12635,
+        0.12281,
+        0.128398,
+        0.121012,
+        0.129483
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.7.block.x_up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.155436,
+      "entropy_ratio": 0.538632,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.122097,
+        0.155436,
+        0.132419,
+        0.124213,
+        0.099528,
+        0.111315,
+        0.152805,
+        0.102186
+      ],
+      "topk_distribution": [
+        0.124132,
+        0.121453,
+        0.130669,
+        0.123928,
+        0.120924,
+        0.124173,
+        0.127184,
+        0.127536
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.7.block.out_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.142971,
+      "entropy_ratio": 0.65468,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.114041,
+        0.123345,
+        0.119195,
+        0.124851,
+        0.119412,
+        0.126885,
+        0.142971,
+        0.1293
+      ],
+      "topk_distribution": [
+        0.125773,
+        0.122287,
+        0.126289,
+        0.12502,
+        0.120375,
+        0.126675,
+        0.126397,
+        0.127184
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.8.block.x_up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.182753,
+      "entropy_ratio": 0.443415,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.111925,
+        0.10928,
+        0.182753,
+        0.139513,
+        0.1529,
+        0.08351,
+        0.119859,
+        0.10026
+      ],
+      "topk_distribution": [
+        0.120809,
+        0.124464,
+        0.129259,
+        0.121229,
+        0.124064,
+        0.128927,
+        0.127252,
+        0.123996
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.8.block.out_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.143853,
+      "entropy_ratio": 0.635093,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.143853,
+        0.127102,
+        0.122545,
+        0.127007,
+        0.117432,
+        0.104234,
+        0.128065,
+        0.129761
+      ],
+      "topk_distribution": [
+        0.127346,
+        0.127021,
+        0.127102,
+        0.125481,
+        0.121935,
+        0.119236,
+        0.130025,
+        0.121853
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.9.block.ffn.gate_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.146077,
+      "entropy_ratio": 0.997014,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.113892,
+        0.137343,
+        0.146077,
+        0.12797,
+        0.111084,
+        0.131944,
+        0.110324,
+        0.121365
+      ],
+      "topk_distribution": [
+        0.118829,
+        0.125909,
+        0.126105,
+        0.124559,
+        0.125604,
+        0.132324,
+        0.119141,
+        0.12753
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.9.block.ffn.up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.139594,
+      "entropy_ratio": 0.996432,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.127346,
+        0.114678,
+        0.124417,
+        0.139594,
+        0.125434,
+        0.120904,
+        0.123671,
+        0.123956
+      ],
+      "topk_distribution": [
+        0.121819,
+        0.124674,
+        0.124146,
+        0.129408,
+        0.126675,
+        0.125936,
+        0.12462,
+        0.122721
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.9.block.ffn.down_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.322049,
+      "entropy_ratio": 0.999933,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.072523,
+        0.083293,
+        0.129951,
+        0.152018,
+        0.322049,
+        0.125285,
+        0.065308,
+        0.049574
+      ],
+      "topk_distribution": [
+        0.076877,
+        0.075663,
+        0.113363,
+        0.165921,
+        0.253737,
+        0.161452,
+        0.089315,
+        0.063673
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.10.block.x_up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.142429,
+      "entropy_ratio": 0.440566,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.12576,
+        0.111138,
+        0.103258,
+        0.121948,
+        0.140503,
+        0.12656,
+        0.128404,
+        0.142429
+      ],
+      "topk_distribution": [
+        0.12323,
+        0.114061,
+        0.124125,
+        0.127787,
+        0.128269,
+        0.129259,
+        0.127258,
+        0.12601
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.10.block.out_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.136922,
+      "entropy_ratio": 0.602675,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.127496,
+        0.129096,
+        0.112101,
+        0.11731,
+        0.12873,
+        0.117879,
+        0.130466,
+        0.136922
+      ],
+      "topk_distribution": [
+        0.124254,
+        0.129395,
+        0.125136,
+        0.121101,
+        0.125949,
+        0.123488,
+        0.116977,
+        0.133701
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.11.block.x_up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.138034,
+      "entropy_ratio": 0.360782,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.135064,
+        0.104763,
+        0.125339,
+        0.135457,
+        0.132528,
+        0.138034,
+        0.100572,
+        0.128242
+      ],
+      "topk_distribution": [
+        0.12913,
+        0.124505,
+        0.125427,
+        0.120314,
+        0.122199,
+        0.121555,
+        0.138258,
+        0.118612
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.11.block.out_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.153063,
+      "entropy_ratio": 0.565573,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.125624,
+        0.153063,
+        0.131714,
+        0.111572,
+        0.124783,
+        0.112725,
+        0.117554,
+        0.122965
+      ],
+      "topk_distribution": [
+        0.126851,
+        0.126682,
+        0.126329,
+        0.122145,
+        0.126689,
+        0.128167,
+        0.120721,
+        0.122416
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.12.block.x_up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.161892,
+      "entropy_ratio": 0.404197,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.088135,
+        0.161892,
+        0.127536,
+        0.120321,
+        0.129272,
+        0.137383,
+        0.112983,
+        0.122477
+      ],
+      "topk_distribution": [
+        0.123915,
+        0.120239,
+        0.132338,
+        0.134243,
+        0.123406,
+        0.125956,
+        0.12207,
+        0.117832
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.12.block.out_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.14011,
+      "entropy_ratio": 0.578456,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.137221,
+        0.115316,
+        0.11735,
+        0.122464,
+        0.133762,
+        0.112033,
+        0.121745,
+        0.14011
+      ],
+      "topk_distribution": [
+        0.128445,
+        0.111003,
+        0.125102,
+        0.123345,
+        0.133036,
+        0.124376,
+        0.125739,
+        0.128954
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.13.block.x_up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.170709,
+      "entropy_ratio": 0.508399,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.11301,
+        0.170709,
+        0.120592,
+        0.140042,
+        0.088677,
+        0.1368,
+        0.108398,
+        0.121772
+      ],
+      "topk_distribution": [
+        0.121195,
+        0.126567,
+        0.12243,
+        0.123549,
+        0.127625,
+        0.13227,
+        0.123928,
+        0.122437
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.13.block.out_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.137627,
+      "entropy_ratio": 0.589539,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.119507,
+        0.132189,
+        0.133491,
+        0.137627,
+        0.126533,
+        0.108032,
+        0.111857,
+        0.130764
+      ],
+      "topk_distribution": [
+        0.129503,
+        0.126431,
+        0.122118,
+        0.135118,
+        0.127068,
+        0.114563,
+        0.12129,
+        0.123908
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.14.block.ffn.gate_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.136312,
+      "entropy_ratio": 0.99688,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.121053,
+        0.116808,
+        0.135213,
+        0.136312,
+        0.133803,
+        0.11891,
+        0.123779,
+        0.114122
+      ],
+      "topk_distribution": [
+        0.124403,
+        0.122498,
+        0.125142,
+        0.125244,
+        0.132277,
+        0.120843,
+        0.123901,
+        0.125692
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.14.block.ffn.up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.132351,
+      "entropy_ratio": 0.997259,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.118707,
+        0.130642,
+        0.130113,
+        0.132351,
+        0.121677,
+        0.125298,
+        0.12694,
+        0.114271
+      ],
+      "topk_distribution": [
+        0.121589,
+        0.125739,
+        0.124797,
+        0.126187,
+        0.127197,
+        0.124091,
+        0.125902,
+        0.124498
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.14.block.ffn.down_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.188151,
+      "entropy_ratio": 0.999939,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.120551,
+        0.136339,
+        0.068319,
+        0.07902,
+        0.109239,
+        0.116374,
+        0.188151,
+        0.182007
+      ],
+      "topk_distribution": [
+        0.140828,
+        0.126689,
+        0.108344,
+        0.125414,
+        0.098429,
+        0.109856,
+        0.145386,
+        0.145053
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.15.block.x_up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.148451,
+      "entropy_ratio": 0.484116,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.142131,
+        0.148451,
+        0.116279,
+        0.119331,
+        0.100396,
+        0.108073,
+        0.131917,
+        0.133423
+      ],
+      "topk_distribution": [
+        0.118741,
+        0.123094,
+        0.126248,
+        0.134969,
+        0.124288,
+        0.120734,
+        0.126662,
+        0.125264
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.15.block.out_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.137763,
+      "entropy_ratio": 0.56802,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.133789,
+        0.116374,
+        0.117025,
+        0.133124,
+        0.111816,
+        0.12519,
+        0.124919,
+        0.137763
+      ],
+      "topk_distribution": [
+        0.133023,
+        0.122559,
+        0.124688,
+        0.125068,
+        0.116414,
+        0.122884,
+        0.126038,
+        0.129327
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.16.block.x_up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.194512,
+      "entropy_ratio": 0.483348,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.059475,
+        0.093452,
+        0.194512,
+        0.106188,
+        0.140584,
+        0.150811,
+        0.135308,
+        0.11967
+      ],
+      "topk_distribution": [
+        0.123874,
+        0.123481,
+        0.131816,
+        0.126872,
+        0.119622,
+        0.118727,
+        0.128228,
+        0.12738
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.16.block.out_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.141412,
+      "entropy_ratio": 0.571286,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.141412,
+        0.140923,
+        0.135783,
+        0.122423,
+        0.120945,
+        0.120321,
+        0.103068,
+        0.115126
+      ],
+      "topk_distribution": [
+        0.124552,
+        0.123244,
+        0.123013,
+        0.125332,
+        0.132426,
+        0.119527,
+        0.124953,
+        0.126953
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.17.block.x_up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.186863,
+      "entropy_ratio": 0.582958,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.128337,
+        0.088352,
+        0.119303,
+        0.109389,
+        0.10102,
+        0.125041,
+        0.186863,
+        0.141697
+      ],
+      "topk_distribution": [
+        0.123813,
+        0.127102,
+        0.127374,
+        0.121691,
+        0.121257,
+        0.12403,
+        0.129456,
+        0.125278
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.17.block.out_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.153483,
+      "entropy_ratio": 0.553622,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.137953,
+        0.121039,
+        0.13501,
+        0.134915,
+        0.099948,
+        0.108534,
+        0.153483,
+        0.109117
+      ],
+      "topk_distribution": [
+        0.124363,
+        0.124064,
+        0.130432,
+        0.128689,
+        0.128289,
+        0.119059,
+        0.125109,
+        0.119995
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.18.block.x_up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.145684,
+      "entropy_ratio": 0.587192,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.096368,
+        0.13269,
+        0.145684,
+        0.122464,
+        0.127021,
+        0.111464,
+        0.133626,
+        0.130683
+      ],
+      "topk_distribution": [
+        0.123067,
+        0.124288,
+        0.130615,
+        0.122904,
+        0.124532,
+        0.125359,
+        0.122796,
+        0.126438
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.18.block.out_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.158976,
+      "entropy_ratio": 0.563778,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.143378,
+        0.131307,
+        0.106093,
+        0.105116,
+        0.121148,
+        0.108303,
+        0.158976,
+        0.125678
+      ],
+      "topk_distribution": [
+        0.130134,
+        0.124471,
+        0.120687,
+        0.124383,
+        0.121263,
+        0.127407,
+        0.122782,
+        0.128872
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.19.block.ffn.gate_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.134874,
+      "entropy_ratio": 0.994243,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.117282,
+        0.122843,
+        0.122803,
+        0.134874,
+        0.126166,
+        0.130792,
+        0.117337,
+        0.127903
+      ],
+      "topk_distribution": [
+        0.123027,
+        0.121494,
+        0.128004,
+        0.125922,
+        0.126709,
+        0.123244,
+        0.124179,
+        0.127421
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.19.block.ffn.up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.131388,
+      "entropy_ratio": 0.994275,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.131388,
+        0.122179,
+        0.112671,
+        0.125393,
+        0.127441,
+        0.12816,
+        0.124023,
+        0.128743
+      ],
+      "topk_distribution": [
+        0.130764,
+        0.114651,
+        0.127435,
+        0.121006,
+        0.128235,
+        0.122816,
+        0.123623,
+        0.13147
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.19.block.ffn.down_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.286784,
+      "entropy_ratio": 0.999941,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.118449,
+        0.075331,
+        0.100084,
+        0.094591,
+        0.084174,
+        0.286784,
+        0.123101,
+        0.117486
+      ],
+      "topk_distribution": [
+        0.11714,
+        0.07883,
+        0.097053,
+        0.098572,
+        0.084961,
+        0.228353,
+        0.171244,
+        0.123847
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.20.block.x_up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.136651,
+      "entropy_ratio": 0.613421,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.106066,
+        0.13303,
+        0.136651,
+        0.115546,
+        0.133287,
+        0.134698,
+        0.11773,
+        0.122993
+      ],
+      "topk_distribution": [
+        0.121765,
+        0.125461,
+        0.122138,
+        0.127279,
+        0.129883,
+        0.124783,
+        0.123766,
+        0.124925
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.20.block.out_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.155111,
+      "entropy_ratio": 0.601033,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.110758,
+        0.120361,
+        0.120456,
+        0.11202,
+        0.155111,
+        0.139838,
+        0.123359,
+        0.118096
+      ],
+      "topk_distribution": [
+        0.128866,
+        0.122464,
+        0.119683,
+        0.127292,
+        0.123305,
+        0.128452,
+        0.125393,
+        0.124546
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.21.block.x_up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.161092,
+      "entropy_ratio": 0.683672,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.114271,
+        0.10867,
+        0.118815,
+        0.098226,
+        0.132487,
+        0.136325,
+        0.130113,
+        0.161092
+      ],
+      "topk_distribution": [
+        0.121568,
+        0.13012,
+        0.119297,
+        0.123576,
+        0.128594,
+        0.127903,
+        0.124308,
+        0.124634
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.21.block.out_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.152127,
+      "entropy_ratio": 0.595576,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.104234,
+        0.139296,
+        0.135783,
+        0.117188,
+        0.099379,
+        0.152127,
+        0.123644,
+        0.12835
+      ],
+      "topk_distribution": [
+        0.121887,
+        0.127631,
+        0.126411,
+        0.124946,
+        0.126885,
+        0.120653,
+        0.129652,
+        0.121935
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.22.block.x_up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.14681,
+      "entropy_ratio": 0.847294,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.14681,
+        0.141276,
+        0.146471,
+        0.091241,
+        0.091024,
+        0.133002,
+        0.114285,
+        0.135891
+      ],
+      "topk_distribution": [
+        0.12561,
+        0.124593,
+        0.125902,
+        0.122409,
+        0.121589,
+        0.127672,
+        0.127916,
+        0.124308
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.22.block.out_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.16508,
+      "entropy_ratio": 0.608282,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.16508,
+        0.101074,
+        0.113688,
+        0.103692,
+        0.137221,
+        0.102281,
+        0.133287,
+        0.143677
+      ],
+      "topk_distribution": [
+        0.128567,
+        0.120388,
+        0.12753,
+        0.120958,
+        0.130832,
+        0.118679,
+        0.127611,
+        0.125434
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.23.block.x_up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.153375,
+      "entropy_ratio": 0.539233,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.126817,
+        0.127401,
+        0.153375,
+        0.11655,
+        0.137533,
+        0.127943,
+        0.096653,
+        0.113729
+      ],
+      "topk_distribution": [
+        0.121833,
+        0.133484,
+        0.131049,
+        0.123094,
+        0.12521,
+        0.129598,
+        0.117981,
+        0.11775
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.23.block.out_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.141832,
+      "entropy_ratio": 0.609978,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.141832,
+        0.136271,
+        0.117296,
+        0.122843,
+        0.133586,
+        0.107151,
+        0.116781,
+        0.12424
+      ],
+      "topk_distribution": [
+        0.121826,
+        0.123121,
+        0.128838,
+        0.128669,
+        0.125766,
+        0.121412,
+        0.124471,
+        0.125895
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.24.block.ffn.gate_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.172092,
+      "entropy_ratio": 0.974547,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.099026,
+        0.121609,
+        0.172092,
+        0.122626,
+        0.12085,
+        0.121379,
+        0.13425,
+        0.108168
+      ],
+      "topk_distribution": [
+        0.122721,
+        0.129035,
+        0.125007,
+        0.122742,
+        0.125699,
+        0.124797,
+        0.127638,
+        0.122362
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.24.block.ffn.up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.151679,
+      "entropy_ratio": 0.972758,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.124769,
+        0.121718,
+        0.151679,
+        0.147705,
+        0.110067,
+        0.111735,
+        0.110406,
+        0.121921
+      ],
+      "topk_distribution": [
+        0.127584,
+        0.121785,
+        0.129578,
+        0.123827,
+        0.123325,
+        0.122064,
+        0.124417,
+        0.127421
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.24.block.ffn.down_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.182807,
+      "entropy_ratio": 0.994224,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.139174,
+        0.086466,
+        0.099338,
+        0.095161,
+        0.141669,
+        0.182807,
+        0.138143,
+        0.117242
+      ],
+      "topk_distribution": [
+        0.145989,
+        0.1144,
+        0.111613,
+        0.102295,
+        0.137105,
+        0.145779,
+        0.124959,
+        0.117859
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.25.block.x_up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.152886,
+      "entropy_ratio": 0.933884,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.117445,
+        0.127699,
+        0.14959,
+        0.152886,
+        0.080309,
+        0.141995,
+        0.111559,
+        0.118517
+      ],
+      "topk_distribution": [
+        0.123928,
+        0.122871,
+        0.120185,
+        0.129259,
+        0.130541,
+        0.124586,
+        0.123467,
+        0.125163
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.25.block.out_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.144192,
+      "entropy_ratio": 0.626156,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.112888,
+        0.131727,
+        0.123576,
+        0.132392,
+        0.114285,
+        0.110189,
+        0.144192,
+        0.130751
+      ],
+      "topk_distribution": [
+        0.125556,
+        0.120578,
+        0.125766,
+        0.12835,
+        0.120429,
+        0.124674,
+        0.124871,
+        0.129774
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.26.block.x_up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.152642,
+      "entropy_ratio": 0.855737,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.107327,
+        0.116943,
+        0.152642,
+        0.124064,
+        0.124539,
+        0.125922,
+        0.101807,
+        0.146756
+      ],
+      "topk_distribution": [
+        0.121046,
+        0.125719,
+        0.124681,
+        0.12795,
+        0.122382,
+        0.132128,
+        0.121379,
+        0.124715
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.26.block.out_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.134806,
+      "entropy_ratio": 0.652392,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.126194,
+        0.121243,
+        0.134074,
+        0.121487,
+        0.131578,
+        0.11731,
+        0.113308,
+        0.134806
+      ],
+      "topk_distribution": [
+        0.128113,
+        0.131721,
+        0.123338,
+        0.122979,
+        0.122491,
+        0.124098,
+        0.118652,
+        0.128608
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.27.block.x_up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.179064,
+      "entropy_ratio": 0.8933,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.096612,
+        0.106242,
+        0.126072,
+        0.179064,
+        0.086195,
+        0.128187,
+        0.111871,
+        0.165758
+      ],
+      "topk_distribution": [
+        0.121894,
+        0.119208,
+        0.12639,
+        0.132711,
+        0.120633,
+        0.124959,
+        0.125047,
+        0.129157
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.27.block.out_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.150486,
+      "entropy_ratio": 0.660777,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.120483,
+        0.113024,
+        0.138509,
+        0.145169,
+        0.150486,
+        0.105821,
+        0.143704,
+        0.082804
+      ],
+      "topk_distribution": [
+        0.12167,
+        0.128635,
+        0.135044,
+        0.125665,
+        0.123596,
+        0.125882,
+        0.127469,
+        0.11204
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.28.block.x_up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.164958,
+      "entropy_ratio": 0.990511,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.164958,
+        0.129544,
+        0.082262,
+        0.120294,
+        0.110596,
+        0.148953,
+        0.135444,
+        0.107951
+      ],
+      "topk_distribution": [
+        0.126282,
+        0.124315,
+        0.12776,
+        0.123745,
+        0.122837,
+        0.130466,
+        0.116618,
+        0.127977
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.28.block.out_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.159709,
+      "entropy_ratio": 0.683609,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.123969,
+        0.093655,
+        0.140367,
+        0.154338,
+        0.1014,
+        0.135403,
+        0.159709,
+        0.091159
+      ],
+      "topk_distribution": [
+        0.130595,
+        0.122694,
+        0.132202,
+        0.122993,
+        0.11693,
+        0.123779,
+        0.131653,
+        0.119154
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.29.block.ffn.gate_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.144341,
+      "entropy_ratio": 0.985497,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.113851,
+        0.123644,
+        0.115736,
+        0.143134,
+        0.112888,
+        0.144341,
+        0.117255,
+        0.12915
+      ],
+      "topk_distribution": [
+        0.123881,
+        0.121372,
+        0.122891,
+        0.13012,
+        0.119622,
+        0.13147,
+        0.124179,
+        0.126465
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.29.block.ffn.up_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.140584,
+      "entropy_ratio": 0.987594,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.12424,
+        0.138333,
+        0.129042,
+        0.140584,
+        0.10791,
+        0.112305,
+        0.128391,
+        0.119195
+      ],
+      "topk_distribution": [
+        0.128635,
+        0.130968,
+        0.122782,
+        0.12576,
+        0.121901,
+        0.120273,
+        0.123535,
+        0.126146
+      ],
+      "nan_count": 0
+    },
+    {
+      "module": "backbone.layers.29.block.ffn.down_proj",
+      "tokens": 73728,
+      "top1_max_share": 0.175442,
+      "entropy_ratio": 0.996041,
+      "dead_expert_ratio": 0.0,
+      "top1_distribution": [
+        0.130154,
+        0.175442,
+        0.15979,
+        0.096463,
+        0.117689,
+        0.127957,
+        0.088257,
+        0.104248
+      ],
+      "topk_distribution": [
+        0.129896,
+        0.132562,
+        0.124037,
+        0.123074,
+        0.12361,
+        0.130568,
+        0.1128,
+        0.123454
+      ],
+      "nan_count": 0
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+\documentclass[preview,border=10pt]{standalone}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang SC}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\begin{document}
+\scalebox{1.5}{%
+\begin{tabular}{|l|c|c|l|}
+\hline
+\textbf{Model Architecture} & \textbf{Total Params} & \textbf{Active Params / Token} & \textbf{Complexity (Inference)} \\
+\hline
+Standard GPT-2 (Dense) & $\sim 1.5$B  & $1.5$B & $O(N \cdot d^2)$ \\
+Mistral 8x7B (Sparse MoE) & $\sim 47$B & $\sim 13$B & $O(N \cdot d^2)$ \\
+Mamba (Dense SSM) & $\sim 3$B & $3$B & $O(1)$ Memory, $O(d^2)$ Compute \\
+\textbf{Hybrid Mamba-TuckerMoE (Ours)} & $\mathbf{\sim 3B}$ & $\mathbf{\sim 0.6B}$ & $\mathbf{O(1)}$ \textbf{Memory, Sparse Compute} \\
+\hline
+\end{tabular}
+}
+\end{document}

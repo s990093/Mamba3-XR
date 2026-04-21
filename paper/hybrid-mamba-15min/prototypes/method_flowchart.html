@@ -1,0 +1,513 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Hybrid Mamba — Method Pipeline Flowchart</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      MathJax = {
+        tex: {
+          inlineMath: [
+            ["$", "$"],
+            ["\\(", "\\)"],
+          ],
+        },
+        svg: { fontCache: "global" },
+      };
+    </script>
+    <script
+      type="text/javascript"
+      id="MathJax-script"
+      async
+      src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"
+    ></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        background: #fff;
+        font-family: "Inter", system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 1.5rem;
+      }
+      .diagram-wrap {
+        width: 100%;
+        max-width: 1600px;
+        overflow-x: auto;
+        padding-bottom: 0.5rem;
+      }
+      svg {
+        width: 100%;
+        min-width: 1500px;
+        height: auto;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="diagram-wrap">
+      <svg viewBox="0 0 1650 800" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker
+            id="arrow"
+            markerWidth="8"
+            markerHeight="8"
+            refX="7"
+            refY="4"
+            orient="auto"
+          >
+            <path d="M0,1 L7,4 L0,7 L2,4 Z" fill="#475569" />
+          </marker>
+          <marker
+            id="arrowRed"
+            markerWidth="8"
+            markerHeight="8"
+            refX="7"
+            refY="4"
+            orient="auto"
+          >
+            <path d="M0,1 L7,4 L0,7 L2,4 Z" fill="#EF4444" />
+          </marker>
+          <marker
+            id="arrowGreen"
+            markerWidth="8"
+            markerHeight="8"
+            refX="7"
+            refY="4"
+            orient="auto"
+          >
+            <path d="M0,1 L7,4 L0,7 L2,4 Z" fill="#10B981" />
+          </marker>
+          <marker
+            id="arrowGreenLarge"
+            markerWidth="7"
+            markerHeight="7"
+            refX="6"
+            refY="3.5"
+            orient="auto"
+          >
+            <path d="M0,1 L6,3.5 L0,6 L1.5,3.5 Z" fill="#10B981" />
+          </marker>
+          <marker
+            id="arrowBlue"
+            markerWidth="8"
+            markerHeight="8"
+            refX="7"
+            refY="4"
+            orient="auto"
+          >
+            <path d="M0,1 L7,4 L0,7 L2,4 Z" fill="#3B82F6" />
+          </marker>
+          <marker
+            id="arrowPurple"
+            markerWidth="8"
+            markerHeight="8"
+            refX="7"
+            refY="4"
+            orient="auto"
+          >
+            <path d="M0,1 L7,4 L0,7 L2,4 Z" fill="#7C3AED" />
+          </marker>
+
+          <linearGradient id="gPhase1" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#EFF6FF" />
+            <stop offset="100%" stop-color="#DBEAFE" />
+          </linearGradient>
+          <linearGradient id="gPhase2" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#ECFDF5" />
+            <stop offset="100%" stop-color="#D1FAE5" />
+          </linearGradient>
+          <linearGradient id="gPhase3" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#F5F3FF" />
+            <stop offset="100%" stop-color="#EDE9FE" />
+          </linearGradient>
+
+          <filter id="shadow">
+            <feDropShadow dx="0" dy="2" stdDeviation="4" flood-opacity="0.08" />
+          </filter>
+        </defs>
+
+        <text
+          x="750"
+          y="38"
+          font-size="22"
+          fill="#0F172A"
+          text-anchor="middle"
+          font-weight="700"
+          letter-spacing="-0.3"
+        >
+          True Hybrid Mamba-TuckerMoE: End-to-End System Architecture
+        </text>
+        <text
+          x="750"
+          y="60"
+          font-size="12"
+          fill="#64748B"
+          text-anchor="middle"
+          font-weight="500"
+        >
+          Illustrating Data Flow, Structural Decompositions, and Zero-Overhead
+          Memory Fusion
+        </text>
+
+        <g transform="translate(0, 80)">
+          <path
+            d="M 30,260 L 120,260 L 110,230 L 40,230 Z"
+            fill="#FEF3C7"
+            stroke="#F59E0B"
+            stroke-width="1.8"
+          />
+          <text
+            x="75"
+            y="250"
+            font-size="10"
+            fill="#92400E"
+            text-anchor="middle"
+            font-weight="700"
+          >
+            Input
+          </text>
+
+          <rect
+            x="18"
+            y="270"
+            width="114"
+            height="120"
+            rx="8"
+            fill="#FFFBEB"
+            stroke="#F59E0B"
+            stroke-width="1.5"
+            filter="url(#shadow)"
+          />
+          <text
+            x="75"
+            y="295"
+            font-size="12"
+            fill="#92400E"
+            text-anchor="middle"
+            font-weight="700"
+          >
+            Token Stream
+          </text>
+          <line
+            x1="30"
+            y1="305"
+            x2="120"
+            y2="305"
+            stroke="#FDE68A"
+            stroke-width="1"
+          />
+
+          <path
+            d="M 40,320 L 50,310 L 110,310 L 100,320 L 40,320"
+            fill="#FEF3C7"
+            stroke="#F59E0B"
+            stroke-width="1.2"
+          />
+          <path
+            d="M 100,320 L 110,310 L 110,360 L 100,370 L 100,320"
+            fill="#FDE68A"
+            stroke="#F59E0B"
+            stroke-width="1.2"
+          />
+          <rect
+            x="40"
+            y="320"
+            width="60"
+            height="50"
+            fill="#FFF8F0"
+            stroke="#F59E0B"
+            stroke-width="1.2"
+          />
+
+          <foreignObject x="40" y="335" width="60" height="30">
+            <div
+              style="
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 100%;
+                height: 100%;
+                font-size: 11px;
+                color: #78350f;
+                font-weight: 700;
+              "
+            >
+              $X \in \mathbb{R}^{L \times d}$
+            </div>
+          </foreignObject>
+
+          <line
+            x1="132"
+            y1="330"
+            x2="170"
+            y2="330"
+            stroke="#F59E0B"
+            stroke-width="2.5"
+            marker-end="url(#arrow)"
+          />
+        </g>
+
+        <g id="canvas_a"></g>
+        <g transform="translate(0, 80)">
+          <line
+            x1="580"
+            y1="285"
+            x2="610"
+            y2="285"
+            stroke="#475569"
+            stroke-width="3"
+            marker-end="url(#arrow)"
+          />
+        </g>
+
+        <g id="canvas_b"></g>
+        <g transform="translate(0, 80)">
+          <line
+            x1="1020"
+            y1="285"
+            x2="1040"
+            y2="285"
+            stroke="#475569"
+            stroke-width="3"
+            marker-end="url(#arrow)"
+          />
+        </g>
+
+        <g id="canvas_c"></g>
+        <g transform="translate(0, 80)">
+          <line
+            x1="1435"
+            y1="565"
+            x2="1475"
+            y2="565"
+            stroke="#7C3AED"
+            stroke-width="2.5"
+            marker-end="url(#arrow)"
+          />
+
+          <rect
+            x="1475"
+            y="515"
+            width="110"
+            height="100"
+            rx="8"
+            fill="#FAF5FF"
+            stroke="#9333EA"
+            stroke-width="1.5"
+            filter="url(#shadow)"
+          />
+
+          <path
+            d="M 1475,523 Q 1475,515 1483,515 L 1483,615 L 1475,615 Z"
+            fill="#9333EA"
+          />
+
+          <text
+            x="1533"
+            y="538"
+            font-size="13"
+            fill="#6B21A8"
+            text-anchor="middle"
+            font-weight="700"
+          >
+            Model Output
+          </text>
+
+          <line
+            x1="1490"
+            y1="546"
+            x2="1570"
+            y2="546"
+            stroke="#E9D5FF"
+            stroke-width="1"
+          />
+
+          <rect
+            x="1490"
+            y="555"
+            width="80"
+            height="26"
+            rx="4"
+            fill="#FFFFFF"
+            stroke="#D8B4FE"
+            stroke-width="1"
+          />
+          <foreignObject x="1490" y="555" width="80" height="26">
+            <div
+              style="
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 100%;
+                height: 100%;
+                font-size: 11px;
+                color: #581c87;
+                font-weight: 700;
+              "
+            >
+              $Y \in \mathbb{R}^{L \times V}$
+            </div>
+          </foreignObject>
+
+          <rect
+            x="1495"
+            y="588"
+            width="70"
+            height="20"
+            rx="10"
+            fill="#DCFCE7"
+            stroke="#86EFAC"
+            stroke-width="1"
+          />
+          <text
+            x="1530"
+            y="602"
+            font-size="11"
+            fill="#166534"
+            text-anchor="middle"
+            font-weight="700"
+          >
+            PPL: 12.5
+          </text>
+        </g>
+
+        <g transform="translate(0, 140)">
+          <line
+            x1="75"
+            y1="600"
+            x2="1535"
+            y2="600"
+            stroke="#CBD5E1"
+            stroke-width="1.5"
+            stroke-dasharray="8 4"
+          />
+          <circle
+            cx="75"
+            cy="600"
+            r="5"
+            fill="#F59E0B"
+            stroke="#fff"
+            stroke-width="1.5"
+          />
+          <circle
+            cx="380"
+            cy="600"
+            r="5"
+            fill="#3B82F6"
+            stroke="#fff"
+            stroke-width="1.5"
+          />
+          <circle
+            cx="800"
+            cy="600"
+            r="5"
+            fill="#10B981"
+            stroke="#fff"
+            stroke-width="1.5"
+          />
+          <circle
+            cx="1200"
+            cy="600"
+            r="5"
+            fill="#7C3AED"
+            stroke="#fff"
+            stroke-width="1.5"
+          />
+          <circle
+            cx="1535"
+            cy="600"
+            r="5"
+            fill="#7C3AED"
+            stroke="#fff"
+            stroke-width="1.5"
+          />
+
+          <text
+            x="75"
+            y="622"
+            font-size="9"
+            fill="#64748B"
+            text-anchor="middle"
+            font-weight="600"
+          >
+            Data stream
+          </text>
+          <text
+            x="380"
+            y="622"
+            font-size="9"
+            fill="#64748B"
+            text-anchor="middle"
+            font-weight="600"
+          >
+            Forward pass geometry
+          </text>
+          <text
+            x="800"
+            y="622"
+            font-size="9"
+            fill="#64748B"
+            text-anchor="middle"
+            font-weight="600"
+          >
+            Memory Hierarchy
+          </text>
+          <text
+            x="1200"
+            y="622"
+            font-size="9"
+            fill="#64748B"
+            text-anchor="middle"
+            font-weight="600"
+          >
+            Deployment platforms
+          </text>
+          <text
+            x="1535"
+            y="622"
+            font-size="9"
+            fill="#64748B"
+            text-anchor="middle"
+            font-weight="600"
+          >
+            Evaluation
+          </text>
+        </g>
+      </svg>
+    </div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        Promise.all([
+          fetch("canvas_a.html").then((r) => r.text()),
+          fetch("canvas_b.html").then((r) => r.text()),
+          fetch("canvas_c.html").then((r) => r.text()),
+        ]).then(([a, b, c]) => {
+          document.getElementById("canvas_a").innerHTML = a;
+          document.getElementById("canvas_b").innerHTML = b;
+          document.getElementById("canvas_c").innerHTML = c;
+          setTimeout(() => {
+            if (window.MathJax) MathJax.typesetPromise();
+          }, 100);
+        });
+      });
+    </script>
+  </body>
+</html>

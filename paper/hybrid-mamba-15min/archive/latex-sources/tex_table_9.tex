@@ -1,0 +1,19 @@
+\documentclass[preview,border=10pt]{standalone}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{xeCJK}
+\setCJKmainfont{PingFang SC}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\begin{document}
+\scalebox{1.5}{%
+\begin{tabular}{|l|c|l|}
+\hline
+\textbf{Layer Module} & \textbf{Parameters Formula} & \textbf{Memory Access Cost (MAC)} \\
+\hline
+Standard FFN & $2 \times (d \cdot d_{ff})$ & 高頻寬飽和 (Memory-bound) \\
+Sparse MoE (Top-2) & $E \times 2(d \cdot d_{ff})$ & 中等等級 (需容忍 Expert 切換延遲) \\
+\textbf{TuckerMoE (Ours)} & $\mathcal{G}_{r^3} + 3(U_{d \times r})$ & \textbf{極低：僅載入 Core Tensor 計算} \\
+\hline
+\end{tabular}
+}
+\end{document}

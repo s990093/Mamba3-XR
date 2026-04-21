@@ -1,0 +1,156 @@
+<!-- PHASE 2: TRAINING (Memory Fusion)               -->
+<!-- ═══════════════════════════════════════════════ -->
+<g transform="translate(0, 80)">
+  <rect
+    x="620"
+    y="0"
+    width="400"
+    height="630"
+    rx="10"
+    fill="#F8FAFC"
+    stroke="#10B981"
+    stroke-width="2"
+    stroke-dasharray="5 3"
+    filter="url(#shadow)"
+  />
+  <rect x="622" y="2" width="396" height="36" rx="8" fill="url(#gPhase2)" />
+  <text
+    x="820"
+    y="26"
+    font-size="15"
+    fill="#047857"
+    text-anchor="middle"
+    font-weight="700"
+  >
+    Phase 2: Training & Triton Memory Fusion
+  </text>
+
+  <!-- UPPER SECTION: Mathematical Training Framework -->
+  <rect x="635" y="55" width="370" height="295" rx="6" fill="#F8FAFC" stroke="#94A3B8" stroke-width="1.2" stroke-dasharray="4 2"/>
+  <text x="820" y="75" font-size="12" fill="#334155" text-anchor="middle" font-weight="700">Mathematical Training &amp; Optimization Framework</text>
+
+  <!-- LR Schedule Math -->
+  <rect x="650" y="90" width="340" height="60" rx="4" fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1" />
+  <text x="820" y="105" font-size="9" fill="#475569" text-anchor="middle" font-weight="800">Learning Rate Schedule (Warmup + Cosine Decay + Re-warmup)</text>
+  <foreignObject x="650" y="110" width="340" height="40">
+    <div style="display:flex; justify-content:center; align-items:center; width:100%; height:100%; font-size:12px; color:#1e40af; font-family:serif;">
+      $\eta_t = \eta_{min} + \frac{1}{2}(\eta_{max} - \eta_{min}) \left[ 1 + \cos\left( \pi \frac{t - T_w}{T_{tot} - T_w} \right) \right]$
+    </div>
+  </foreignObject>
+
+  <!-- Joint Loss Box -->
+  <rect x="650" y="160" width="340" height="120" rx="4" fill="#FEF3C7" stroke="#FDE68A" stroke-width="1" />
+  <text x="820" y="174" font-size="9" fill="#92400E" text-anchor="middle" font-weight="800">Joint Loss Optimization Target</text>
+  <foreignObject x="650" y="178" width="340" height="100">
+    <div style="display:flex; flex-direction:column; justify-content:space-around; align-items:center; width:100%; height:100%; padding: 4px; box-sizing: border-box;">
+      <!-- Main Equation -->
+      <div style="font-size:14px; font-weight:600; color:#78350f; margin-bottom: 5px;">
+        $\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{CE}} + \alpha \mathcal{L}_{\text{bal}} + \beta \mathcal{L}_{z}$
+      </div>
+      <!-- Decompositions -->
+      <div style="display:flex; justify-content:space-between; width:100%; text-align:center;">
+        <div style="flex:1;">
+          <div style="font-size:9px; font-weight:700; color:#b45309; margin-bottom:3px;">Cross Entropy</div>
+          <div style="font-size:11px; color:#78350f;">$\mathcal{L}_{\text{CE}} = - \frac{1}{B}\sum y \log \hat{y}$</div>
+        </div>
+        <div style="flex:1; border-left: 1px dashed #fcd34d; border-right: 1px dashed #fcd34d;">
+          <div style="font-size:9px; font-weight:700; color:#b45309; margin-bottom:3px;">Load Balancing</div>
+          <div style="font-size:11px; color:#78350f;">$\mathcal{L}_{\text{bal}} = E \sum_{i=1}^E f_i P_i$</div>
+        </div>
+        <div style="flex:1;">
+          <div style="font-size:9px; font-weight:700; color:#b45309; margin-bottom:3px;">Router Z-Loss</div>
+          <div style="font-size:11px; color:#78350f;">$\mathcal{L}_{z} = \frac{1}{B} \sum \left( \log \sum e^h \right)^2$</div>
+        </div>
+      </div>
+    </div>
+  </foreignObject>
+
+  <!-- Router Temp Annealing -->
+  <rect x="650" y="290" width="340" height="45" rx="4" fill="#FEF08A" stroke="#FDE047" stroke-width="1" />
+  <text x="820" y="304" font-size="9" fill="#B45309" text-anchor="middle" font-weight="700">Router Temperature Cosine Annealing (2.0 $\to$ 0.5)</text>
+  <foreignObject x="650" y="306" width="340" height="25">
+    <div style="display:flex; justify-content:center; align-items:center; width:100%; height:100%; font-size:11px; color:#92400e; font-family:serif; font-weight:600;">
+      $\tau(t) = \tau_{\text{end}} + \frac{1}{2}(\tau_{\text{start}} - \tau_{\text{end}}) \left[ 1 + \cos\left( \pi \min\Big(\frac{t - T_w}{T_{tot} - T_w}, 1\Big) \right) \right]$
+    </div>
+  </foreignObject>
+
+
+  <!-- LOWER SECTION: Triton Memory Fusion & DDP -->
+  <rect x="635" y="360" width="370" height="240" rx="6" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="1.2"/>
+  <text x="820" y="380" font-size="12" fill="#065F46" text-anchor="middle" font-weight="700">Triton Memory Fusion &amp; Distributed Data Parallel</text>
+
+  <!-- GPU 0 Box -->
+  <rect x="642" y="390" width="195" height="205" rx="4" fill="#F0FDF4" stroke="#4ADE80" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="650" y="402" font-size="9" fill="#059669" font-weight="700">GPU 0 (RTX 3090)</text>
+
+  <!-- GPU 0 HBM -->
+  <rect x="650" y="415" width="180" height="25" rx="4" fill="#D1FAE5" stroke="#34D399" stroke-width="1.5" />
+  <text x="740" y="432" font-size="11" fill="#065F46" text-anchor="middle" font-weight="700">HBM (Hard Limit 24GB)</text>
+
+  <!-- GPU 0 SRAM -->
+  <rect x="696" y="455" width="128" height="135" rx="6" fill="#ECFDF5" stroke="#10B981" stroke-width="1.5" />
+  <text x="760" y="470" font-size="10" fill="#047857" text-anchor="middle" font-weight="700">SRAM (L1 Shared)</text>
+
+  <!-- Fusion Green Load Arrow -->
+  <path d="M 760 440 L 760 455" fill="none" stroke="#10B981" stroke-width="2" marker-end="url(#arrowGreenLarge)" />
+  <text x="765" y="452" font-size="9" fill="#059669" font-weight="700">Fused Load</text>
+
+  <!-- Operations Inside SRAM -->
+  <rect x="704" y="480" width="112" height="22" rx="4" fill="#A7F3D0" stroke="#059669" stroke-width="1" />
+  <text x="760" y="494" font-size="9" fill="#065F46" text-anchor="middle" font-weight="600">Triton Chunk Scan</text>
+
+  <line x1="760" y1="502" x2="760" y2="510" stroke="#059669" stroke-width="1.5" marker-end="url(#arrowGreenLarge)" />
+
+  <rect x="704" y="510" width="112" height="32" rx="4" fill="#A7F3D0" stroke="#059669" stroke-width="1" />
+  <text x="760" y="524" font-size="9" fill="#065F46" text-anchor="middle" font-weight="600">MoE Fwd/Bwd</text>
+  <text x="760" y="536" font-size="8" fill="#047857" text-anchor="middle">+ Tucker Gating</text>
+
+  <path d="M 800,530 A 12,12 0 0,0 810,515" fill="none" stroke="#059669" stroke-width="1.5" marker-end="url(#arrowGreenLarge)" />
+  <text x="812" y="515" font-size="7" fill="#059669" font-weight="700">In-Reg</text>
+
+  <line x1="760" y1="542" x2="760" y2="550" stroke="#059669" stroke-width="1.5" marker-end="url(#arrowGreenLarge)" />
+
+  <rect x="704" y="550" width="112" height="22" rx="4" fill="#A7F3D0" stroke="#059669" stroke-width="1" />
+  <text x="760" y="565" font-size="9" fill="#065F46" text-anchor="middle" font-weight="600">Out Proj (Fused)</text>
+
+  <!-- Store back (Corrected Arrow outside SRAM) -->
+  <path d="M 760 572 L 760 584 L 826 584 L 826 444" fill="none" stroke="#10B981" stroke-width="2" marker-end="url(#arrowGreenLarge)" />
+  <text x="785" y="581" font-size="8" fill="#059669" font-weight="700">Single Store Back</text>
+
+  <!-- Standard HBM Trips -->
+  <text x="672" y="465" font-size="8" fill="#DC2626" font-weight="700" text-anchor="middle">Standard Trips</text>
+  <g transform="translate(660, 475)">
+    <line x1="0" y1="0" x2="0" y2="85" stroke="#EF4444" stroke-width="1.5" stroke-dasharray="2 2" marker-end="url(#arrowRed)" />
+    <line x1="10" y1="85" x2="10" y2="0" stroke="#EF4444" stroke-width="1.5" stroke-dasharray="2 2" marker-end="url(#arrowRed)" />
+    <line x1="20" y1="0" x2="20" y2="85" stroke="#EF4444" stroke-width="1.5" stroke-dasharray="2 2" marker-end="url(#arrowRed)" />
+  </g>
+  <text x="670" y="572" font-size="7" fill="#EF4444" font-weight="600" text-anchor="middle">Massive I/O</text>
+  <text x="670" y="582" font-size="7" fill="#EF4444" font-weight="600" text-anchor="middle">Bottleneck</text>
+
+  <!-- DDP PCIe Interconnect -->
+  <line x1="835" y1="428" x2="915" y2="428" stroke="#8B5CF6" stroke-width="2.5" />
+  <polygon points="838,424 831,428 838,432" fill="#8B5CF6" />
+  <polygon points="912,424 919,428 912,432" fill="#8B5CF6" />
+  <text x="875" y="414" font-size="9" fill="#7C3AED" font-weight="bold" text-anchor="middle">DDP Sync</text>
+  <text x="875" y="423" font-size="9" fill="#7C3AED" font-weight="bold" text-anchor="middle">($\nabla W$)</text>
+  <text x="875" y="440" font-size="8" fill="#6D28D9" font-weight="bold" text-anchor="middle">PCIe 4.0</text>
+
+  <!-- GPU 1 Box -->
+  <rect x="915" y="390" width="75" height="205" rx="4" fill="#F0FDF4" stroke="#4ADE80" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="920" y="402" font-size="9" fill="#059669" font-weight="700">GPU 1</text>
+
+  <!-- GPU 1 HBM -->
+  <rect x="920" y="415" width="65" height="25" rx="4" fill="#D1FAE5" stroke="#34D399" stroke-width="1.5" />
+  <text x="952" y="432" font-size="10" fill="#065F46" text-anchor="middle" font-weight="700">HBM</text>
+
+  <!-- GPU 1 SRAM (Replicated) -->
+  <rect x="925" y="455" width="55" height="135" rx="4" fill="#ECFDF5" stroke="#10B981" stroke-dasharray="2 2" stroke-width="1.5" />
+  <text x="952" y="505" font-size="10" fill="#047857" font-style="italic" text-anchor="middle">Identical</text>
+  <text x="952" y="520" font-size="10" fill="#047857" font-style="italic" text-anchor="middle">Triton</text>
+  <text x="952" y="535" font-size="10" fill="#047857" font-style="italic" text-anchor="middle">Fusion</text>
+
+  <!-- Phase label -->
+  <text x="820" y="614" font-size="14" fill="#047857" text-anchor="middle" font-weight="700">(b) Training</text>
+</g>
+
+<!-- ═══════════════════════════════════════════════ -->

@@ -79,6 +79,8 @@ yarn-error.log*
 *.safetensors
 data/
 dataset/
+!paper/hybrid-mamba-15min/assets/data/
+!paper/hybrid-mamba-15min/assets/data/router_collapse_report_relaxed.json
 
 # Project Specific (Artifacts, Homework, Logs)
 hw/
@@ -86,6 +88,8 @@ hw2/
 photo_merger_tool/
 history/
 3090/
+paper/hybrid-mamba-15min/archive/profiling/*.ncu-rep
+paper/hybrid-mamba-15min/archive/profiling/*.nsys-rep
 # Local homework / submission archives (also covered by *.zip)
 *作業*.zip
 *_homework*.zip

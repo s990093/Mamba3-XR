@@ -1,0 +1,2114 @@
+There is no president of Mars.<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>True Hybrid Mamba — Architecture Diagram</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        background: #fff;
+        font-family: "Inter", system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      body {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        padding: 1.5rem;
+      }
+      .diagram-wrap {
+        width: 100%;
+        max-width: 1400px;
+      }
+      svg {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="diagram-wrap">
+      <!--
+  All Y-coordinates use "bottom = 690 (input), top = 46 (output)".
+  Each block goes from y=46 to y=680.
+  Title at y=28.
+-->
+      <svg
+        viewBox="0 0 1400 780"
+        xmlns="http://www.w3.org/2000/svg"
+        font-family="'Inter', system-ui, sans-serif"
+      >
+        <defs>
+          <linearGradient id="projGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#FF8C00" />
+            <stop offset="100%" stop-color="#E67700" />
+          </linearGradient>
+          <linearGradient id="ssmGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#2196F3" />
+            <stop offset="100%" stop-color="#1565C0" />
+          </linearGradient>
+          <linearGradient id="normGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#00BCD4" />
+            <stop offset="100%" stop-color="#00838F" />
+          </linearGradient>
+          <linearGradient id="tuckerGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#AB47BC" />
+            <stop offset="100%" stop-color="#7B1FA2" />
+          </linearGradient>
+          <linearGradient id="attnGrad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#4CAF50" />
+            <stop offset="100%" stop-color="#2E7D32" />
+          </linearGradient>
+
+          <marker
+            id="arrowUp"
+            markerWidth="8"
+            markerHeight="8"
+            refX="4"
+            refY="1"
+            orient="auto"
+          >
+            <path d="M0,8 L4,0 L8,8 L4,6Z" fill="#333" />
+          </marker>
+
+          <!-- Symbols -->
+          <g id="mulSym">
+            <circle r="11" fill="#fff" stroke="#333" stroke-width="1.8" />
+            <line
+              x1="-5"
+              y1="-5"
+              x2="5"
+              y2="5"
+              stroke="#333"
+              stroke-width="2"
+            />
+            <line
+              x1="5"
+              y1="-5"
+              x2="-5"
+              y2="5"
+              stroke="#333"
+              stroke-width="2"
+            />
+          </g>
+          <g id="addSym">
+            <circle r="11" fill="#fff" stroke="#333" stroke-width="1.8" />
+            <line x1="-5" y1="0" x2="5" y2="0" stroke="#333" stroke-width="2" />
+            <line x1="0" y1="-5" x2="0" y2="5" stroke="#333" stroke-width="2" />
+          </g>
+          <g id="sigSym">
+            <circle r="11" fill="#E8F5E9" stroke="#4CAF50" stroke-width="1.8" />
+            <text
+              font-size="13"
+              fill="#2E7D32"
+              text-anchor="middle"
+              dominant-baseline="central"
+              font-weight="600"
+            >
+              σ
+            </text>
+          </g>
+        </defs>
+
+        <!-- ═══ TITLE ═══ -->
+        <text
+          x="590"
+          y="28"
+          font-size="18"
+          fill="#1a1a1a"
+          text-anchor="middle"
+          font-weight="700"
+          letter-spacing="-0.3"
+        >
+          True Hybrid Mamba-TuckerMoE Architecture
+        </text>
+
+        <!-- ═══════════════════════════════ -->
+        <!-- (a) MAMBA-3 BLOCK — x:20..385 -->
+        <!-- ═══════════════════════════════ -->
+        <rect
+          x="20"
+          y="46"
+          width="365"
+          height="644"
+          rx="6"
+          fill="none"
+          stroke="#1565C0"
+          stroke-width="2.5"
+        />
+        <rect x="22" y="48" width="361" height="22" rx="4" fill="#fff" />
+        <text
+          x="202"
+          y="65"
+          font-size="14"
+          fill="#1565C0"
+          text-anchor="middle"
+          font-weight="700"
+        >
+          Mamba-3 Block
+        </text>
+
+        <!-- Input arrow -->
+        <line
+          x1="202"
+          y1="736"
+          x2="202"
+          y2="680"
+          stroke="#333"
+          stroke-width="2"
+          marker-end="url(#arrowUp)"
+        />
+
+        <!-- in_proj trapezoid -->
+        <path
+          d="M 132,668 L 272,668 L 252,636 L 152,636 Z"
+          fill="url(#projGrad)"
+        />
+        <text
+          x="202"
+          y="657"
+          font-size="10"
+          fill="#fff"
+          text-anchor="middle"
+          font-weight="600"
+        >
+          in_proj
+        </text>
+        <text x="202" y="628" font-size="8" fill="#666" text-anchor="middle">
+          → z, x', B, C, Δ, A, λ
+        </text>
+
+        <!-- z skip-connection (dashed, far left) -->
+        <line
+          x1="142"
+          y1="636"
+          x2="142"
+          y2="258"
+          stroke="#333"
+          stroke-width="1.5"
+          stroke-dasharray="5 3"
+        />
+
+        <!-- Main path from in_proj upward -->
+        <line
+          x1="202"
+          y1="636"
+          x2="202"
+          y2="616"
+          stroke="#333"
+          stroke-width="2"
+          marker-end="url(#arrowUp)"
+        />
+
+        <!-- x_up_proj (TuckerMoE) -->
+        <rect
+          x="156"
+          y="584"
+          width="92"
+          height="30"
+          rx="5"
+          fill="url(#tuckerGrad)"
+        />
+        <text
+          x="202"
+          y="603"
+          font-size="9"
+          fill="#fff"
+          text-anchor="middle"
+          font-weight="600"
+        >
+          x_up_proj
+        </text>
+        <text
+          x="202"
+          y="578"
+          font-size="7"
+          fill="#7B1FA2"
+          text-anchor="middle"
+          font-weight="500"
+        >
+          TuckerMoE
+        </text>
+        <line
+          x1="202"
+          y1="614"
+          x2="202"
+          y2="584"
+          stroke="#333"
+          stroke-width="1.5"
+          marker-end="url(#arrowUp)"
+        />
+
+        <!-- B/C branch: RMSNorm → RoPE -->
+        <line
+          x1="262"
+          y1="648"
+          x2="321"
+          y2="648"
+          stroke="#333"
+          stroke-width="1.2"
+        />
+        <line
+          x1="321"
+          y1="648"
+          x2="321"
+          y2="582"
+          stroke="#333"
+          stroke-width="1.2"
+          marker-end="url(#arrowUp)"
+        />
+        <rect
+          x="280"
+          y="558"
+          width="82"
+          height="22"
+          rx="4"
+          fill="#E0F7FA"
+          stroke="#00BCD4"
+          stroke-width="1.2"
+        />
+        <text
+          x="321"
+          y="573"
+          font-size="8"
+          fill="#00838F"
+          text-anchor="middle"
+          font-weight="600"
+        >
+          RMSNorm
+        </text>
+        <line
+          x1="321"
+          y1="558"
+          x2="321"
+          y2="550"
+          stroke="#333"
+          stroke-width="1.2"
+          marker-end="url(#arrowUp)"
+        />
+        <rect
+          x="280"
+          y="524"
+          width="82"
+          height="26"
+          rx="4"
+          fill="url(#normGrad)"
+        />
+        <text
+          x="321"
+          y="541"
+          font-size="8.5"
+          fill="#fff"
+          text-anchor="middle"
+          font-weight="600"
+        >
+          RoPE
+        </text>
+        <text x="321" y="515" font-size="7" fill="#00838F" text-anchor="middle">
+          B_rot, C_rot
+        </text>
+
+        <!-- B⊗x multiply -->
+        <use href="#mulSym" x="258" y="538" />
+        <text x="238" y="525" font-size="7" fill="#333" text-anchor="end">
+          B⊗x
+        </text>
+        <line
+          x1="202"
+          y1="584"
+          x2="202"
+          y2="548"
+          stroke="#333"
+          stroke-width="1.5"
+        />
+        <line
+          x1="202"
+          y1="548"
+          x2="247"
+          y2="542"
+          stroke="#333"
+          stroke-width="1.2"
+        />
+        <line
+          x1="280"
+          y1="537"
+          x2="269"
+          y2="538"
+          stroke="#333"
+          stroke-width="1.2"
+        />
+
+        <!-- λ gating -->
+        <use href="#sigSym" x="258" y="496" />
+        <text x="238" y="485" font-size="7" fill="#333" text-anchor="end">
+          λ gate
+        </text>
+        <line
+          x1="258"
+          y1="527"
+          x2="258"
+          y2="507"
+          stroke="#333"
+          stroke-width="1.2"
+          marker-end="url(#arrowUp)"
+        />
+
+        <!-- Chunk Parallel Scan -->
+        <rect
+          x="154"
+          y="430"
+          width="130"
+          height="40"
+          rx="5"
+          fill="url(#ssmGrad)"
+        />
+        <text
+          x="219"
+          y="447"
+          font-size="10"
+          fill="#fff"
+          text-anchor="middle"
+          font-weight="700"
+        >
+          Chunk Parallel
+        </text>
+        <text
+          x="219"
+          y="462"
+          font-size="10"
+          fill="#fff"
+          text-anchor="middle"
+          font-weight="700"
+        >
+          Scan (Triton)
+        </text>
+        <line
+          x1="258"
+          y1="485"
+          x2="258"
+          y2="478"
+          stroke="#333"
+          stroke-width="1.2"
+        />
+        <line
+          x1="258"
+          y1="478"
+          x2="219"
+          y2="478"
+          stroke="#333"
+          stroke-width="1.2"
+        />
+        <line
+          x1="219"
+          y1="478"
+          x2="219"
+          y2="470"
+          stroke="#333"
+          stroke-width="1.2"
+          marker-end="url(#arrowUp)"
+        />
+
+        <!-- C·h multiply -->
+        <use href="#mulSym" x="219" y="405" />
+        <text x="200" y="393" font-size="7" fill="#333" text-anchor="end">
+          C·h
+        </text>
+        <line
+          x1="219"
+          y1="430"
+          x2="219"
+          y2="416"
+          stroke="#333"
+          stroke-width="1.5"
+          marker-end="url(#arrowUp)"
+        />
+        <!-- C_rot arrow -->
+        <line
+          x1="321"
+          y1="524"
+          x2="321"
+          y2="405"
+          stroke="#333"
+          stroke-width="1.2"
+        />
+        <line
+          x1="321"
+          y1="405"
+          x2="230"
+          y2="405"
+          stroke="#333"
+          stroke-width="1.2"
+        />
+
+        <!-- y_down_proj -->
+        <rect
+          x="168"
+          y="360"
+          width="102"
+          height="26"
+          rx="5"
+          fill="url(#projGrad)"
+        />
+        <text
+          x="219"
+          y="378"
+          font-size="9"
+          fill="#fff"
+          text-anchor="middle"
+          font-weight="600"
+        >
+          y_down_proj
+        </text>
+        <line
+          x1="219"
+          y1="394"
+          x2="219"
+          y2="386"
+          stroke="#333"
+          stroke-width="1.5"
+          marker-end="url(#arrowUp)"
+        />
+
+        <!-- + D·x' -->
+        <use href="#addSym" x="219" y="336" />
+        <text x="260" y="340" font-size="7" fill="#333" text-anchor="start">
+          + D·x'
+        </text>
+        <line
+          x1="219"
+          y1="360"
+          x2="219"
+          y2="347"
+          stroke="#333"
+          stroke-width="1.5"
+          marker-end="url(#arrowUp)"
+        />
+
+        <!-- RMSNorm (pre_gate) -->
+        <rect
+          x="172"
+          y="300"
+          width="94"
+          height="22"
+          rx="4"
+          fill="#E0F7FA"
+          stroke="#00BCD4"
+          stroke-width="1.2"
+        />
+        <text
+          x="219"
+          y="315"
+          font-size="8"
+          fill="#00838F"
+          text-anchor="middle"
+          font-weight="600"
+        >
+          RMSNorm
+        </text>
+        <line
+          x1="219"
+          y1="325"
+          x2="219"
+          y2="322"
+          stroke="#333"
+          stroke-width="1.2"
+          marker-end="url(#arrowUp)"
+        />
+
+        <!-- Gate multiply -->
+        <use href="#mulSym" x="180" y="274" />
+        <text x="180" y="256" font-size="7" fill="#333" text-anchor="middle">
+          gate
+        </text>
+        <line
+          x1="219"
+          y1="300"
+          x2="219"
+          y2="284"
+          stroke="#333"
+          stroke-width="1.2"
+        />
+        <line
+          x1="219"
+          y1="284"
+          x2="191"
+          y2="278"
+          stroke="#333"
+          stroke-width="1.2"
+        />
+        <!-- z → SiLU → gate -->
+        <use href="#sigSym" x="142" y="272" />
+        <text x="116" y="276" font-size="7" fill="#333" text-anchor="end">
+          SiLU
+        </text>
+        <line
+          x1="142"
+          y1="258"
+          x2="142"
+          y2="261"
+          stroke="#333"
+          stroke-width="1.2"
+        />
+        <line
+          x1="153"
+          y1="268"
+          x2="169"
+          y2="272"
+          stroke="#333"
+          stroke-width="1.2"
+        />
+
+        <!-- mamba_dense_proj -->
+        <rect
+          x="140"
+          y="224"
+          width="110"
+          height="26"
+          rx="5"
+          fill="url(#projGrad)"
+        />
+        <text
+          x="195"
+          y="242"
+          font-size="9"
+          fill="#fff"
+          text-anchor="middle"
+          font-weight="600"
+        >
+          mamba_dense
+        </text>
+        <line
+          x1="180"
+          y1="263"
+          x2="180"
+          y2="250"
+          stroke="#333"
+          stroke-width="1.5"
+          marker-end="url(#arrowUp)"
+        />
+
+        <!-- LayerScale 1 -->
+        <rect
+          x="148"
+          y="198"
+          width="60"
+          height="18"
+          rx="3"
+          fill="#FFF3E0"
+          stroke="#FF8C00"
+          stroke-width="1"
+        />
+        <text
+          x="178"
+          y="211"
+          font-size="7.5"
+          fill="#E67700"
+          text-anchor="middle"
+          font-weight="600"
+        >
+          LayerScale
+        </text>
+        <line
+          x1="195"
+          y1="224"
+          x2="195"
+          y2="216"
+          stroke="#333"
+          stroke-width="1.2"
+          marker-end="url(#arrowUp)"
+        />
+
+        <!-- + residual 1 -->
+        <use href="#addSym" x="202" y="178" />
+        <line
+          x1="195"
+          y1="198"
+          x2="202"
+          y2="189"
+          stroke="#333"
+          stroke-width="1.2"
+        />
+        <!-- Residual skip from input -->
+        <line
+          x1="55"
+          y1="680"
+          x2="55"
+          y2="178"
+          stroke="#333"
+          stroke-width="1.5"
+          stroke-dasharray="5 3"
+        />
+        <line
+          x1="55"
+          y1="178"
+          x2="191"
+          y2="178"
+          stroke="#333"
+          stroke-width="1.2"
+        />
+
+        <!-- RMSNorm (out) -->
+        <rect
+          x="162"
+          y="142"
+          width="80"
+          height="20"
+          rx="3"
+          fill="#E0F7FA"
+          stroke="#00BCD4"
+          stroke-width="1"
+        />
+        <text
+          x="202"
+          y="156"
+          font-size="8"
+          fill="#00838F"
+          text-anchor="middle"
+          font-weight="600"
+        >
+          RMSNorm
+        </text>
+        <line
+          x1="202"
+          y1="167"
+          x2="202"
+          y2="162"
+          stroke="#333"
+          stroke-width="1.2"
+          marker-end="url(#arrowUp)"
+        />
+
+        <!-- out_proj (TuckerMoE) -->
+        <rect
+          x="156"
+          y="112"
+          width="92"
+          height="26"
+          rx="5"
+          fill="url(#tuckerGrad)"
+        />
+        <text
+          x="202"
+          y="129"
+          font-size="9"
+          fill="#fff"
+          text-anchor="middle"
+          font-weight="600"
+        >
+          out_proj
+        </text>
+        <text
+          x="263"
+          y="129"
+          font-size="7"
+          fill="#7B1FA2"
+          text-anchor="start"
+          font-weight="500"
+        >
+          TuckerMoE
+        </text>
+        <line
+          x1="202"
+          y1="142"
+          x2="202"
+          y2="138"
+          stroke="#333"
+          stroke-width="1.2"
+          marker-end="url(#arrowUp)"
+        />
+
+        <!-- LayerScale 2 + residual -->
+        <rect
+          x="168"
+          y="95"
+          width="60"
+          height="16"
+          rx="3"
+          fill="#FFF3E0"
+          stroke="#FF8C00"
+          stroke-width="1"
+        />
+        <text
+          x="198"
+          y="107"
+          font-size="7.5"
+          fill="#E67700"
+          text-anchor="middle"
+          font-weight="600"
+        >
+          LayerScale
+        </text>
+        <line
+          x1="202"
+          y1="112"
+          x2="202"
+          y2="111"
+          stroke="#333"
+          stroke-width="1.2"
+          marker-end="url(#arrowUp)"
+        />
+
+        <use href="#addSym" x="202" y="82" />
+        <line
+          x1="202"
+          y1="95"
+          x2="202"
+          y2="93"
+          stroke="#333"
+          stroke-width="1"
+        />
+        <!-- Second residual skip -->
+        <line
+          x1="40"
+          y1="178"
+          x2="40"
+          y2="82"
+          stroke="#333"
+          stroke-width="1.2"
+          stroke-dasharray="5 3"
+        />
+        <line
+          x1="40"
+          y1="82"
+          x2="191"
+          y2="82"
+          stroke="#333"
+          stroke-width="1.2"
+        />
+
+        <!-- Output arrow -->
+        <line
+          x1="202"
+          y1="71"
+          x2="202"
+          y2="48"
+          stroke="#333"
+          stroke-width="2"
+          marker-end="url(#arrowUp)"
+        />
+
+        <!-- ═══════════════════════════════════ -->
+        <!-- (b) TRANSFORMER BLOCK — x:420..780 -->
+        <!-- ═══════════════════════════════════ -->
+        <rect
+          x="420"
+          y="46"
+          width="360"
+          height="644"
+          rx="6"
+          fill="none"
+          stroke="#2E7D32"
+          stroke-width="2.5"
+        />
+        <rect x="422" y="48" width="356" height="22" rx="4" fill="#fff" />
+        <text
+          x="600"
+          y="65"
+          font-size="14"
+          fill="#2E7D32"
+          text-anchor="middle"
+          font-weight="700"
+        >
+          Transformer Block
+        </text>
+
+        <!-- Input arrow -->
+        <line
+          x1="600"
+          y1="736"
+          x2="600"
+          y2="680"
+          stroke="#333"
+          stroke-width="2"
+          marker-end="url(#arrowUp)"
+        />
+
+        <!-- RMSNorm (attn) -->
+        <rect
+          x="553"
+          y="648"
+          width="94"
+          height="24"
+          rx="4"
+          fill="#E0F7FA"
+          stroke="#00BCD4"
+          stroke-width="1.2"
+        />
+        <text
+          x="600"
+          y="665"
+          font-size="9"
+          fill="#00838F"
+          text-anchor="middle"
+          font-weight="600"
+        >
+          RMSNorm
+        </text>
+
+        <!-- Q K V projections -->
+        <rect
+          x="447"
+          y="590"
+          width="66"
+          height="28"
+          rx="5"
+          fill="url(#projGrad)"
+        />
+        <text
+          x="480"
+          y="609"
+          font-size="9"
+          fill="#fff"
+          text-anchor="middle"
+          font-weight="600"
+        >
+          Q proj
+        </text>
+        <rect
+          x="527"
+          y="590"
+          width="66"
+          height="28"
+          rx="5"
+          fill="url(#projGrad)"
+        />
+        <text
+          x="560"
+          y="609"
+          font-size="9"
+          fill="#fff"
+          text-anchor="middle"
+          font-weight="600"
+        >
+          K proj
+        </text>
+        <rect
+          x="607"
+          y="590"
+          width="66"
+          height="28"
+          rx="5"
+          fill="url(#projGrad)"
+        />
+        <text
+          x="640"
+          y="609"
+          font-size="9"
+          fill="#fff"
+          text-anchor="middle"
+          font-weight="600"
+        >
+          V proj
+        </text>
+        <text x="687" y="602" font-size="7" fill="#666" text-anchor="start">
+          GQA
+        </text>
+
+        <!-- Lines from norm to Q/K/V -->
+        <line
+          x1="600"
+          y1="648"
+          x2="600"
+          y2="632"
+          stroke="#333"
+          stroke-width="1.5"
+        />
+        <line
+          x1="480"
+          y1="632"
+          x2="640"
+          y2="632"
+          stroke="#333"
+          stroke-width="1.2"
+        />
+        <line
+          x1="480"
+          y1="632"
+          x2="480"
+          y2="618"
+          stroke="#333"
+          stroke-width="1.2"
+          marker-end="url(#arrowUp)"
+        />
+        <line
+          x1="560"
+          y1="632"
+          x2="560"
+          y2="618"
+          stroke="#333"
+          stroke-width="1.2"
+          marker-end="url(#arrowUp)"
+        />
+        <line
+          x1="640"
+          y1="632"
+          x2="640"
+          y2="618"
+          stroke="#333"
+          stroke-width="1.2"
+          marker-end="url(#arrowUp)"
+        />
+
+        <!-- GQA Attention -->
+        <rect
+          x="488"
+          y="522"
+          width="144"
+          height="42"
+          rx="5"
+          fill="url(#attnGrad)"
+        />
+        <text
+          x="560"
+          y="541"
+          font-size="10.5"
+          fill="#fff"
+          text-anchor="middle"
+          font-weight="700"
+        >
+          Grouped Query
+        </text>
+        <text
+          x="560"
+          y="556"
+          font-size="10.5"
+          fill="#fff"
+          text-anchor="middle"
+          font-weight="700"
+        >
+          Attention (GQA)
+        </text>
+        <line
+          x1="480"
+          y1="590"
+          x2="480"
+          y2="570"
+          stroke="#333"
+          stroke-width="1.2"
+        />
+        <line
+          x1="480"
+          y1="570"
+          x2="488"
+          y2="552"
+          stroke="#333"
+          stroke-width="1.2"
+        />
+        <line
+          x1="560"
+          y1="590"
+          x2="560"
+          y2="564"
+          stroke="#333"
+          stroke-width="1.2"
+          marker-end="url(#arrowUp)"
+        />
+        <line
+          x1="640"
+          y1="590"
+          x2="640"
+          y2="570"
+          stroke="#333"
+          stroke-width="1.2"
+        />
+        <line
+          x1="640"
+          y1="570"
+          x2="632"
+          y2="552"
+          stroke="#333"
+          stroke-width="1.2"
+        />
+
+        <!-- o_proj -->
+        <rect
+          x="524"
+          y="478"
+          width="72"
+          height="26"
+          rx="5"
+          fill="url(#projGrad)"
+        />
+        <text
+          x="560"
+          y="496"
+          font-size="9"
+          fill="#fff"
+          text-anchor="middle"
+          font-weight="600"
+        >
+          o_proj
+        </text>
+        <line
+          x1="560"
+          y1="522"
+          x2="560"
+          y2="504"
+          stroke="#333"
+          stroke-width="1.5"
+          marker-end="url(#arrowUp)"
+        />
+
+        <!-- LayerScale + residual (attention) -->
+        <rect
+          x="530"
+          y="452"
+          width="60"
+          height="18"
+          rx="3"
+          fill="#FFF3E0"
+          stroke="#FF8C00"
+          stroke-width="1"
+        />
+        <text
+          x="560"
+          y="465"
+          font-size="7.5"
+          fill="#E67700"
+          text-anchor="middle"
+          font-weight="600"
+        >
+          LayerScale
+        </text>
+        <line
+          x1="560"
+          y1="478"
+          x2="560"
+          y2="470"
+          stroke="#333"
+          stroke-width="1.2"
+          marker-end="url(#arrowUp)"
+        />
+
+        <use href="#addSym" x="560" y="430" />
+        <line
+          x1="560"
+          y1="452"
+          x2="560"
+          y2="441"
+          stroke="#333"
+          stroke-width="1.2"
+        />
+        <!-- Residual skip -->
+        <line
+          x1="440"
+          y1="672"
+          x2="440"
+          y2="430"
+          stroke="#333"
+          stroke-width="1.5"
+          stroke-dasharray="5 3"
+        />
+        <line
+          x1="440"
+          y1="430"
+          x2="549"
+          y2="430"
+          stroke="#333"
+          stroke-width="1.2"
+        />
+
+        <!-- RMSNorm (ffn) -->
+        <rect
+          x="513"
+          y="392"
+          width="94"
+          height="24"
+          rx="4"
+          fill="#E0F7FA"
+          stroke="#00BCD4"
+          stroke-width="1.2"
+        />
+        <text
+          x="560"
+          y="409"
+          font-size="9"
+          fill="#00838F"
+          text-anchor="middle"
+          font-weight="600"
+        >
+          RMSNorm
+        </text>
+        <line
+          x1="560"
+          y1="419"
+          x2="560"
+          y2="416"
+          stroke="#333"
+          stroke-width="1.2"
+          marker-end="url(#arrowUp)"
+        />
+
+        <!-- gate_proj / up_proj (TuckerMoE) -->
+        <rect
+          x="460"
+          y="330"
+          width="76"
+          height="28"
+          rx="5"
+          fill="url(#tuckerGrad)"
+        />
+        <text
+          x="498"
+          y="349"
+          font-size="8.5"
+          fill="#fff"
+          text-anchor="middle"
+          font-weight="600"
+        >
+          gate_proj
+        </text>
+        <rect
+          x="555"
+          y="330"
+          width="76"
+          height="28"
+          rx="5"
+          fill="url(#tuckerGrad)"
+        />
+        <text
+          x="593"
+          y="349"
+          font-size="8.5"
+          fill="#fff"
+          text-anchor="middle"
+          font-weight="600"
+        >
+          up_proj
+        </text>
+        <text
+          x="645"
+          y="340"
+          font-size="7"
+          fill="#7B1FA2"
+          text-anchor="start"
+          font-weight="500"
+        >
+          TuckerMoE
+        </text>
+
+        <!-- Lines from norm_ffn to gate/up -->
+        <line
+          x1="560"
+          y1="392"
+          x2="560"
+          y2="376"
+          stroke="#333"
+          stroke-width="1.2"
+        />
+        <line
+          x1="498"
+          y1="376"
+          x2="593"
+          y2="376"
+          stroke="#333"
+          stroke-width="1.2"
+        />
+        <line
+          x1="498"
+          y1="376"
+          x2="498"
+          y2="358"
+          stroke="#333"
+          stroke-width="1.2"
+          marker-end="url(#arrowUp)"
+        />
+        <line
+          x1="593"
+          y1="376"
+          x2="593"
+          y2="358"
+          stroke="#333"
+          stroke-width="1.2"
+          marker-end="url(#arrowUp)"
+        />
+
+        <!-- SiLU on gate -->
+        <use href="#sigSym" x="498" y="306" />
+        <text x="475" y="310" font-size="7" fill="#333" text-anchor="end">
+          SiLU
+        </text>
+        <line
+          x1="498"
+          y1="330"
+          x2="498"
+          y2="317"
+          stroke="#333"
+          stroke-width="1.2"
+          marker-end="url(#arrowUp)"
+        />
+
+        <!-- gate × up -->
+        <use href="#mulSym" x="545" y="284" />
+        <line
+          x1="498"
+          y1="295"
+          x2="534"
+          y2="288"
+          stroke="#333"
+          stroke-width="1.2"
+        />
+        <line
+          x1="593"
+          y1="330"
+          x2="593"
+          y2="289"
+          stroke="#333"
+          stroke-width="1.2"
+        />
+        <line
+          x1="593"
+          y1="289"
+          x2="556"
+          y2="286"
+          stroke="#333"
+          stroke-width="1.2"
+        />
+
+        <!-- down_proj (TuckerMoE) -->
+        <rect
+          x="505"
+          y="244"
+          width="80"
+          height="28"
+          rx="5"
+          fill="url(#tuckerGrad)"
+        />
+        <text
+          x="545"
+          y="263"
+          font-size="8.5"
+          fill="#fff"
+          text-anchor="middle"
+          font-weight="600"
+        >
+          down_proj
+        </text>
+        <text
+          x="600"
+          y="262"
+          font-size="7"
+          fill="#7B1FA2"
+          text-anchor="start"
+          font-weight="500"
+        >
+          TuckerMoE
+        </text>
+        <line
+          x1="545"
+          y1="273"
+          x2="545"
+          y2="272"
+          stroke="#333"
+          stroke-width="1.2"
+          marker-end="url(#arrowUp)"
+        />
+
+        <!-- LayerScale + residual (FFN) -->
+        <rect
+          x="524"
+          y="216"
+          width="60"
+          height="18"
+          rx="3"
+          fill="#FFF3E0"
+          stroke="#FF8C00"
+          stroke-width="1"
+        />
+        <text
+          x="554"
+          y="229"
+          font-size="7.5"
+          fill="#E67700"
+          text-anchor="middle"
+          font-weight="600"
+        >
+          LayerScale
+        </text>
+        <line
+          x1="545"
+          y1="244"
+          x2="545"
+          y2="234"
+          stroke="#333"
+          stroke-width="1.2"
+          marker-end="url(#arrowUp)"
+        />
+
+        <use href="#addSym" x="560" y="195" />
+        <line
+          x1="554"
+          y1="216"
+          x2="560"
+          y2="206"
+          stroke="#333"
+          stroke-width="1.2"
+        />
+        <!-- FFN residual skip -->
+        <line
+          x1="450"
+          y1="420"
+          x2="450"
+          y2="195"
+          stroke="#333"
+          stroke-width="1.2"
+          stroke-dasharray="5 3"
+        />
+        <line
+          x1="450"
+          y1="195"
+          x2="549"
+          y2="195"
+          stroke="#333"
+          stroke-width="1.2"
+        />
+
+        <!-- Output -->
+        <line
+          x1="560"
+          y1="184"
+          x2="560"
+          y2="48"
+          stroke="#333"
+          stroke-width="2"
+          marker-end="url(#arrowUp)"
+        />
+
+        <!-- ═══════════════════════════════════════ -->
+        <!-- (c) OVERALL MODEL — x:820..1180        -->
+        <!-- ═══════════════════════════════════════ -->
+        <rect
+          x="820"
+          y="46"
+          width="360"
+          height="644"
+          rx="6"
+          fill="none"
+          stroke="#555"
+          stroke-width="2.5"
+        />
+        <rect x="822" y="48" width="356" height="22" rx="4" fill="#fff" />
+        <text
+          x="1000"
+          y="65"
+          font-size="14"
+          fill="#333"
+          text-anchor="middle"
+          font-weight="700"
+        >
+          True Hybrid Mamba (Overall)
+        </text>
+
+        <!-- Input arrow -->
+        <line
+          x1="1000"
+          y1="736"
+          x2="1000"
+          y2="680"
+          stroke="#333"
+          stroke-width="2"
+          marker-end="url(#arrowUp)"
+        />
+
+        <!-- Embedding -->
+        <rect
+          x="930"
+          y="644"
+          width="140"
+          height="30"
+          rx="5"
+          fill="url(#projGrad)"
+        />
+        <text
+          x="1000"
+          y="664"
+          font-size="11"
+          fill="#fff"
+          text-anchor="middle"
+          font-weight="600"
+        >
+          Embedding
+        </text>
+        <text x="1000" y="638" font-size="7.5" fill="#666" text-anchor="middle">
+          d = 768 , V = 32,007
+        </text>
+        <line
+          x1="1000"
+          y1="644"
+          x2="1000"
+          y2="620"
+          stroke="#333"
+          stroke-width="2"
+          marker-end="url(#arrowUp)"
+        />
+
+        <!-- Macro Block dashed box -->
+        <rect
+          x="850"
+          y="232"
+          width="300"
+          height="378"
+          rx="8"
+          fill="none"
+          stroke="#1565C0"
+          stroke-width="2"
+          stroke-dasharray="8 4"
+        />
+        <text
+          x="1000"
+          y="228"
+          font-size="10"
+          fill="#1565C0"
+          text-anchor="middle"
+          font-weight="700"
+        >
+          Macro Block × N
+          <tspan font-size="7" baseline-shift="sub">macro</tspan>
+        </text>
+
+        <!-- 4× Mamba-3 -->
+        <rect
+          x="878"
+          y="554"
+          width="244"
+          height="42"
+          rx="5"
+          fill="url(#ssmGrad)"
+        />
+        <text
+          x="1000"
+          y="575"
+          font-size="11"
+          fill="#fff"
+          text-anchor="middle"
+          font-weight="700"
+        >
+          Mamba-3 Block
+        </text>
+        <text
+          x="1000"
+          y="590"
+          font-size="8"
+          fill="#B3E5FC"
+          text-anchor="middle"
+        >
+          + TuckerMoE (x_up, out_proj)
+        </text>
+        <line
+          x1="1000"
+          y1="618"
+          x2="1000"
+          y2="596"
+          stroke="#333"
+          stroke-width="1.5"
+          marker-end="url(#arrowUp)"
+        />
+
+        <rect
+          x="878"
+          y="498"
+          width="244"
+          height="42"
+          rx="5"
+          fill="url(#ssmGrad)"
+        />
+        <text
+          x="1000"
+          y="519"
+          font-size="11"
+          fill="#fff"
+          text-anchor="middle"
+          font-weight="700"
+        >
+          Mamba-3 Block
+        </text>
+        <text
+          x="1000"
+          y="534"
+          font-size="8"
+          fill="#B3E5FC"
+          text-anchor="middle"
+        >
+          + TuckerMoE (x_up, out_proj)
+        </text>
+        <line
+          x1="1000"
+          y1="554"
+          x2="1000"
+          y2="540"
+          stroke="#333"
+          stroke-width="1.5"
+          marker-end="url(#arrowUp)"
+        />
+
+        <rect
+          x="878"
+          y="442"
+          width="244"
+          height="42"
+          rx="5"
+          fill="url(#ssmGrad)"
+        />
+        <text
+          x="1000"
+          y="463"
+          font-size="11"
+          fill="#fff"
+          text-anchor="middle"
+          font-weight="700"
+        >
+          Mamba-3 Block
+        </text>
+        <text
+          x="1000"
+          y="478"
+          font-size="8"
+          fill="#B3E5FC"
+          text-anchor="middle"
+        >
+          + TuckerMoE (x_up, out_proj)
+        </text>
+        <line
+          x1="1000"
+          y1="498"
+          x2="1000"
+          y2="484"
+          stroke="#333"
+          stroke-width="1.5"
+          marker-end="url(#arrowUp)"
+        />
+
+        <rect
+          x="878"
+          y="386"
+          width="244"
+          height="42"
+          rx="5"
+          fill="url(#ssmGrad)"
+        />
+        <text
+          x="1000"
+          y="407"
+          font-size="11"
+          fill="#fff"
+          text-anchor="middle"
+          font-weight="700"
+        >
+          Mamba-3 Block
+        </text>
+        <text
+          x="1000"
+          y="422"
+          font-size="8"
+          fill="#B3E5FC"
+          text-anchor="middle"
+        >
+          + TuckerMoE (x_up, out_proj)
+        </text>
+        <line
+          x1="1000"
+          y1="442"
+          x2="1000"
+          y2="428"
+          stroke="#333"
+          stroke-width="1.5"
+          marker-end="url(#arrowUp)"
+        />
+
+        <!-- 1× Transformer -->
+        <rect
+          x="878"
+          y="296"
+          width="244"
+          height="58"
+          rx="5"
+          fill="url(#attnGrad)"
+        />
+        <text
+          x="1000"
+          y="319"
+          font-size="11"
+          fill="#fff"
+          text-anchor="middle"
+          font-weight="700"
+        >
+          Transformer Block
+        </text>
+        <text
+          x="1000"
+          y="334"
+          font-size="8.5"
+          fill="#C8E6C9"
+          text-anchor="middle"
+        >
+          GQA Attention
+        </text>
+        <text
+          x="1000"
+          y="347"
+          font-size="8"
+          fill="#C8E6C9"
+          text-anchor="middle"
+        >
+          + MoE FFN (3× TuckerMoE)
+        </text>
+        <line
+          x1="1000"
+          y1="386"
+          x2="1000"
+          y2="354"
+          stroke="#333"
+          stroke-width="1.5"
+          marker-end="url(#arrowUp)"
+        />
+
+        <!-- Side braces for 4:1 ratio -->
+        <line
+          x1="862"
+          y1="382"
+          x2="862"
+          y2="604"
+          stroke="#1565C0"
+          stroke-width="1.5"
+        />
+        <line
+          x1="858"
+          y1="382"
+          x2="866"
+          y2="382"
+          stroke="#1565C0"
+          stroke-width="1.5"
+        />
+        <line
+          x1="858"
+          y1="604"
+          x2="866"
+          y2="604"
+          stroke="#1565C0"
+          stroke-width="1.5"
+        />
+        <text
+          x="856"
+          y="498"
+          font-size="9"
+          fill="#1565C0"
+          font-weight="600"
+          text-anchor="middle"
+          transform="rotate(-90 856 498)"
+        >
+          × 4 SSM layers
+        </text>
+
+        <line
+          x1="862"
+          y1="292"
+          x2="862"
+          y2="356"
+          stroke="#2E7D32"
+          stroke-width="1.5"
+        />
+        <line
+          x1="858"
+          y1="292"
+          x2="866"
+          y2="292"
+          stroke="#2E7D32"
+          stroke-width="1.5"
+        />
+        <line
+          x1="858"
+          y1="356"
+          x2="866"
+          y2="356"
+          stroke="#2E7D32"
+          stroke-width="1.5"
+        />
+        <text
+          x="856"
+          y="328"
+          font-size="9"
+          fill="#2E7D32"
+          font-weight="600"
+          text-anchor="middle"
+          transform="rotate(-90 856 328)"
+        >
+          × 1 Attn
+        </text>
+
+        <line
+          x1="1000"
+          y1="296"
+          x2="1000"
+          y2="276"
+          stroke="#333"
+          stroke-width="2"
+          marker-end="url(#arrowUp)"
+        />
+
+        <!-- Repeat dots -->
+        <text
+          x="1000"
+          y="264"
+          font-size="16"
+          fill="#666"
+          text-anchor="middle"
+          font-weight="700"
+        >
+          ⋮
+        </text>
+
+        <!-- RMSNorm (final) -->
+        <rect
+          x="945"
+          y="165"
+          width="110"
+          height="26"
+          rx="4"
+          fill="#E0F7FA"
+          stroke="#00BCD4"
+          stroke-width="1.5"
+        />
+        <text
+          x="1000"
+          y="183"
+          font-size="10"
+          fill="#00838F"
+          text-anchor="middle"
+          font-weight="600"
+        >
+          RMSNorm
+        </text>
+        <line
+          x1="1000"
+          y1="232"
+          x2="1000"
+          y2="191"
+          stroke="#333"
+          stroke-width="2"
+          marker-end="url(#arrowUp)"
+        />
+
+        <!-- LM Head trapezoid -->
+        <path
+          d="M 940,152 L 1060,152 L 1040,122 L 960,122 Z"
+          fill="url(#projGrad)"
+        />
+        <text
+          x="1000"
+          y="142"
+          font-size="10"
+          fill="#fff"
+          text-anchor="middle"
+          font-weight="600"
+        >
+          LM Head
+        </text>
+        <text
+          x="1000"
+          y="116"
+          font-size="7.5"
+          fill="#E67700"
+          text-anchor="middle"
+        >
+          (weight tying)
+        </text>
+        <line
+          x1="1000"
+          y1="165"
+          x2="1000"
+          y2="152"
+          stroke="#333"
+          stroke-width="1.5"
+          marker-end="url(#arrowUp)"
+        />
+
+        <!-- Scaled Tanh -->
+        <rect
+          x="950"
+          y="94"
+          width="100"
+          height="20"
+          rx="3"
+          fill="#FFF3E0"
+          stroke="#FF8C00"
+          stroke-width="1.2"
+        />
+        <text
+          x="1000"
+          y="108"
+          font-size="8"
+          fill="#E67700"
+          text-anchor="middle"
+          font-weight="600"
+        >
+          Scaled Tanh(30)
+        </text>
+        <line
+          x1="1000"
+          y1="122"
+          x2="1000"
+          y2="114"
+          stroke="#333"
+          stroke-width="1.2"
+          marker-end="url(#arrowUp)"
+        />
+
+        <!-- Output -->
+        <line
+          x1="1000"
+          y1="94"
+          x2="1000"
+          y2="48"
+          stroke="#333"
+          stroke-width="2"
+          marker-end="url(#arrowUp)"
+        />
+        <text x="1000" y="44" font-size="9" fill="#666" text-anchor="middle">
+          Logits
+        </text>
+
+        <!-- ═════════ LEGEND ═════════ -->
+        <rect
+          x="1200"
+          y="60"
+          width="185"
+          height="332"
+          rx="6"
+          fill="#FAFAFA"
+          stroke="#ddd"
+          stroke-width="1.5"
+        />
+        <text
+          x="1292"
+          y="84"
+          font-size="12"
+          fill="#333"
+          text-anchor="middle"
+          font-weight="700"
+        >
+          Legend
+        </text>
+
+        <rect
+          x="1216"
+          y="98"
+          width="50"
+          height="22"
+          rx="3"
+          fill="url(#projGrad)"
+        />
+        <text
+          x="1280"
+          y="114"
+          font-size="9"
+          fill="#333"
+          text-anchor="start"
+          font-weight="600"
+        >
+          Linear projection
+        </text>
+
+        <rect
+          x="1216"
+          y="132"
+          width="50"
+          height="22"
+          rx="3"
+          fill="url(#ssmGrad)"
+        />
+        <text
+          x="1280"
+          y="148"
+          font-size="9"
+          fill="#333"
+          text-anchor="start"
+          font-weight="600"
+        >
+          SSM / Scan
+        </text>
+
+        <rect
+          x="1216"
+          y="166"
+          width="50"
+          height="22"
+          rx="3"
+          fill="url(#attnGrad)"
+        />
+        <text
+          x="1280"
+          y="182"
+          font-size="9"
+          fill="#333"
+          text-anchor="start"
+          font-weight="600"
+        >
+          GQA Attention
+        </text>
+
+        <rect
+          x="1216"
+          y="200"
+          width="50"
+          height="22"
+          rx="3"
+          fill="url(#tuckerGrad)"
+        />
+        <text
+          x="1280"
+          y="216"
+          font-size="9"
+          fill="#333"
+          text-anchor="start"
+          font-weight="600"
+        >
+          TuckerMoE
+        </text>
+
+        <rect
+          x="1216"
+          y="234"
+          width="50"
+          height="22"
+          rx="3"
+          fill="#E0F7FA"
+          stroke="#00BCD4"
+          stroke-width="1"
+        />
+        <text
+          x="1280"
+          y="250"
+          font-size="9"
+          fill="#333"
+          text-anchor="start"
+          font-weight="600"
+        >
+          Normalization
+        </text>
+
+        <use href="#mulSym" x="1241" y="278" />
+        <text
+          x="1280"
+          y="283"
+          font-size="9"
+          fill="#333"
+          text-anchor="start"
+          font-weight="600"
+        >
+          Multiplication
+        </text>
+
+        <use href="#addSym" x="1241" y="310" />
+        <text
+          x="1280"
+          y="315"
+          font-size="9"
+          fill="#333"
+          text-anchor="start"
+          font-weight="600"
+        >
+          Residual Add
+        </text>
+
+        <use href="#sigSym" x="1241" y="342" />
+        <text
+          x="1280"
+          y="347"
+          font-size="9"
+          fill="#333"
+          text-anchor="start"
+          font-weight="600"
+        >
+          Activation (σ)
+        </text>
+
+        <line
+          x1="1220"
+          y1="370"
+          x2="1260"
+          y2="370"
+          stroke="#333"
+          stroke-width="1.5"
+          stroke-dasharray="5 3"
+        />
+        <text
+          x="1280"
+          y="375"
+          font-size="9"
+          fill="#333"
+          text-anchor="start"
+          font-weight="600"
+        >
+          Skip connection
+        </text>
+
+        <!-- ═════════ BOTTOM LABELS ═════════ -->
+        <text x="202" y="754" font-size="8" fill="#888" text-anchor="middle">
+          SSM + Tucker Decomposition
+        </text>
+        <text x="600" y="754" font-size="8" fill="#888" text-anchor="middle">
+          GQA + MoE FFN
+        </text>
+        <text x="1000" y="754" font-size="8" fill="#888" text-anchor="middle">
+          4:1 Hybrid Architecture
+        </text>
+        <text
+          x="202"
+          y="772"
+          font-size="14"
+          fill="#1565C0"
+          text-anchor="middle"
+          font-weight="700"
+        >
+          (a) Mamba-3 Block
+        </text>
+        <text
+          x="600"
+          y="772"
+          font-size="14"
+          fill="#2E7D32"
+          text-anchor="middle"
+          font-weight="700"
+        >
+          (b) Transformer Block
+        </text>
+        <text
+          x="1000"
+          y="772"
+          font-size="14"
+          fill="#333"
+          text-anchor="middle"
+          font-weight="700"
+        >
+          (c) Overall Model
+        </text>
+
+        <!-- ═════════ INPUT LABELS ═════════ -->
+        <text
+          x="1000"
+          y="742"
+          font-size="10"
+          fill="#666"
+          text-anchor="middle"
+          font-weight="500"
+        >
+          Input Tokens
+        </text>
+      </svg>
+    </div>
+  </body>
+</html>
