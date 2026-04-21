@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Triton Kernel Architecture — §6.5</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script>
+    MathJax = { tex:{inlineMath:[["$","$"],["\\(","\\)"]]}, svg:{fontCache:"global"} };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{background:#F8FAFF;font-family:"Inter",system-ui,sans-serif;
+         display:flex;flex-direction:column;align-items:center;padding:1.5rem;}
+    h1{font-size:1.15rem;font-weight:800;color:#0F172A;margin-bottom:.25rem;text-align:center;}
+    p.sub{font-size:.82rem;color:#64748B;margin-bottom:1.2rem;text-align:center;}
+    .wrap{width:100%;max-width:1380px;overflow-x:auto;}
+    svg{width:100%;height:auto;display:block;}
+  </style>
+</head>
+<body>
+<h1>Triton Kernel Memory-Fusion Architecture</h1>
+<p class="sub">§6.5 — Five custom Triton kernels in the Hybrid Mamba-TuckerMoE training pipeline · DRAM bandwidth: 82% → 21% (−75%)</p>
+<div class="wrap">
+<svg viewBox="0 0 1360 800" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <marker id="arr"  markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,1 L7,4 L0,7 L2,4 Z" fill="#475569"/></marker>
+  <marker id="arrR" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,1 L7,4 L0,7 L2,4 Z" fill="#EF4444"/></marker>
+  <marker id="arrG" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,1 L7,4 L0,7 L2,4 Z" fill="#10B981"/></marker>
+  <marker id="arrO" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,1 L7,4 L0,7 L2,4 Z" fill="#D97706"/></marker>
+  <marker id="arrP" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,1 L7,4 L0,7 L2,4 Z" fill="#7C3AED"/></marker>
+  <filter id="sh"><feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.09"/></filter>
+</defs>
+
+<!-- ══════════ BACKGROUND BANDS ══════════ -->
+<rect x="0" y="0"   width="1360" height="800" fill="#F8FAFF"/>
+<!-- Forward band -->
+<rect x="0" y="50"  width="1360" height="295" rx="0" fill="#EFF6FF" opacity="0.55"/>
+<text x="8" y="72" font-size="9.5" fill="#1D4ED8" font-weight="700" letter-spacing="1">FORWARD PASS</text>
+<!-- Backward band -->
+<rect x="0" y="355" width="1360" height="235" rx="0" fill="#FFF1F2" opacity="0.5"/>
+<text x="8" y="374" font-size="9.5" fill="#BE123C" font-weight="700" letter-spacing="1">BACKWARD PASS</text>
+<!-- Memory band -->
+<rect x="0" y="600" width="1360" height="192" rx="0" fill="#ECFDF5" opacity="0.5"/>
+<text x="8" y="618" font-size="9.5" fill="#047857" font-weight="700" letter-spacing="1">MEMORY HIERARCHY</text>
+
+<!-- ══════════ PAGE TITLE ══════════ -->
+<text x="680" y="35" font-size="14" fill="#0F172A" font-weight="800" text-anchor="middle">Training Pipeline: 5 Triton Fused Kernels</text>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     FORWARD PASS LAYOUT (y = 80..345)
+
+     Column A (x=40..200):   Input tensor
+     Column B (x=220..450):  K1 fused_scaled_tanh  (y=80..155)
+                             K2 fused_silu_mul      (y=175..250)
+     Column C (x=470..680):  Router + top-k        (y=80..130)
+                             Expert dispatch path
+     Column D (x=700..950):  K3 fused_latent_moe   (y=80..200)
+     Column E (x=680..900):  K4 chunk_scan         (y=220..310)
+     Column F (x=970..1100): Expert output / SSM state
+     Column G (x=1120..1330): Loss node
+═══════════════════════════════════════════════════════════════ -->
+
+<!-- Input X -->
+<rect x="30" y="130" width="90" height="58" rx="8"
+      fill="#FEF3C7" stroke="#D97706" stroke-width="2" filter="url(#sh)"/>
+<text x="75" y="153" font-size="11" fill="#92400E" text-anchor="middle" font-weight="700">Input X</text>
+<text x="75" y="168" font-size="8.5" fill="#B45309" text-anchor="middle">B × L × d</text>
+
+<!-- Arrow: Input → K1 (horizontal, y=145) -->
+<path d="M 121,148 L 198,148" fill="none" stroke="#D97706" stroke-width="1.8" marker-end="url(#arrO)"/>
+
+<!-- Arrow: Input → K2 (down then horizontal, y=218) -->
+<path d="M 75,188 L 75,218 L 198,218" fill="none" stroke="#475569" stroke-width="1.5" marker-end="url(#arr)"/>
+<text x="88" y="210" font-size="8" fill="#64748B" font-style="italic">z, x'</text>
+
+<!-- ──── K1: fused_scaled_tanh (y=80..158) ──── -->
+<rect x="200" y="80" width="220" height="78" rx="10"
+      fill="#FFFBEB" stroke="#D97706" stroke-width="2" filter="url(#sh)"/>
+<rect x="200" y="80" width="220" height="22" rx="10" fill="#FDE68A"/>
+<rect x="200" y="92" width="220" height="10" fill="#FDE68A"/>
+<text x="310" y="96" font-size="9.5" fill="#78350F" text-anchor="middle" font-weight="700">K1 · fused_scaled_tanh</text>
+<text x="310" y="117" font-size="9" fill="#92400E" text-anchor="middle">tanh.approx.f32 + scale</text>
+<text x="310" y="131" font-size="8.5" fill="#B45309" text-anchor="middle" font-style="italic">logit clipping: 3 passes → 1 pass</text>
+<text x="310" y="149" font-size="8" fill="#92400E" text-anchor="middle">applied to: LM-head logits</text>
+<rect x="366" y="80" width="54" height="14" rx="7" fill="#D97706"/>
+<text x="393" y="91" font-size="7.5" fill="#FFF" text-anchor="middle" font-weight="700">L139–174</text>
+
+<!-- Arrow: K1 → Router (horizontal, y=119) -->
+<path d="M 421,119 L 478,119" fill="none" stroke="#D97706" stroke-width="1.5" marker-end="url(#arrO)"/>
+<text x="450" y="112" font-size="8" fill="#B45309" text-anchor="middle">capped logits</text>
+
+<!-- Router node -->
+<rect x="480" y="95" width="105" height="50" rx="7"
+      fill="#FFFBEB" stroke="#D97706" stroke-width="1.4" filter="url(#sh)"/>
+<text x="532" y="116" font-size="9.5" fill="#92400E" text-anchor="middle" font-weight="600">Router</text>
+<text x="532" y="131" font-size="8.5" fill="#B45309" text-anchor="middle">top-k select</text>
+
+<!-- Arrow: Router → K3 (diagonal down-right, y=145→162) -->
+<path d="M 585,145 L 698,162" fill="none" stroke="#D97706"
+      stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arrO)"/>
+<text x="640" y="148" font-size="8" fill="#B45309" text-anchor="middle">expert idx, prob</text>
+
+<!-- ──── K2: fused_silu_mul (y=175..258) ──── -->
+<rect x="200" y="175" width="220" height="78" rx="10"
+      fill="#ECFDF5" stroke="#10B981" stroke-width="2" filter="url(#sh)"/>
+<rect x="200" y="175" width="220" height="22" rx="10" fill="#A7F3D0"/>
+<rect x="200" y="187" width="220" height="10" fill="#A7F3D0"/>
+<text x="310" y="191" font-size="9.5" fill="#065F46" text-anchor="middle" font-weight="700">K2 · fused_silu_mul</text>
+<text x="310" y="212" font-size="9" fill="#047857" text-anchor="middle">SiLU(gate) ⊙ feat</text>
+<text x="310" y="226" font-size="8.5" fill="#059669" text-anchor="middle" font-style="italic">2 element-wise → 1 pass</text>
+<text x="310" y="243" font-size="8" fill="#047857" text-anchor="middle">Mamba gate + FFN gate</text>
+<rect x="366" y="175" width="54" height="14" rx="7" fill="#10B981"/>
+<text x="393" y="186" font-size="7.5" fill="#FFF" text-anchor="middle" font-weight="700">L179–220</text>
+
+<!-- Arrow: K2 → K4 (horizontal, y=235) -->
+<path d="M 421,233 L 700,233" fill="none" stroke="#10B981"
+      stroke-width="1.5" marker-end="url(#arrG)"/>
+<text x="560" y="226" font-size="8" fill="#047857" text-anchor="middle">gated output</text>
+
+<!-- ──── K3: fused_latent_moe_fwd (y=155..280) ──── -->
+<rect x="700" y="80" width="230" height="140" rx="10"
+      fill="#F5F3FF" stroke="#7C3AED" stroke-width="2" filter="url(#sh)"/>
+<rect x="700" y="80" width="230" height="24" rx="10" fill="#DDD6FE"/>
+<rect x="700" y="93" width="230" height="11" fill="#DDD6FE"/>
+<text x="815" y="98" font-size="9.5" fill="#4C1D95" text-anchor="middle" font-weight="700">K3 · fused_latent_moe_fwd</text>
+<text x="815" y="122" font-size="9" fill="#5B21B6" text-anchor="middle">① token→expert dispatch</text>
+<text x="815" y="138" font-size="9" fill="#5B21B6" text-anchor="middle">② U_exp · 𝒢 einsum</text>
+<text x="815" y="154" font-size="9" fill="#5B21B6" text-anchor="middle">③ top-k weighted sum</text>
+<text x="815" y="172" font-size="8.5" fill="#7C3AED" text-anchor="middle" font-style="italic">→ removes 3 intermediate HBM writes</text>
+<text x="815" y="186" font-size="8.5" fill="#6D28D9" text-anchor="middle" font-style="italic">all 3 steps in shared SRAM tile</text>
+<text x="815" y="206" font-size="8" fill="#5B21B6" text-anchor="middle">input: x_shared (after U_in projection)</text>
+<rect x="872" y="80" width="58" height="14" rx="7" fill="#7C3AED"/>
+<text x="901" y="91" font-size="7.5" fill="#FFF" text-anchor="middle" font-weight="700">L259–287</text>
+
+<!-- Arrow: K3 → y_moe output node -->
+<path d="M 931,157 L 970,157" fill="none" stroke="#7C3AED"
+      stroke-width="1.5" marker-end="url(#arrP)"/>
+
+<!-- y_moe node -->
+<rect x="970" y="136" width="85" height="42" rx="7"
+      fill="#F5F3FF" stroke="#7C3AED" stroke-width="1.4" filter="url(#sh)"/>
+<text x="1012" y="154" font-size="9.5" fill="#5B21B6" text-anchor="middle" font-weight="600">y_moe</text>
+<text x="1012" y="169" font-size="8.5" fill="#7C3AED" text-anchor="middle">expert output</text>
+
+<!-- Arrow: y_moe → K4 (curve down) -->
+<path d="M 1012,178 L 1012,255 L 933,255" fill="none" stroke="#7C3AED"
+      stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#arrP)"/>
+
+<!-- ──── K4: chunk_scan_fwd/bwd (y=230..315) ──── -->
+<rect x="700" y="245" width="230" height="85" rx="10"
+      fill="#EFF6FF" stroke="#3B82F6" stroke-width="2" filter="url(#sh)"/>
+<rect x="700" y="245" width="230" height="24" rx="10" fill="#BFDBFE"/>
+<rect x="700" y="257" width="230" height="12" fill="#BFDBFE"/>
+<text x="815" y="262" font-size="9.5" fill="#1E3A8A" text-anchor="middle" font-weight="700">K4 · chunk_scan_fwd / bwd</text>
+<text x="815" y="283" font-size="9" fill="#1D4ED8" text-anchor="middle">tl.associative_scan</text>
+<text x="815" y="297" font-size="9" fill="#1D4ED8" text-anchor="middle">h_t = Ā_t h_{t−1} + u_t</text>
+<text x="815" y="312" font-size="8.5" fill="#3B82F6" text-anchor="middle" font-style="italic">O(log L) parallel, chunk_size=64</text>
+<rect x="872" y="245" width="58" height="14" rx="7" fill="#3B82F6"/>
+<text x="901" y="256" font-size="7.5" fill="#FFF" text-anchor="middle" font-weight="700">L469–532</text>
+
+<!-- Arrow: K4 → SSM state (horizontal) -->
+<path d="M 931,285 L 970,285" fill="none" stroke="#3B82F6"
+      stroke-width="1.5" marker-end="url(#arr)"/>
+
+<!-- SSM state node -->
+<rect x="970" y="264" width="90" height="42" rx="7"
+      fill="#EFF6FF" stroke="#3B82F6" stroke-width="1.4" filter="url(#sh)"/>
+<text x="1015" y="281" font-size="9.5" fill="#1E3A8A" text-anchor="middle" font-weight="600">SSM state</text>
+<text x="1015" y="296" font-size="8.5" fill="#3B82F6" text-anchor="middle">h_t ∈ ℝ^{D×N}</text>
+
+<!-- Arrow: y_moe + SSM state → Loss (merge lines, go to Loss node) -->
+<path d="M 1060,157 L 1090,157 L 1090,190 L 1120,190" fill="none" stroke="#7C3AED"
+      stroke-width="1.4" marker-end="url(#arrP)"/>
+<path d="M 1060,285 L 1090,285 L 1090,210 L 1120,210" fill="none" stroke="#3B82F6"
+      stroke-width="1.4" marker-end="url(#arr)"/>
+<!-- K1 logit smooth → Loss -->
+<path d="M 421,105 L 440,105 L 440,60 L 1150,60 L 1150,178" fill="none" stroke="#D97706"
+      stroke-width="1.3" stroke-dasharray="5 3" marker-end="url(#arrO)"/>
+<text x="720" y="53" font-size="8" fill="#B45309" text-anchor="middle">logit smooth → LM head</text>
+
+<!-- ℒ_CE Loss node -->
+<rect x="1120" y="178" width="120" height="60" rx="9"
+      fill="#FFF1F2" stroke="#EF4444" stroke-width="2" filter="url(#sh)"/>
+<text x="1180" y="201" font-size="12" fill="#BE123C" text-anchor="middle" font-weight="800">ℒ</text>
+<text x="1180" y="216" font-size="9" fill="#EF4444" text-anchor="middle">CE + LB + Z-loss</text>
+<text x="1180" y="229" font-size="8.5" fill="#E11D48" text-anchor="middle" font-style="italic">joint loss</text>
+
+<!-- Auxiliary losses badge -->
+<rect x="1252" y="186" width="90" height="36" rx="7"
+      fill="#FFFBEB" stroke="#D97706" stroke-width="1.2"/>
+<text x="1297" y="200" font-size="8.5" fill="#92400E" text-anchor="middle" font-weight="600">ℒ_LB + ℒ_Z</text>
+<text x="1297" y="214" font-size="8" fill="#B45309" text-anchor="middle">router aux</text>
+<path d="M 1252,204 L 1241,204" fill="none" stroke="#D97706" stroke-width="1.2" stroke-dasharray="3 3" marker-end="url(#arrO)"/>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     BACKWARD PASS (y=365..580)
+═══════════════════════════════════════════════════════════════ -->
+
+<!-- ∂ℒ/∂logits back arrow from Loss to K1.bwd -->
+<path d="M 1120,220 L 80,220 L 80,388 L 198,388" fill="none" stroke="#EF4444"
+      stroke-width="1.6" stroke-dasharray="6 3" marker-end="url(#arrR)"/>
+<text x="600" y="214" font-size="8.5" fill="#BE123C" text-anchor="middle" font-style="italic">∂ℒ/∂logits</text>
+
+<!-- K1.bwd -->
+<rect x="200" y="375" width="220" height="50" rx="9"
+      fill="#FFF1F2" stroke="#F43F5E" stroke-width="1.8" filter="url(#sh)"/>
+<text x="310" y="396" font-size="9" fill="#BE123C" text-anchor="middle" font-weight="700">K1 ← bwd_scaled_tanh</text>
+<text x="310" y="412" font-size="8.5" fill="#E11D48" text-anchor="middle" font-style="italic">∂tanh fused in 1 pass</text>
+
+<!-- K1.bwd → K2.bwd -->
+<path d="M 310,425 L 310,455" fill="none" stroke="#EF4444" stroke-width="1.4" marker-end="url(#arrR)"/>
+
+<!-- K2.bwd -->
+<rect x="200" y="455" width="220" height="50" rx="9"
+      fill="#FFF1F2" stroke="#F43F5E" stroke-width="1.8" filter="url(#sh)"/>
+<text x="310" y="476" font-size="9" fill="#BE123C" text-anchor="middle" font-weight="700">K2 ← bwd_silu_mul</text>
+<text x="310" y="492" font-size="8.5" fill="#E11D48" text-anchor="middle" font-style="italic">∂SiLU fused with ∂gate</text>
+
+<!-- K4.bwd  -->
+<path d="M 815,330 L 815,375" fill="none" stroke="#EF4444" stroke-width="1.4" stroke-dasharray="5 3" marker-end="url(#arrR)"/>
+<rect x="700" y="375" width="230" height="50" rx="9"
+      fill="#FFF1F2" stroke="#F43F5E" stroke-width="1.8" filter="url(#sh)"/>
+<text x="815" y="396" font-size="9" fill="#BE123C" text-anchor="middle" font-weight="700">K4 ← bwd_chunk_scan</text>
+<text x="815" y="412" font-size="8.5" fill="#E11D48" text-anchor="middle" font-style="italic">∂h_t accumulated per chunk</text>
+
+<!-- ──── K5: fused_latent_moe_bwd_dG (y=445..540) ──── -->
+<!-- Arrow from K3's forward gradient path to K5 -->
+<path d="M 815,220 L 815,290 L 1005,290 L 1005,440 L 970,440" fill="none" stroke="#EF4444"
+      stroke-width="1.5" stroke-dasharray="5 3" marker-end="url(#arrR)"/>
+<text x="960" y="356" font-size="8" fill="#BE123C" text-anchor="middle" font-style="italic">∂ℒ/∂𝒢_e</text>
+
+<rect x="970" y="440" width="280" height="110" rx="10"
+      fill="#FFF1F2" stroke="#EF4444" stroke-width="2" filter="url(#sh)"/>
+<rect x="970" y="440" width="280" height="26" rx="10" fill="#FECDD3"/>
+<rect x="970" y="454" width="280" height="12" fill="#FECDD3"/>
+<text x="1110" y="458" font-size="9.5" fill="#9F1239" text-anchor="middle" font-weight="700">K5 · fused_latent_moe_bwd_dG</text>
+<text x="1110" y="480" font-size="9" fill="#BE123C" text-anchor="middle">tl.atomic_add on 𝒢_e</text>
+<text x="1110" y="496" font-size="9" fill="#BE123C" text-anchor="middle">∂ℒ/∂𝒢_e = 0 for unselected experts</text>
+<text x="1110" y="512" font-size="8.5" fill="#E11D48" text-anchor="middle" font-style="italic">sparse gradient: only activated k=2 experts</text>
+<text x="1110" y="528" font-size="8.5" fill="#E11D48" text-anchor="middle" font-style="italic">race cost minimal: k=2 concurrent writes</text>
+<rect x="1196" y="440" width="54" height="14" rx="7" fill="#EF4444"/>
+<text x="1223" y="451" font-size="7.5" fill="#FFF" text-anchor="middle" font-weight="700">L299–322</text>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MEMORY HIERARCHY (y=610..790)
+═══════════════════════════════════════════════════════════════ -->
+
+<!-- BEFORE box -->
+<rect x="40" y="630" width="260" height="130" rx="10"
+      fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.4" filter="url(#sh)"/>
+<text x="170" y="652" font-size="10" fill="#334155" text-anchor="middle" font-weight="700">Before Fusion (PyTorch)</text>
+<text x="170" y="666" font-size="8.5" fill="#64748B" text-anchor="middle">Each op = separate HBM read+write</text>
+
+<!-- 82% bar -->
+<rect x="55" y="674" width="230" height="20" rx="4" fill="#FEE2E2" stroke="#FCA5A5" stroke-width="0.8"/>
+<rect x="55" y="674" width="189" height="20" rx="4" fill="#EF4444"/>
+<text x="170" y="688" font-size="9" fill="#FFF" text-anchor="middle" font-weight="700">82% DRAM bandwidth pressure</text>
+
+<!-- 4 op chips -->
+<rect x="55" y="700" width="50" height="16" rx="3" fill="#FECDD3" stroke="#F43F5E" stroke-width="0.7"/>
+<text x="80" y="712" font-size="7.5" fill="#BE123C" text-anchor="middle">tanh</text>
+<rect x="110" y="700" width="50" height="16" rx="3" fill="#FECDD3" stroke="#F43F5E" stroke-width="0.7"/>
+<text x="135" y="712" font-size="7.5" fill="#BE123C" text-anchor="middle">scale</text>
+<rect x="165" y="700" width="50" height="16" rx="3" fill="#FECDD3" stroke="#F43F5E" stroke-width="0.7"/>
+<text x="190" y="712" font-size="7.5" fill="#BE123C" text-anchor="middle">SiLU</text>
+<rect x="220" y="700" width="50" height="16" rx="3" fill="#FECDD3" stroke="#F43F5E" stroke-width="0.7"/>
+<text x="245" y="712" font-size="7.5" fill="#BE123C" text-anchor="middle">mul</text>
+<!-- HBM arrows between ops -->
+<path d="M 105,708 L 109,708" fill="none" stroke="#EF4444" stroke-width="4" opacity="0.4"/>
+<path d="M 160,708 L 164,708" fill="none" stroke="#EF4444" stroke-width="4" opacity="0.4"/>
+<path d="M 215,708 L 219,708" fill="none" stroke="#EF4444" stroke-width="4" opacity="0.4"/>
+<text x="170" y="734" font-size="8" fill="#EF4444" text-anchor="middle" font-style="italic">HBM round-trip between each op</text>
+<text x="170" y="748" font-size="8" fill="#94A3B8" text-anchor="middle">autotune: not applicable</text>
+
+<!-- Fusion arrow -->
+<path d="M 302,695 L 360,695" fill="none" stroke="#10B981"
+      stroke-width="3" marker-end="url(#arrG)"/>
+<text x="331" y="686" font-size="9" fill="#047857" text-anchor="middle" font-weight="700">Triton</text>
+<text x="331" y="700" font-size="9" fill="#047857" text-anchor="middle" font-weight="700">Fusion</text>
+
+<!-- AFTER box -->
+<rect x="362" y="630" width="280" height="130" rx="10"
+      fill="#FFFFFF" stroke="#CBD5E1" stroke-width="1.4" filter="url(#sh)"/>
+<text x="502" y="652" font-size="10" fill="#334155" text-anchor="middle" font-weight="700">After Fusion (Triton)</text>
+<text x="502" y="666" font-size="8.5" fill="#64748B" text-anchor="middle">All ops tile in shared SRAM → 1 pass</text>
+
+<!-- 21% bar -->
+<rect x="378" y="674" width="248" height="20" rx="4" fill="#DCFCE7" stroke="#86EFAC" stroke-width="0.8"/>
+<rect x="378" y="674" width="52" height="20" rx="4" fill="#10B981"/>
+<text x="502" y="688" font-size="9" fill="#065F46" text-anchor="middle" font-weight="700">21% DRAM bandwidth pressure (−75%)</text>
+
+<!-- Single fused tile -->
+<rect x="378" y="700" width="248" height="20" rx="4" fill="#A7F3D0" stroke="#10B981" stroke-width="0.9"/>
+<text x="502" y="713.5" font-size="9" fill="#065F46" text-anchor="middle" font-weight="700">Single SRAM tile kernel</text>
+
+<text x="502" y="737" font-size="8" fill="#059669" text-anchor="middle" font-style="italic">tanh + scale + SiLU + mul in 1 tile pass</text>
+<text x="502" y="751" font-size="8" fill="#94A3B8" text-anchor="middle">autotune: block_size / warps / stages</text>
+
+<!-- NCU Verified badge -->
+<rect x="660" y="630" width="220" height="46" rx="8"
+      fill="#F0FDF4" stroke="#86EFAC" stroke-width="1.2"/>
+<text x="770" y="648" font-size="9.5" fill="#047857" text-anchor="middle" font-weight="700">✓ NCU Profiling Verified</text>
+<text x="770" y="664" font-size="8.5" fill="#16A34A" text-anchor="middle">ncu --section SpeedOfLight</text>
+<text x="770" y="677" font-size="8" fill="#94A3B8" text-anchor="middle">checkpoint step 38,400</text>
+
+<!-- SRAM diagram box -->
+<rect x="660" y="686" width="220" height="72" rx="8"
+      fill="#FFFBEB" stroke="#D97706" stroke-width="1.4"/>
+<text x="770" y="704" font-size="9" fill="#92400E" text-anchor="middle" font-weight="700">SRAM (L1 Shared)</text>
+<rect x="672" y="710" width="196" height="16" rx="3" fill="#FDE68A" stroke="#D97706" stroke-width="0.7"/>
+<text x="770" y="722" font-size="8.5" fill="#78350F" text-anchor="middle">ops stay in registers / L1 tile</text>
+<text x="770" y="746" font-size="8" fill="#B45309" text-anchor="middle" font-style="italic">tl.autotune: optimal block/warp/stage per shape</text>
+
+<!-- ══════════ LEGEND ══════════ -->
+<rect x="900" y="615" width="440" height="180" rx="10"
+      fill="#FFFFFF" stroke="#E2E8F0" stroke-width="1.4" filter="url(#sh)"/>
+<text x="1120" y="635" font-size="11" fill="#0F172A" text-anchor="middle" font-weight="800">Kernel Summary</text>
+<line x1="918" y1="640" x2="1322" y2="640" stroke="#E2E8F0" stroke-width="0.8"/>
+
+<!-- K1 -->
+<rect x="918" y="648" width="10" height="10" rx="2" fill="#D97706"/>
+<text x="934" y="657.5" font-size="9" fill="#334155" font-weight="700">K1</text>
+<text x="952" y="657.5" font-size="9" fill="#334155">fused_scaled_tanh</text>
+<text x="1120" y="657.5" font-size="8.5" fill="#64748B">L139–174</text>
+<text x="1190" y="657.5" font-size="8.5" fill="#10B981" font-weight="700">3 → 1 pass</text>
+
+<!-- K2 -->
+<rect x="918" y="666" width="10" height="10" rx="2" fill="#10B981"/>
+<text x="934" y="675.5" font-size="9" fill="#334155" font-weight="700">K2</text>
+<text x="952" y="675.5" font-size="9" fill="#334155">fused_silu_mul</text>
+<text x="1120" y="675.5" font-size="8.5" fill="#64748B">L179–220</text>
+<text x="1190" y="675.5" font-size="8.5" fill="#10B981" font-weight="700">2 → 1 pass</text>
+
+<!-- K3 -->
+<rect x="918" y="684" width="10" height="10" rx="2" fill="#7C3AED"/>
+<text x="934" y="693.5" font-size="9" fill="#334155" font-weight="700">K3</text>
+<text x="952" y="693.5" font-size="9" fill="#334155">fused_latent_moe_fwd</text>
+<text x="1120" y="693.5" font-size="8.5" fill="#64748B">L259–287</text>
+<text x="1190" y="693.5" font-size="8.5" fill="#10B981" font-weight="700">dispatch + einsum fused</text>
+
+<!-- K4 -->
+<rect x="918" y="702" width="10" height="10" rx="2" fill="#3B82F6"/>
+<text x="934" y="711.5" font-size="9" fill="#334155" font-weight="700">K4</text>
+<text x="952" y="711.5" font-size="9" fill="#334155">chunk_scan_fwd / bwd</text>
+<text x="1120" y="711.5" font-size="8.5" fill="#64748B">L469–532</text>
+<text x="1190" y="711.5" font-size="8.5" fill="#10B981" font-weight="700">O(log L) parallel scan</text>
+
+<!-- K5 -->
+<rect x="918" y="720" width="10" height="10" rx="2" fill="#EF4444"/>
+<text x="934" y="729.5" font-size="9" fill="#334155" font-weight="700">K5</text>
+<text x="952" y="729.5" font-size="9" fill="#334155">latent_moe_bwd_dG</text>
+<text x="1120" y="729.5" font-size="8.5" fill="#64748B">L299–322</text>
+<text x="1190" y="729.5" font-size="8.5" fill="#10B981" font-weight="700">sparse atomic_add</text>
+
+<!-- Total badge -->
+<rect x="918" y="742" width="404" height="16" rx="8" fill="#DCFCE7" stroke="#86EFAC" stroke-width="1"/>
+<text x="1120" y="754" font-size="9" fill="#166534" text-anchor="middle" font-weight="700">
+  Combined: DRAM bandwidth 82% → 21% (−75%) · NCU verified @ step 38,400
+</text>
+
+</svg>
+</div>
+</body>
+</html>

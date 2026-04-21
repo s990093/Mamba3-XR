@@ -62,7 +62,7 @@
   </head>
   <body>
     <div class="diagram-wrap">
-      <svg viewBox="0 0 1650 800" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 1660 970" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <marker
             id="arrow"
@@ -167,15 +167,16 @@
         </text>
 
         <g transform="translate(0, 80)">
+          <!-- ═══ Input label (trapezoid) ═══ -->
           <path
-            d="M 30,260 L 120,260 L 110,230 L 40,230 Z"
+            d="M 30,220 L 120,220 L 110,192 L 40,192 Z"
             fill="#FEF3C7"
             stroke="#F59E0B"
             stroke-width="1.8"
           />
           <text
             x="75"
-            y="250"
+            y="211"
             font-size="10"
             fill="#92400E"
             text-anchor="middle"
@@ -184,11 +185,12 @@
             Input
           </text>
 
+          <!-- ═══ Token Stream container ═══ -->
           <rect
             x="18"
-            y="270"
+            y="228"
             width="114"
-            height="120"
+            height="184"
             rx="8"
             fill="#FFFBEB"
             stroke="#F59E0B"
@@ -197,7 +199,7 @@
           />
           <text
             x="75"
-            y="295"
+            y="250"
             font-size="12"
             fill="#92400E"
             text-anchor="middle"
@@ -207,36 +209,42 @@
           </text>
           <line
             x1="30"
-            y1="305"
+            y1="258"
             x2="120"
-            y2="305"
+            y2="258"
             stroke="#FDE68A"
             stroke-width="1"
           />
 
-          <path
-            d="M 40,320 L 50,310 L 110,310 L 100,320 L 40,320"
-            fill="#FEF3C7"
-            stroke="#F59E0B"
-            stroke-width="1.2"
-          />
-          <path
-            d="M 100,320 L 110,310 L 110,360 L 100,370 L 100,320"
-            fill="#FDE68A"
-            stroke="#F59E0B"
-            stroke-width="1.2"
-          />
-          <rect
-            x="40"
-            y="320"
-            width="60"
-            height="50"
-            fill="#FFF8F0"
-            stroke="#F59E0B"
-            stroke-width="1.2"
-          />
+          <!-- Token chips (vertical stack, LLM token style) -->
+          <!-- [BOS] special token (blue) -->
+          <rect x="30" y="266" width="90" height="18" rx="4"
+                fill="#DBEAFE" stroke="#3B82F6" stroke-width="1"/>
+          <text x="75" y="279" font-size="9.5" fill="#1E3A8A"
+                text-anchor="middle" font-weight="700">[BOS]</text>
 
-          <foreignObject x="40" y="335" width="60" height="30">
+          <!-- Content tokens (green) -->
+          <rect x="30" y="288" width="90" height="18" rx="4"
+                fill="#BBF7D0" stroke="#22C55E" stroke-width="1"/>
+          <text x="75" y="301" font-size="9" fill="#166534"
+                text-anchor="middle" font-weight="600">'Machine'</text>
+
+          <rect x="30" y="310" width="90" height="18" rx="4"
+                fill="#BBF7D0" stroke="#22C55E" stroke-width="1"/>
+          <text x="75" y="323" font-size="9" fill="#166534"
+                text-anchor="middle" font-weight="600">'learning'</text>
+
+          <rect x="30" y="332" width="90" height="18" rx="4"
+                fill="#BBF7D0" stroke="#22C55E" stroke-width="1"/>
+          <text x="75" y="345" font-size="9" fill="#166534"
+                text-anchor="middle" font-weight="600">'is'</text>
+
+          <!-- Ellipsis -->
+          <text x="75" y="362" font-size="12" fill="#92400E"
+                text-anchor="middle" font-weight="700">⋯</text>
+
+          <!-- Dimension label -->
+          <foreignObject x="30" y="368" width="90" height="20">
             <div
               style="
                 display: flex;
@@ -244,7 +252,7 @@
                 align-items: center;
                 width: 100%;
                 height: 100%;
-                font-size: 11px;
+                font-size: 10px;
                 color: #78350f;
                 font-weight: 700;
               "
@@ -253,6 +261,11 @@
             </div>
           </foreignObject>
 
+          <!-- Bottom label -->
+          <text x="75" y="404" font-size="9" fill="#92400E"
+                text-anchor="middle" font-weight="600">Input prompt</text>
+
+          <!-- Arrow → Phase 1 -->
           <line
             x1="132"
             y1="330"
@@ -292,107 +305,223 @@
 
         <g id="canvas_c"></g>
         <g transform="translate(0, 80)">
-          <line
-            x1="1435"
-            y1="565"
-            x2="1475"
-            y2="565"
-            stroke="#7C3AED"
-            stroke-width="2.5"
-            marker-end="url(#arrow)"
-          />
 
-          <rect
-            x="1475"
-            y="515"
-            width="110"
-            height="100"
-            rx="8"
-            fill="#FAF5FF"
-            stroke="#9333EA"
-            stroke-width="1.5"
-            filter="url(#shadow)"
-          />
+          <!-- ═══════════════════════════════════════════════════
+               LM Head + Model Output
+               Token Stream: y=228..412 (h=184), center=320
+               Model Output: y=228..412 (h=184), center=320  ← MATCHED
+               LM Head trapezoid: y=200..228, above Model Output
+               Arrow: y=320 (center), x from canvas_c right (1470) → LM Head
+          ═══════════════════════════════════════════════════ -->
 
-          <path
-            d="M 1475,523 Q 1475,515 1483,515 L 1483,615 L 1475,615 Z"
-            fill="#9333EA"
-          />
+          <!-- ═══════════════════════════════════════════════════
+               LM Head + Model Output
+               Token Stream:  y=228..412 (h=184, center=320)
+               LM Head trap:  y=196..224 (32px tall, 4px gap before box)
+               Model Output:  y=228..412 (h=184, center=320) ← aligned
+               Arrow:         y=320 (center of Model Output)
+          ═══════════════════════════════════════════════════ -->
 
-          <text
-            x="1533"
-            y="538"
-            font-size="13"
-            fill="#6B21A8"
-            text-anchor="middle"
-            font-weight="700"
-          >
-            Model Output
-          </text>
+          <!-- Arrow: canvas_c right (x=1470) → Model Output center (y=320) -->
+          <line x1="1470" y1="320" x2="1490" y2="320"
+                stroke="#7C3AED" stroke-width="2.5"
+                marker-end="url(#arrow)"/>
 
-          <line
-            x1="1490"
-            y1="546"
-            x2="1570"
-            y2="546"
-            stroke="#E9D5FF"
-            stroke-width="1"
-          />
+          <!-- LM Head trapezoid (32px, 4px gap above Model Output at y=228) -->
+          <!-- bottom=224, top=196, trapezoid angled inward on both sides -->
+          <path d="M 1495,224 L 1611,224 L 1601,196 L 1505,196 Z"
+                fill="#EDE9FE" stroke="#9333EA" stroke-width="1.8"/>
+          <text x="1553" y="215" font-size="10.5" fill="#6B21A8"
+                text-anchor="middle" font-weight="700">LM Head</text>
 
-          <rect
-            x="1490"
-            y="555"
-            width="80"
-            height="26"
-            rx="4"
-            fill="#FFFFFF"
-            stroke="#D8B4FE"
-            stroke-width="1"
-          />
-          <foreignObject x="1490" y="555" width="80" height="26">
-            <div
-              style="
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                width: 100%;
-                height: 100%;
-                font-size: 11px;
-                color: #581c87;
-                font-weight: 700;
-              "
-            >
+          <!-- 4px visual gap between trapezoid bottom (224) and box top (228) -->
+
+          <!-- Model Output container: y=228..412, h=184, matches Token Stream exactly -->
+          <rect x="1493" y="228" width="122" height="184" rx="8"
+                fill="#FAF5FF" stroke="#9333EA" stroke-width="1.5"
+                filter="url(#shadow)"/>
+          <!-- Purple left accent bar -->
+          <path d="M 1493,236 Q 1493,228 1501,228 L 1501,412 L 1493,412 Z"
+                fill="#9333EA"/>
+
+          <!-- Title + divider -->
+          <text x="1554" y="250" font-size="12" fill="#6B21A8"
+                text-anchor="middle" font-weight="700">Model Output</text>
+          <line x1="1501" y1="258" x2="1606" y2="258"
+                stroke="#E9D5FF" stroke-width="1"/>
+
+          <!-- Token chips: 18px h, 6px gap, starting y=266 -->
+          <rect x="1508" y="266" width="100" height="18" rx="4"
+                fill="#DBEAFE" stroke="#3B82F6" stroke-width="1"/>
+          <text x="1558" y="279" font-size="9.5" fill="#1E3A8A"
+                text-anchor="middle" font-weight="700">[BOS]</text>
+
+          <rect x="1508" y="290" width="100" height="18" rx="4"
+                fill="#EDE9FE" stroke="#A855F7" stroke-width="0.8"/>
+          <text x="1558" y="303" font-size="9" fill="#6B21A8"
+                text-anchor="middle" font-weight="600">'fun'</text>
+
+          <rect x="1508" y="314" width="100" height="18" rx="4"
+                fill="#EDE9FE" stroke="#A855F7" stroke-width="0.8"/>
+          <text x="1558" y="327" font-size="9" fill="#6B21A8"
+                text-anchor="middle" font-weight="600">'to'</text>
+
+          <rect x="1508" y="338" width="100" height="18" rx="4"
+                fill="#EDE9FE" stroke="#A855F7" stroke-width="0.8"/>
+          <text x="1558" y="351" font-size="9" fill="#6B21A8"
+                text-anchor="middle" font-weight="600">'explore'</text>
+
+          <text x="1558" y="370" font-size="12" fill="#7C3AED" text-anchor="middle">⋯</text>
+
+          <!-- Y dimension label (LaTeX) -->
+          <foreignObject x="1508" y="374" width="100" height="22">
+            <div xmlns="http://www.w3.org/1999/xhtml"
+                 style="display:flex;justify-content:center;align-items:center;
+                        width:100%;height:100%;font-size:10.5px;
+                        color:#581C87;font-weight:700;">
               $Y \in \mathbb{R}^{L \times V}$
             </div>
           </foreignObject>
 
-          <rect
-            x="1495"
-            y="588"
-            width="70"
-            height="20"
-            rx="10"
-            fill="#DCFCE7"
-            stroke="#86EFAC"
-            stroke-width="1"
-          />
-          <text
-            x="1530"
-            y="602"
-            font-size="11"
-            fill="#166534"
-            text-anchor="middle"
-            font-weight="700"
-          >
-            PPL: 12.5
-          </text>
+          <!-- PPL badge -->
+          <rect x="1518" y="399" width="76" height="17" rx="8"
+                fill="#DCFCE7" stroke="#86EFAC" stroke-width="1"/>
+          <text x="1556" y="411" font-size="10" fill="#166534"
+                text-anchor="middle" font-weight="700">PPL: 12.5</text>
+
+          <!-- Bottom label -->
+          <text x="1554" y="432" font-size="9" fill="#6B21A8"
+                text-anchor="middle" font-weight="600">Next-token predictions</text>
         </g>
 
-        <g transform="translate(0, 140)">
+        <!-- ═══════════════════════════════════════════════════════
+             FORMULA CARDS — LaTeX via MathJax foreignObject
+             Both cards: w=720, h=160, rx=10, y=730
+             Title section: y=0..46  (title bar + divider)
+             Row layout:  row1 y=50..84, row2 y=88..122, row3 y=126..160
+             Each row: label chip (h=18) + foreignObject (h=30)
+        ═══════════════════════════════════════════════════════ -->
+
+        <!-- ═══ CARD 1 · Architecture Formulas ═══ -->
+        <g transform="translate(95, 730)">
+          <rect x="0" y="0" width="720" height="160" rx="10"
+                fill="#F8FBFF" stroke="#3B82F6" stroke-width="1.8"
+                filter="url(#shadow)"/>
+          <rect x="0" y="0" width="9" height="160" fill="#3B82F6" rx="4"/>
+          <rect x="5" y="0" width="4" height="160" fill="#3B82F6"/>
+
+          <!-- Title -->
+          <rect x="18" y="10" width="24" height="18" rx="5" fill="#1E3A8A"/>
+          <text x="30" y="23" font-size="10" fill="#FFF" text-anchor="middle" font-weight="800">a</text>
+          <text x="48" y="23" font-size="12" fill="#1D4ED8" font-weight="800">ARCHITECTURE FORMULAS</text>
+          <text x="48" y="37" font-size="9" fill="#94A3B8" font-style="italic">
+            Selective SSM  ·  Grouped-Query Attention  ·  Tucker MoE
+          </text>
+          <line x1="18" y1="44" x2="704" y2="44" stroke="#BFDBFE" stroke-width="1"/>
+
+          <!-- ── Row 1: Mamba SSM ── -->
+          <rect x="18" y="50" width="64" height="18" rx="4"
+                fill="#EFF6FF" stroke="#93C5FD" stroke-width="0.9"/>
+          <text x="50" y="63" font-size="8" fill="#1E40AF"
+                text-anchor="middle" font-weight="700">MAMBA SSM</text>
+          <foreignObject x="88" y="46" width="618" height="30">
+            <div xmlns="http://www.w3.org/1999/xhtml"
+                 style="display:flex;align-items:center;height:30px;
+                        font-size:13.5px;color:#1E3A8A;white-space:nowrap;">
+              $h_t = \bar{A}_t\, h_{t-1} + \bar{B}_t\, x_t,\qquad y_t = C_t\, h_t$
+            </div>
+          </foreignObject>
+
+          <!-- ── Row 2: GQA Attention ── -->
+          <rect x="18" y="88" width="64" height="18" rx="4"
+                fill="#ECFEFF" stroke="#67E8F9" stroke-width="0.9"/>
+          <text x="50" y="101" font-size="8" fill="#0E7490"
+                text-anchor="middle" font-weight="700">GQA ATTN</text>
+          <foreignObject x="88" y="84" width="618" height="30">
+            <div xmlns="http://www.w3.org/1999/xhtml"
+                 style="display:flex;align-items:center;height:30px;
+                        font-size:13.5px;color:#155E75;white-space:nowrap;">
+              $\mathrm{Attn}(Q,K,V) = \mathrm{softmax}\!\left(\dfrac{QK^\top}{\sqrt{d_h}}\right)V$
+            </div>
+          </foreignObject>
+
+          <!-- ── Row 3: Tucker MoE ── -->
+          <rect x="18" y="126" width="64" height="18" rx="4"
+                fill="#F5F3FF" stroke="#C4B5FD" stroke-width="0.9"/>
+          <text x="50" y="139" font-size="8" fill="#6B21A8"
+                text-anchor="middle" font-weight="700">TUCKER MoE</text>
+          <foreignObject x="88" y="122" width="618" height="34">
+            <div xmlns="http://www.w3.org/1999/xhtml"
+                 style="display:flex;align-items:center;height:34px;
+                        font-size:13px;color:#581C87;white-space:nowrap;">
+              $y = \displaystyle\sum_{i \in \mathcal{E}} G(x)_i \cdot \Bigl(\mathcal{G}_i \times_1 U_i^{(1)} \times_2 U^{(2)} \times_3 U^{(3)}\Bigr)$
+            </div>
+          </foreignObject>
+        </g>
+
+        <!-- ═══ CARD 2 · Inference Complexity ═══ -->
+        <g transform="translate(831, 730)">
+          <rect x="0" y="0" width="720" height="165" rx="10"
+                fill="#FDF8FF" stroke="#7C3AED" stroke-width="1.8"
+                filter="url(#shadow)"/>
+          <rect x="0" y="0" width="9" height="165" fill="#7C3AED" rx="4"/>
+          <rect x="5" y="0" width="4" height="165" fill="#7C3AED"/>
+
+          <!-- Title -->
+          <rect x="18" y="10" width="24" height="18" rx="5" fill="#581C87"/>
+          <text x="30" y="23" font-size="10" fill="#FFF" text-anchor="middle" font-weight="800">c</text>
+          <text x="48" y="23" font-size="12" fill="#6B21A8" font-weight="800">INFERENCE COMPLEXITY</text>
+          <!-- Subtitle split across 2 lines so nothing overflows -->
+          <text x="48" y="34" font-size="9" fill="#94A3B8" font-style="italic">Per-token cost  ·  KV memory</text>
+          <text x="48" y="44" font-size="9" fill="#94A3B8" font-style="italic">Hybrid O(N) wall-clock  vs.  dense O(N²)</text>
+          <line x1="18" y1="50" x2="704" y2="50" stroke="#E9D5FF" stroke-width="1"/>
+
+          <!-- ── Row 1: Hybrid per-token cost (y starts at 56, 6px below new divider) ── -->
+          <rect x="18" y="56" width="64" height="18" rx="4"
+                fill="#F5F3FF" stroke="#C4B5FD" stroke-width="0.9"/>
+          <text x="50" y="69" font-size="8" fill="#6B21A8"
+                text-anchor="middle" font-weight="700">HYBRID</text>
+          <!-- underbrace needs h=40 so text+underbrace label don't clip -->
+          <foreignObject x="88" y="52" width="618" height="40">
+            <div xmlns="http://www.w3.org/1999/xhtml"
+                 style="display:flex;align-items:center;height:40px;
+                        font-size:12px;color:#581C87;white-space:nowrap;">
+              $T_{\mathrm{hyb}}(t) = \underbrace{\alpha c_1 d^2}_{\text{const}} + \underbrace{(1-\alpha)\,c_2\,t\,d}_{\text{linear}},\quad \alpha = \tfrac{m}{m+1} = \tfrac{4}{5}$
+            </div>
+          </foreignObject>
+
+          <!-- ── Row 2: Total generation cost ── -->
+          <rect x="18" y="98" width="64" height="18" rx="4"
+                fill="#F5F3FF" stroke="#C4B5FD" stroke-width="0.9"/>
+          <text x="50" y="111" font-size="8" fill="#7C3AED"
+                text-anchor="middle" font-weight="700">TOTAL N</text>
+          <foreignObject x="88" y="94" width="618" height="30">
+            <div xmlns="http://www.w3.org/1999/xhtml"
+                 style="display:flex;align-items:center;height:30px;
+                        font-size:12.5px;color:#6B21A8;white-space:nowrap;">
+              $\displaystyle\sum_{t=1}^{N} T_{\mathrm{hyb}}(t) = O\!\left(\alpha N d^2\right) + O\!\left(\tfrac{1-\alpha}{2}N^2 d\right) \;\approx\; O(N)$
+            </div>
+          </foreignObject>
+
+          <!-- ── Row 3: Memory ── -->
+          <rect x="18" y="130" width="64" height="18" rx="4"
+                fill="#FDF4FF" stroke="#E879F9" stroke-width="0.9"/>
+          <text x="50" y="143" font-size="8" fill="#86198F"
+                text-anchor="middle" font-weight="700">MEMORY</text>
+          <foreignObject x="88" y="126" width="618" height="30">
+            <div xmlns="http://www.w3.org/1999/xhtml"
+                 style="display:flex;align-items:center;height:30px;
+                        font-size:12.5px;color:#701A75;white-space:nowrap;">
+              $\text{KV} = O(L_{\text{macro}} \cdot N \cdot d_h)\ \cdot\ \text{Mamba} = O(1)\ \cdot\ \text{saves} \approx 80\%$ vs. Transformer
+            </div>
+          </foreignObject>
+        </g>
+
+        <g transform="translate(0, 310)">
           <line
             x1="75"
             y1="600"
-            x2="1535"
+            x2="1600"
             y2="600"
             stroke="#CBD5E1"
             stroke-width="1.5"
