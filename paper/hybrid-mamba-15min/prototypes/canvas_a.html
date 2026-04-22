@@ -41,9 +41,11 @@
         stroke-dasharray="10 5"/>
 
   <!-- ═══════════════ Input X (receives from parent Token Stream) ═══ -->
-  <text x="186" y="165" font-size="16" fill="#0F172A"
+  <!-- Aligned to in_proj vertical center: y = 134 + 38/2 = 153 -->
+  <text x="196" y="158" font-size="16" fill="#0F172A"
+        text-anchor="middle"
         font-style="italic" font-family="Georgia,serif">X</text>
-  <path d="M 198,160 L 228,160"
+  <path d="M 208,153 L 227,153"
         fill="none" stroke="#334155" stroke-width="2.2"
         marker-end="url(#arrow)"/>
 
@@ -84,13 +86,13 @@
   <foreignObject x="242" y="134" width="54" height="38">
     <div xmlns="http://www.w3.org/1999/xhtml"
          style="display:flex;align-items:center;justify-content:center;
-                width:100%;height:100%;font-size:9px;
-                color:#4338CA;font-weight:600;">
-      $\text{in\_proj}$
+                width:100%;height:100%;font-size:10px;
+                color:#4338CA;font-weight:600;font-family:Georgia,serif;">
+      $in_{\text{proj}}$
     </div>
   </foreignObject>
 
-  <path d="M 296,153 L 310,153" fill="none"
+  <path d="M 296,153 L 309,153" fill="none"
         stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)"/>
 
   <rect x="312" y="134" width="130" height="38" rx="5"
@@ -100,7 +102,7 @@
   <text x="377" y="165" font-size="8.5" fill="#3B82F6"
         text-anchor="middle">Triton kernel</text>
 
-  <path d="M 444,153 L 458,153" fill="none"
+  <path d="M 444,153 L 457,153" fill="none"
         stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)"/>
 
   <rect x="460" y="134" width="50" height="38" rx="5"
@@ -108,14 +110,14 @@
   <foreignObject x="456" y="134" width="58" height="38">
     <div xmlns="http://www.w3.org/1999/xhtml"
          style="display:flex;align-items:center;justify-content:center;
-                width:100%;height:100%;font-size:8.5px;
-                color:#4338CA;font-weight:600;">
-      $\text{out\_proj}$
+                width:100%;height:100%;font-size:10px;
+                color:#4338CA;font-weight:600;font-family:Georgia,serif;">
+      $out_{\text{proj}}$
     </div>
   </foreignObject>
 
   <!-- Row A → Row B transition arrow -->
-  <path d="M 380,200 L 380,210"
+  <path d="M 380,200 L 380,209"
         fill="none" stroke="#334155" stroke-width="2"
         marker-end="url(#arrow)"/>
 
@@ -139,7 +141,7 @@
   <text x="342" y="267" font-size="10.5" fill="#1E3A8A"
         text-anchor="middle" font-weight="700">V</text>
 
-  <path d="M 362,263 L 376,263" fill="none"
+  <path d="M 362,263 L 374,263" fill="none"
         stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)"/>
 
   <!-- Grouped Query Attn (w=80, h=38) -->
@@ -150,7 +152,7 @@
   <text x="418" y="273" font-size="9.5" fill="#065F46"
         text-anchor="middle">Attn (SDPA)</text>
 
-  <path d="M 460,263 L 472,263" fill="none"
+  <path d="M 460,263 L 470,263" fill="none"
         stroke="#334155" stroke-width="1.5" marker-end="url(#arrow)"/>
 
   <!-- o_proj (w=50, h=38, same as in_proj/out_proj) -->
@@ -166,7 +168,7 @@
   </foreignObject>
 
   <!-- ═══════════════ Output X' (connects to parent next-phase arrow) ═══ -->
-  <path d="M 526,263 L 560,263"
+  <path d="M 526,263 L 555,263"
         fill="none" stroke="#334155" stroke-width="2.2"
         marker-end="url(#arrow)"/>
   <text x="543" y="256" font-size="15" fill="#0F172A"
@@ -264,12 +266,6 @@
 
   <!-- 𝒢 core cube (yellow, ×E stacked) -->
   <g transform="translate(346, 414)">
-    <rect x="8" y="9" width="22" height="40"
-          fill="#FEF9C3" stroke="#CA8A04" stroke-width="0.8"
-          rx="1" opacity="0.35"/>
-    <rect x="6" y="7" width="22" height="40"
-          fill="#FEF9C3" stroke="#CA8A04" stroke-width="0.8"
-          rx="1" opacity="0.6"/>
     <path d="M 4,5 L 14,0 L 34,0 L 24,5 Z"
           fill="#FEF08A" stroke="#CA8A04" stroke-width="1.3"/>
     <path d="M 24,5 L 34,0 L 34,40 L 24,45 Z"
@@ -341,7 +337,7 @@
   </foreignObject>
 
   <!-- ═══ Decomposition formula ═══ -->
-  <foreignObject x="210" y="472" width="340" height="28">
+  <foreignObject x="110" y="512" width="340" height="28">
     <div xmlns="http://www.w3.org/1999/xhtml"
          style="display:flex;align-items:center;justify-content:center;
                 width:100%;height:100%;font-size:12px;
@@ -352,23 +348,23 @@
 
   <!-- ═══ Top-K Router (clean professional design) ═══ -->
   <!-- Rounded rect container with expert score bars visual -->
-  <rect x="306" y="506" width="140" height="74" rx="8"
+  <rect x="386" y="506" width="140" height="74" rx="8"
         fill="#FFFBEB" stroke="#F59E0B" stroke-width="2"
         filter="url(#shadow)"/>
 
   <!-- Title -->
-  <foreignObject x="306" y="510" width="140" height="18">
+  <foreignObject x="386" y="510" width="140" height="18">
     <div xmlns="http://www.w3.org/1999/xhtml"
          style="display:flex;align-items:center;justify-content:center;
                 width:100%;height:100%;font-size:10px;
                 color:#92400E;font-weight:700;">
-      Top-$k$ Router
+      Top-<i style="font-family:Georgia,serif;margin:0 2px;">k</i> Router
     </div>
   </foreignObject>
 
   <!-- Expert score bars (mini bar chart showing selection) -->
   <!-- Bars: tall = selected (colored), short = unselected (gray) -->
-  <g transform="translate(318, 558)">
+  <g transform="translate(398, 558)">
     <!-- Bar baseline -->
     <line x1="0" y1="0" x2="116" y2="0"
           stroke="#D4D4D8" stroke-width="0.6"/>
@@ -405,17 +401,17 @@
   </g>
 
   <!-- Router → 𝒢 (gate weights, dashed orange, upward) -->
-  <path d="M 356,506 L 356,468" fill="none"
+  <path d="M 400,506 L 376,468" fill="none"
         stroke="#F59E0B" stroke-width="1.8"
         stroke-dasharray="4 3" marker-end="url(#arrow)"/>
-  <text x="346" y="492" font-size="7.5" fill="#B45309"
+  <text x="386" y="502" font-size="7.5" fill="#B45309"
         font-style="italic" text-anchor="end">gate</text>
 
   <!-- Router → ⊗ (routing weight, dashed orange, curve up-right) -->
-  <path d="M 446,530 C 470,518 478,490 478,454" fill="none"
+  <path d="M 526,530 C 545,510 510,480 490,454" fill="none"
         stroke="#F59E0B" stroke-width="1.6"
         stroke-dasharray="4 3" marker-end="url(#arrow)"/>
-  <text x="470" y="504" font-size="7.5" fill="#B45309"
+  <text x="510" y="500" font-size="7.5" fill="#B45309"
         font-style="italic" text-anchor="end">weight</text>
 
   <!-- ═══ (a) bottom label — y=621 to match b/c at y=626 within their y=0 frames ═══ -->

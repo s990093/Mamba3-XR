@@ -67,10 +67,10 @@
 
   <!-- Router Temp Annealing -->
   <rect x="650" y="290" width="340" height="45" rx="4" fill="#FEF08A" stroke="#FDE047" stroke-width="1" />
-  <text x="820" y="304" font-size="9" fill="#B45309" text-anchor="middle" font-weight="700">Router Temperature Cosine Annealing (2.0 $\to$ 0.5)</text>
-  <foreignObject x="650" y="306" width="340" height="25">
-    <div style="display:flex; justify-content:center; align-items:center; width:100%; height:100%; font-size:11px; color:#92400e; font-family:serif; font-weight:600;">
-      $\tau(t) = \tau_{\text{end}} + \frac{1}{2}(\tau_{\text{start}} - \tau_{\text{end}}) \left[ 1 + \cos\left( \pi \min\Big(\frac{t - T_w}{T_{tot} - T_w}, 1\Big) \right) \right]$
+  <text x="820" y="304" font-size="9" fill="#B45309" text-anchor="middle" font-weight="700">Router Temperature Cosine Annealing (2.0 &#8594; 0.5)</text>
+  <foreignObject x="650" y="306" width="340" height="28">
+    <div style="display:flex; justify-content:center; align-items:center; width:100%; height:100%; font-size:10px; color:#92400e; font-family:serif; font-weight:600;">
+      $\tau(t) = \tau_{\text{end}} + \tfrac{1}{2}(\tau_{\text{start}} - \tau_{\text{end}})\left[ 1 + \cos\!\left( \pi \min\!\big(\tfrac{t - T_w}{T_{tot} - T_w},\, 1\big) \right) \right]$
     </div>
   </foreignObject>
 
@@ -79,78 +79,79 @@
   <rect x="635" y="360" width="370" height="240" rx="6" fill="#F0FDF4" stroke="#BBF7D0" stroke-width="1.2"/>
   <text x="820" y="380" font-size="12" fill="#065F46" text-anchor="middle" font-weight="700">Triton Memory Fusion &amp; Distributed Data Parallel</text>
 
-  <!-- GPU 0 Box -->
-  <rect x="642" y="390" width="195" height="205" rx="4" fill="#F0FDF4" stroke="#4ADE80" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <!-- GPU 0 Box (widened: x=642 w=243, right edge=885) -->
+  <rect x="642" y="390" width="238" height="205" rx="4" fill="#F0FDF4" stroke="#4ADE80" stroke-width="1.5" stroke-dasharray="4 2"/>
   <text x="650" y="402" font-size="9" fill="#059669" font-weight="700">GPU 0 (RTX 3090)</text>
 
-  <!-- GPU 0 HBM -->
-  <rect x="650" y="415" width="180" height="25" rx="4" fill="#D1FAE5" stroke="#34D399" stroke-width="1.5" />
-  <text x="740" y="432" font-size="11" fill="#065F46" text-anchor="middle" font-weight="700">HBM (Hard Limit 24GB)</text>
+  <!-- GPU 0 HBM (centered at x=780) -->
+  <rect x="690" y="415" width="180" height="25" rx="4" fill="#D1FAE5" stroke="#34D399" stroke-width="1.5" />
+  <text x="780" y="432" font-size="11" fill="#065F46" text-anchor="middle" font-weight="700">HBM (Hard Limit 24GB)</text>
 
-  <!-- GPU 0 SRAM -->
-  <rect x="696" y="455" width="128" height="135" rx="6" fill="#ECFDF5" stroke="#10B981" stroke-width="1.5" />
-  <text x="760" y="470" font-size="10" fill="#047857" text-anchor="middle" font-weight="700">SRAM (L1 Shared)</text>
+  <!-- GPU 0 SRAM (centered at x=780) -->
+  <rect x="715" y="455" width="140" height="135" rx="6" fill="#ECFDF5" stroke="#10B981" stroke-width="1.5" />
+  <text x="780" y="470" font-size="10" fill="#047857" text-anchor="middle" font-weight="700">SRAM (L1 Shared)</text>
 
   <!-- Fusion Green Load Arrow -->
-  <path d="M 760 440 L 760 455" fill="none" stroke="#10B981" stroke-width="2" marker-end="url(#arrowGreenLarge)" />
-  <text x="765" y="452" font-size="9" fill="#059669" font-weight="700">Fused Load</text>
+  <path d="M 780 440 L 780 455" fill="none" stroke="#10B981" stroke-width="2" marker-end="url(#arrowGreenLarge)" />
+  <text x="785" y="452" font-size="9" fill="#059669" font-weight="700">Fused Load</text>
 
-  <!-- Operations Inside SRAM -->
-  <rect x="704" y="480" width="112" height="22" rx="4" fill="#A7F3D0" stroke="#059669" stroke-width="1" />
-  <text x="760" y="494" font-size="9" fill="#065F46" text-anchor="middle" font-weight="600">Triton Chunk Scan</text>
+  <!-- Operations Inside SRAM (centered at x=780) -->
+  <rect x="724" y="475" width="112" height="22" rx="4" fill="#A7F3D0" stroke="#059669" stroke-width="1" />
+  <text x="780" y="489" font-size="9" fill="#065F46" text-anchor="middle" font-weight="600">Triton Chunk Scan</text>
 
-  <line x1="760" y1="502" x2="760" y2="510" stroke="#059669" stroke-width="1.5" marker-end="url(#arrowGreenLarge)" />
+  <line x1="780" y1="497" x2="780" y2="507" stroke="#059669" stroke-width="1.5" marker-end="url(#arrowGreenLarge)" />
 
-  <rect x="704" y="510" width="112" height="32" rx="4" fill="#A7F3D0" stroke="#059669" stroke-width="1" />
-  <text x="760" y="524" font-size="9" fill="#065F46" text-anchor="middle" font-weight="600">MoE Fwd/Bwd</text>
-  <text x="760" y="536" font-size="8" fill="#047857" text-anchor="middle">+ Tucker Gating</text>
+  <rect x="724" y="507" width="112" height="32" rx="4" fill="#A7F3D0" stroke="#059669" stroke-width="1" />
+  <text x="780" y="521" font-size="9" fill="#065F46" text-anchor="middle" font-weight="600">MoE Fwd/Bwd</text>
+  <text x="780" y="533" font-size="8" fill="#047857" text-anchor="middle">+ Tucker Gating</text>
 
-  <path d="M 800,530 A 12,12 0 0,0 810,515" fill="none" stroke="#059669" stroke-width="1.5" marker-end="url(#arrowGreenLarge)" />
-  <text x="812" y="515" font-size="7" fill="#059669" font-weight="700">In-Reg</text>
+  <!-- In-Reg: MoE right → up → back into Triton Chunk Scan right (rounded corners, within SRAM) -->
+  <path d="M 836 523 L 842 523 Q 848 523 848 517 L 848 497 Q 848 491 842 491 L 838 491" fill="none" stroke="#10B981" stroke-width="1.5" marker-end="url(#arrowGreenLarge)" />
+  <text x="822" y="505" font-size="7" fill="#059669" font-weight="700">In-Reg</text>
 
-  <line x1="760" y1="542" x2="760" y2="550" stroke="#059669" stroke-width="1.5" marker-end="url(#arrowGreenLarge)" />
+  <line x1="780" y1="539" x2="780" y2="550" stroke="#059669" stroke-width="1.5" marker-end="url(#arrowGreenLarge)" />
 
-  <rect x="704" y="550" width="112" height="22" rx="4" fill="#A7F3D0" stroke="#059669" stroke-width="1" />
-  <text x="760" y="565" font-size="9" fill="#065F46" text-anchor="middle" font-weight="600">Out Proj (Fused)</text>
+  <rect x="724" y="550" width="112" height="22" rx="4" fill="#A7F3D0" stroke="#059669" stroke-width="1" />
+  <text x="780" y="565" font-size="9" fill="#065F46" text-anchor="middle" font-weight="600">Out Proj (Fused)</text>
 
-  <!-- Store back (Corrected Arrow outside SRAM) -->
-  <path d="M 760 572 L 760 584 L 826 584 L 826 444" fill="none" stroke="#10B981" stroke-width="2" marker-end="url(#arrowGreenLarge)" />
-  <text x="785" y="581" font-size="8" fill="#059669" font-weight="700">Single Store Back</text>
+  <!-- Store back: Out Proj bottom → down → right channel → up to HBM (rounded corners) -->
+  <path d="M 780 572 L 780 574 Q 780 582 788 582 L 854 582 Q 862 582 862 574 L 862 440" fill="none" stroke="#10B981" stroke-width="2" marker-end="url(#arrowGreenLarge)" />
+  <text x="820" y="579" font-size="7" fill="#059669" font-weight="700" text-anchor="middle">Single Store Back</text>
 
-  <!-- Standard HBM Trips -->
-  <text x="672" y="465" font-size="8" fill="#DC2626" font-weight="700" text-anchor="middle">Standard Trips</text>
-  <g transform="translate(660, 475)">
+  <!-- Standard HBM Trips (moved to dedicated left column, no longer overlaps HBM) -->
+  <text x="677" y="465" font-size="8" fill="#DC2626" font-weight="700" text-anchor="middle">Standard Trips</text>
+  <g transform="translate(665, 475)">
     <line x1="0" y1="0" x2="0" y2="85" stroke="#EF4444" stroke-width="1.5" stroke-dasharray="2 2" marker-end="url(#arrowRed)" />
-    <line x1="10" y1="85" x2="10" y2="0" stroke="#EF4444" stroke-width="1.5" stroke-dasharray="2 2" marker-end="url(#arrowRed)" />
-    <line x1="20" y1="0" x2="20" y2="85" stroke="#EF4444" stroke-width="1.5" stroke-dasharray="2 2" marker-end="url(#arrowRed)" />
+    <line x1="12" y1="85" x2="12" y2="0" stroke="#EF4444" stroke-width="1.5" stroke-dasharray="2 2" marker-end="url(#arrowRed)" />
+    <line x1="24" y1="0" x2="24" y2="85" stroke="#EF4444" stroke-width="1.5" stroke-dasharray="2 2" marker-end="url(#arrowRed)" />
   </g>
-  <text x="670" y="572" font-size="7" fill="#EF4444" font-weight="600" text-anchor="middle">Massive I/O</text>
-  <text x="670" y="582" font-size="7" fill="#EF4444" font-weight="600" text-anchor="middle">Bottleneck</text>
+  <text x="677" y="572" font-size="7" fill="#EF4444" font-weight="600" text-anchor="middle">Massive I/O</text>
+  <text x="677" y="582" font-size="7" fill="#EF4444" font-weight="600" text-anchor="middle">Bottleneck</text>
 
-  <!-- DDP PCIe Interconnect -->
-  <line x1="835" y1="428" x2="915" y2="428" stroke="#8B5CF6" stroke-width="2.5" />
-  <polygon points="838,424 831,428 838,432" fill="#8B5CF6" />
-  <polygon points="912,424 919,428 912,432" fill="#8B5CF6" />
-  <text x="875" y="414" font-size="9" fill="#7C3AED" font-weight="bold" text-anchor="middle">DDP Sync</text>
-  <text x="875" y="423" font-size="9" fill="#7C3AED" font-weight="bold" text-anchor="middle">($\nabla W$)</text>
-  <text x="875" y="440" font-size="8" fill="#6D28D9" font-weight="bold" text-anchor="middle">PCIe 4.0</text>
+  <!-- DDP PCIe Interconnect (between HBM right=870 and GPU1 box left=925) -->
+  <line x1="885" y1="428" x2="922" y2="428" stroke="#8B5CF6" stroke-width="2.5" />
+  <polygon points="888,424 881,428 888,432" fill="#8B5CF6" />
+  <polygon points="919,424 926,428 919,432" fill="#8B5CF6" />
+  <text x="903" y="414" font-size="9" fill="#7C3AED" font-weight="bold" text-anchor="middle">DDP Sync</text>
+  <text x="903" y="423" font-size="8" fill="#7C3AED" font-weight="bold" text-anchor="middle">($\nabla W$)</text>
+  <text x="903" y="442" font-size="8" fill="#6D28D9" font-weight="bold" text-anchor="middle">PCIe 4.0</text>
 
-  <!-- GPU 1 Box -->
-  <rect x="915" y="390" width="75" height="205" rx="4" fill="#F0FDF4" stroke="#4ADE80" stroke-width="1.5" stroke-dasharray="4 2"/>
-  <text x="920" y="402" font-size="9" fill="#059669" font-weight="700">GPU 1</text>
+  <!-- GPU 1 Box (h matches GPU 0 = 205) -->
+  <rect x="925" y="390" width="75" height="205" rx="4" fill="#F0FDF4" stroke="#4ADE80" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="930" y="402" font-size="9" fill="#059669" font-weight="700">GPU 1</text>
 
   <!-- GPU 1 HBM -->
-  <rect x="920" y="415" width="65" height="25" rx="4" fill="#D1FAE5" stroke="#34D399" stroke-width="1.5" />
-  <text x="952" y="432" font-size="10" fill="#065F46" text-anchor="middle" font-weight="700">HBM</text>
+  <rect x="930" y="415" width="65" height="25" rx="4" fill="#D1FAE5" stroke="#34D399" stroke-width="1.5" />
+  <text x="962" y="432" font-size="10" fill="#065F46" text-anchor="middle" font-weight="700">HBM</text>
 
-  <!-- GPU 1 SRAM (Replicated) -->
-  <rect x="925" y="455" width="55" height="135" rx="4" fill="#ECFDF5" stroke="#10B981" stroke-dasharray="2 2" stroke-width="1.5" />
-  <text x="952" y="505" font-size="10" fill="#047857" font-style="italic" text-anchor="middle">Identical</text>
-  <text x="952" y="520" font-size="10" fill="#047857" font-style="italic" text-anchor="middle">Triton</text>
-  <text x="952" y="535" font-size="10" fill="#047857" font-style="italic" text-anchor="middle">Fusion</text>
+  <!-- GPU 1 SRAM (matches GPU 0 SRAM h=135) -->
+  <rect x="935" y="455" width="55" height="135" rx="4" fill="#ECFDF5" stroke="#10B981" stroke-dasharray="2 2" stroke-width="1.5" />
+  <text x="962" y="505" font-size="10" fill="#047857" font-style="italic" text-anchor="middle">Identical</text>
+  <text x="962" y="520" font-size="10" fill="#047857" font-style="italic" text-anchor="middle">Triton</text>
+  <text x="962" y="535" font-size="10" fill="#047857" font-style="italic" text-anchor="middle">Fusion</text>
 
   <!-- Phase label -->
-  <text x="820" y="626" font-size="13" fill="#047857"
+  <text x="820" y="621" font-size="13" fill="#047857"
         text-anchor="middle" font-weight="700">(b) Training</text>
 </g>
 
