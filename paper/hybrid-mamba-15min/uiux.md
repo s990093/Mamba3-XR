@@ -1,4 +1,4 @@
-把這個「貓咪 AI 助理」的 Demo 放進報告是一個非常棒的決定！前面的章節（§5 到 §8）都是硬核的數學推導與系統底層優化，到了 §9.6 你成功證明了模型在 Apple Silicon 上的極低記憶體佔用（14.1 MiB）。把這個概念實體化，變成一個像 KOC 文章中 Loona DeskMate 那樣的即時桌面助理，能讓整篇報告的「實用價值」瞬間具象化。
+把這個「Mamba 蛇 AI 助理」的 Demo 放進報告是一個非常棒的決定！前面的章節（§5 到 §8）都是硬核的數學推導與系統底層優化，到了 §9.6 你成功證明了模型在 Apple Silicon 上的極低記憶體佔用（14.1 MiB）。把這個概念實體化，變成一個像 KOC 文章中 Loona DeskMate 那樣的即時桌面助理，能讓整篇報告的「實用價值」瞬間具象化。模型本身命名自 Mamba（非洲黑曼巴蛇），以蛇形角色作為 UI 吉祥物，不僅與架構命名高度呼應，更能讓技術論文有獨特的品牌識別感。
 
 網站可以參考。https://www.koc.com.tw/archives/626226 這樣在寫內文
 
@@ -16,11 +16,11 @@
 
 **9.8 邊緣設備應用展示：即時桌面 AI 伴侶 (Edge Application: Real-Time Desktop AI Companion)**
 
-為驗證本研究所提之 Hybrid Mamba-TuckerMoE 架構在真實邊緣裝置上的可行性，本研究開發了一款 iOS 桌面 AI 伴侶原型（見圖 X）。該應用程式參考了市面上搭配 MagSafe 旋轉支架的桌面機器人概念，將 iPhone 16 Pro 轉化為免持的即時互動助理。
+為驗證本研究所提之 Hybrid Mamba-TuckerMoE 架構在真實邊緣裝置上的可行性，本研究開發了一款 iOS 桌面 AI 伴侶原型（見圖 X）。該應用程式以 Mamba 架構的命名來源——非洲黑曼巴蛇（Black Mamba）——為視覺主題，設計了一個流線型蛇形 UI 角色，搭配 MagSafe 旋轉支架，將 iPhone 16 Pro 轉化為免持的即時互動助理。蛇形角色的流暢律動動畫，在視覺隱喻上與模型的線性遞迴序列掃描（Linear Recurrent Scan）一脈相承。
 
 - **極低記憶體佔用的背景執行**：如 §9.6 所述，在 8-bit 量化下，16K 序列的 KV 記憶體消耗低於 1 GiB，解碼狀態更僅需 14.1 MiB。這使得此 AI 伴侶能在 iPhone 的統一記憶體架構中以極低功耗常駐運行，不會排擠使用者同時開啟的其他應用程式。
 - **即時語音互動 (Low-latency Streaming)**：介面上的 `THINKING...` 與 `tap to talk` 標示了流式互動（Streaming）的特性。得益於 Mamba 主幹 $O(1)$ 的解碼複雜度與圖級融合（Graph-level fusion）消除的控制開銷，模型能以極低延遲回應使用者的語音指令。
-- **動態角色渲染**：省下的系統算力與記憶體，得以讓手機 GPU 順暢渲染高更新率的動態貓眼 UI（如圖 X 所示），提供具備情感陪伴價值的視覺回饋。
+- **動態角色渲染**：省下的系統算力與記憶體，得以讓手機 GPU 順暢渲染高更新率的動態蛇形 UI（如圖 X 所示）。蛇身在待機時緩緩起伏、思考時加速盤繞、回應時昂首展示，提供具備情感陪伴價值的視覺回饋，同時讓「Mamba = 蛇」的架構隱喻直接體現於產品設計之中。
 
 此 Demo 證明了「同算力擴增容量」命題的實用性：我們能在不妥協互動流暢度與設備續航力的前提下，將具備龐大知識庫的語言模型完整壓縮至消費級手機中。
 
@@ -34,7 +34,7 @@
     - **內容**：畫一個 iPhone 吸附在會旋轉的 MagSafe 充電座上（類似 KOC 文章裡的 DeskMate 概念），放在電腦桌旁。
     - **目的**：讓評委或讀者一秒看懂這不是普通的 App，而是一個「桌面實體機器人」的替代方案。
 2.  **端到端系統資料流圖 (End-to-End System Flow)**
-    - **內容**：一個簡單的流程圖。左邊是 `User Voice Input` $\rightarrow$ 中間是 `Apple M 系列神經網路引擎 (MLX Backend) + Hybrid Mamba-TuckerMoE` $\rightarrow$ 右邊分兩路輸出：`Text-to-Speech Output` 與 `UI Animation (Cat Eyes Sync)`。
+    - **內容**：一個簡單的流程圖。左邊是 `User Voice Input` $\rightarrow$ 中間是 `Apple M 系列神經網路引擎 (MLX Backend) + Hybrid Mamba-TuckerMoE` $\rightarrow$ 右邊分兩路輸出：`Text-to-Speech Output` 與 `UI Animation (Mamba Snake Sync)`。
     - **目的**：展現你是如何把模型整合進 iOS 系統架構的。
 
 ### 🤖 關於 AI 直接生成圖片
@@ -44,4 +44,4 @@
 既然你對視覺設計軟體很熟悉，我強烈建議：
 
 - **資料流圖**：直接開 Canva 用簡單的方塊和箭頭拉一下，5 分鐘就能搞定，且風格能和你前面的圖表保持一致。
-- **實體情境圖**：可以用 Clip Studio Paint 4.0 找個 3D 素體或透視尺規，畫一個簡單的線稿風格（Line art）示意圖即可，不一定要全彩寫實，純線稿搭配局部高光反而很有 Apple 專利圖或學術論文的極簡感！
+- **實體情境圖**：可以用 Clip Studio Paint 4.0 找個 3D 素體或透視尺規，畫一個簡單的線稿風格（Line art）蛇形角色示意圖即可——蛇身線條本身就天然具備流線感，純線稿搭配局部高光反而很有 Apple 專利圖或學術論文的極簡感。蛇的側面盤繞姿態在學術海報上也更容易辨識，建議以黑曼巴蛇的深灰色調（Dark Slate）為主色，搭配論文整體的配色系統。
