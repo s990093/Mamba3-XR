@@ -36,85 +36,93 @@
     Apple Silicon (MLX): Unified Memory &amp; Metal Compilation
   </text>
 
-  <text x="1055" y="95" font-size="12" fill="#334155" font-weight="700">Unfolded Hybrid Generation Pipeline</text>
+  <text x="1220" y="95" font-size="12" fill="#334155" font-weight="700" text-anchor="middle">Unfolded Hybrid Generation Pipeline</text>
 
+  <g transform="translate(10, -10)">
   <!-- Big Dashed Box -->
-  <rect x="1020" y="105" width="380" height="430" rx="8" fill="#FAFAF9" stroke="#A8A29E" stroke-width="1.5" stroke-dasharray="6 4"/>
-  <rect x="1028" y="540" width="220" height="12" rx="3" fill="#F1F5F9" stroke="#CBD5E1" stroke-width="0.6"/>
-  <text x="1138" y="549" font-size="8" fill="#475569" font-weight="700" text-anchor="middle">@mx.compile Metal JIT Evaluation Graph</text>
+  <rect x="1020" y="118" width="380" height="437" rx="8" fill="#FAFAF9" stroke="#A8A29E" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="1210" y="545" font-size="12" fill="#4B5563" font-weight="700" text-anchor="middle">@mx.compile Metal JIT Evaluation Graph</text>
 
   <!-- Autoregressive Input-to-Next-Token Soft Connections -->
-  <path d="M 1095 112 Q 1132 92 1170 112" fill="none" stroke="#D946EF" stroke-width="1.2" stroke-dasharray="3 3" marker-end="url(#arrow)"/>
-  <path d="M 1215 112 Q 1252 92 1290 112" fill="none" stroke="#D946EF" stroke-width="1.2" stroke-dasharray="3 3" marker-end="url(#arrow)"/>
+  <path d="M 1095 145 Q 1132 130 1170 145" fill="none" stroke="#D946EF" stroke-width="1.2" stroke-dasharray="3 3" marker-end="url(#arrow)"/>
+  <path d="M 1215 145 Q 1252 130 1290 145" fill="none" stroke="#D946EF" stroke-width="1.2" stroke-dasharray="3 3" marker-end="url(#arrow)"/>
 
-  <text x="1132" y="88" font-size="7" fill="#D946EF" font-style="italic" text-anchor="middle">autoregressive</text>
-  <text x="1252" y="88" font-size="7" fill="#D946EF" font-style="italic" text-anchor="middle">autoregressive</text>
+  <text x="1132" y="127" font-size="7" fill="#D946EF" font-style="italic" text-anchor="middle">autoregressive</text>
+  <text x="1252" y="127" font-size="7" fill="#D946EF" font-style="italic" text-anchor="middle">autoregressive</text>
 
   <!-- Outputs (Vertical Up) -->
-  <text x="1095" y="130" font-size="10" fill="#4C1D95" text-anchor="middle" font-weight="700">Token 1</text>
-  <line x1="1095" y1="180" x2="1095" y2="140" stroke="#8B5CF6" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="1095" y="158" font-size="10" fill="#4C1D95" text-anchor="middle" font-weight="700">Token 1</text>
+  <line x1="1095" y1="205" x2="1095" y2="168" stroke="#8B5CF6" stroke-width="1.5" marker-end="url(#arrow)"/>
 
-  <text x="1215" y="130" font-size="10" fill="#4C1D95" text-anchor="middle" font-weight="700">Token 2</text>
-  <line x1="1215" y1="180" x2="1215" y2="140" stroke="#8B5CF6" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="1215" y="158" font-size="10" fill="#4C1D95" text-anchor="middle" font-weight="700">Token 2</text>
+  <line x1="1215" y1="205" x2="1215" y2="168" stroke="#8B5CF6" stroke-width="1.5" marker-end="url(#arrow)"/>
 
-  <text x="1335" y="130" font-size="10" fill="#4C1D95" text-anchor="middle" font-weight="700">[EOS]</text>
-  <line x1="1335" y1="180" x2="1335" y2="140" stroke="#8B5CF6" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="1335" y="158" font-size="10" fill="#4C1D95" text-anchor="middle" font-weight="700">[EOS]</text>
+  <line x1="1335" y1="205" x2="1335" y2="168" stroke="#8B5CF6" stroke-width="1.5" marker-end="url(#arrow)"/>
 
   <!-- Inputs (Diagonal Down) -->
-  <text x="1050" y="130" font-size="10" fill="#1D4ED8" text-anchor="middle" font-weight="700">[BOS]</text>
-  <line x1="1050" y1="140" x2="1075" y2="175" stroke="#3B82F6" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="1050" y="158" font-size="10" fill="#1D4ED8" text-anchor="middle" font-weight="700">[BOS]</text>
+  <line x1="1050" y1="168" x2="1075" y2="200" stroke="#3B82F6" stroke-width="1.5" marker-end="url(#arrow)"/>
 
-  <text x="1170" y="130" font-size="10" fill="#1D4ED8" text-anchor="middle" font-weight="700">Token 1</text>
-  <line x1="1170" y1="140" x2="1195" y2="175" stroke="#3B82F6" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="1170" y="158" font-size="10" fill="#1D4ED8" text-anchor="middle" font-weight="700">Token 1</text>
+  <line x1="1170" y1="168" x2="1195" y2="200" stroke="#3B82F6" stroke-width="1.5" marker-end="url(#arrow)"/>
 
-  <text x="1290" y="130" font-size="10" fill="#1D4ED8" text-anchor="middle" font-weight="700">Token 2</text>
-  <line x1="1290" y1="140" x2="1315" y2="175" stroke="#3B82F6" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="1290" y="158" font-size="10" fill="#1D4ED8" text-anchor="middle" font-weight="700">Token 2</text>
+  <line x1="1290" y1="168" x2="1315" y2="200" stroke="#3B82F6" stroke-width="1.5" marker-end="url(#arrow)"/>
 
   <!-- Decoder Blocks -->
-  <rect x="1070" y="180" width="50" height="50" rx="4" fill="#DBEAFE" stroke="#2563EB" stroke-width="1.5"/>
-  <text x="1095" y="202" font-size="10" fill="#1E3A8A" text-anchor="middle" font-weight="700">Hybrid</text>
-  <text x="1095" y="222" font-size="8" fill="#1D4ED8" font-family="serif" text-anchor="middle">Step <tspan font-style="italic">t</tspan></text>
+  <rect x="1070" y="205" width="50" height="50" rx="4" fill="#DBEAFE" stroke="#2563EB" stroke-width="1.5"/>
+  <text x="1095" y="227" font-size="10" fill="#1E3A8A" text-anchor="middle" font-weight="700">Hybrid</text>
+  <text x="1095" y="247" font-size="8" fill="#1D4ED8" font-family="serif" text-anchor="middle">Step <tspan font-style="italic">t</tspan></text>
 
-  <rect x="1190" y="180" width="50" height="50" rx="4" fill="#DBEAFE" stroke="#2563EB" stroke-width="1.5"/>
-  <text x="1215" y="202" font-size="10" fill="#1E3A8A" text-anchor="middle" font-weight="700">Hybrid</text>
-  <text x="1215" y="222" font-size="8" fill="#1D4ED8" font-family="serif" text-anchor="middle">Step <tspan font-style="italic">t</tspan>+1</text>
+  <rect x="1190" y="205" width="50" height="50" rx="4" fill="#DBEAFE" stroke="#2563EB" stroke-width="1.5"/>
+  <text x="1215" y="227" font-size="10" fill="#1E3A8A" text-anchor="middle" font-weight="700">Hybrid</text>
+  <text x="1215" y="247" font-size="8" fill="#1D4ED8" font-family="serif" text-anchor="middle">Step <tspan font-style="italic">t</tspan>+1</text>
 
-  <rect x="1310" y="180" width="50" height="50" rx="4" fill="#DBEAFE" stroke="#2563EB" stroke-width="1.5"/>
-  <text x="1335" y="202" font-size="10" fill="#1E3A8A" text-anchor="middle" font-weight="700">Hybrid</text>
-  <text x="1335" y="222" font-size="8" fill="#1D4ED8" font-family="serif" text-anchor="middle">Step <tspan font-style="italic">t</tspan>+2</text>
+  <rect x="1310" y="205" width="50" height="50" rx="4" fill="#DBEAFE" stroke="#2563EB" stroke-width="1.5"/>
+  <text x="1335" y="227" font-size="10" fill="#1E3A8A" text-anchor="middle" font-weight="700">Hybrid</text>
+  <text x="1335" y="247" font-size="8" fill="#1D4ED8" font-family="serif" text-anchor="middle">Step <tspan font-style="italic">t</tspan>+2</text>
 
   <!-- Horizontal Arrows (State Passing) -->
-  <line x1="1020" y1="205" x2="1065" y2="205" stroke="#10B981" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <text x="1040" y="196" font-size="8" fill="#047857" font-weight="bold" font-family="serif" text-anchor="middle">C<tspan dy="2" font-size="6">t-1</tspan></text>
+  <line x1="1030" y1="230" x2="1065" y2="230" stroke="#10B981" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="1040" y="221" font-size="8" fill="#047857" font-weight="bold" font-family="serif" text-anchor="middle">C<tspan dy="2" font-size="6">t-1</tspan></text>
 
-  <line x1="1120" y1="205" x2="1185" y2="205" stroke="#10B981" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <text x="1152" y="196" font-size="8" fill="#047857" font-weight="bold" font-family="serif" text-anchor="middle">S<tspan dy="2" font-size="6">t</tspan></text>
-  <text x="1152" y="225" font-size="6" fill="#059669" text-anchor="middle">(KV+SSM)</text>
+  <line x1="1120" y1="230" x2="1185" y2="230" stroke="#10B981" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="1152" y="221" font-size="8" fill="#047857" font-weight="bold" font-family="serif" text-anchor="middle">S<tspan dy="2" font-size="6">t</tspan></text>
+  <text x="1152" y="250" font-size="6" fill="#059669" text-anchor="middle">(KV+SSM)</text>
 
-  <line x1="1240" y1="205" x2="1305" y2="205" stroke="#10B981" stroke-width="1.5" marker-end="url(#arrow)"/>
-  <text x="1272" y="196" font-size="8" fill="#047857" font-weight="bold" font-family="serif" text-anchor="middle">S<tspan dy="2" font-size="6">t+1</tspan></text>
-  <text x="1272" y="225" font-size="6" fill="#059669" text-anchor="middle">(KV+SSM)</text>
+  <line x1="1240" y1="230" x2="1305" y2="230" stroke="#10B981" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="1272" y="221" font-size="8" fill="#047857" font-weight="bold" font-family="serif" text-anchor="middle">S<tspan dy="2" font-size="6">t+1</tspan></text>
+  <text x="1272" y="250" font-size="6" fill="#059669" text-anchor="middle">(KV+SSM)</text>
 
-  <line x1="1360" y1="205" x2="1395" y2="205" stroke="#10B981" stroke-width="1.5" stroke-dasharray="2 2" marker-end="url(#arrow)"/>
+  <line x1="1360" y1="230" x2="1390" y2="230" stroke="#10B981" stroke-width="1.5" stroke-dasharray="2 2" marker-end="url(#arrow)"/>
 
-  <text x="1210" y="310" font-size="11" fill="#334155" text-anchor="middle" font-weight="700">Unified Apple Metal Engine Target (Zero-Copy Target)</text>
+  <text x="1210" y="335" font-size="11" fill="#334155" text-anchor="middle" font-weight="700">Unified Apple Metal Engine Target (Zero-Copy Target)</text>
 
   <!-- Memory Fetch Vertical Arrows -->
-  <line x1="1095" y1="295" x2="1095" y2="235" stroke="#64748B" stroke-width="1.2" stroke-dasharray="3 2" marker-end="url(#arrow)"/>
-  <text x="1080" y="265" font-size="8" fill="#475569" text-anchor="middle">Fetch/Update</text>
+  <line x1="1095" y1="320" x2="1095" y2="260" stroke="#64748B" stroke-width="1.2" stroke-dasharray="3 2" marker-end="url(#arrow)"/>
+  <text x="1095" y="290" font-size="8" fill="#475569" text-anchor="middle">Fetch/Update</text>
 
-  <line x1="1215" y1="295" x2="1215" y2="235" stroke="#64748B" stroke-width="1.2" stroke-dasharray="3 2" marker-end="url(#arrow)"/>
-  <text x="1200" y="265" font-size="8" fill="#475569" text-anchor="middle">Fetch/Update</text>
+  <line x1="1215" y1="320" x2="1215" y2="260" stroke="#64748B" stroke-width="1.2" stroke-dasharray="3 2" marker-end="url(#arrow)"/>
+  <text x="1215" y="290" font-size="8" fill="#475569" text-anchor="middle">Fetch/Update</text>
 
-  <line x1="1335" y1="295" x2="1335" y2="235" stroke="#64748B" stroke-width="1.2" stroke-dasharray="3 2" marker-end="url(#arrow)"/>
-  <text x="1320" y="265" font-size="8" fill="#475569" text-anchor="middle">Fetch/Update</text>
+  <line x1="1335" y1="320" x2="1335" y2="260" stroke="#64748B" stroke-width="1.2" stroke-dasharray="3 2" marker-end="url(#arrow)"/>
+  <text x="1335" y="290" font-size="8" fill="#475569" text-anchor="middle">Fetch/Update</text>
 
   <!-- Extruded Architecture Operations -->
-  <g transform="translate(1030, 315)">
+  <defs>
+    <marker id="arrowXsGreen" markerUnits="userSpaceOnUse" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto">
+      <path d="M0,0 L5,2.5 L0,5 L1,2.5 Z" fill="#059669"/>
+    </marker>
+    <marker id="arrowXs" markerUnits="userSpaceOnUse" markerWidth="5" markerHeight="5" refX="4" refY="2.5" orient="auto">
+      <path d="M0,0 L5,2.5 L0,5 L1,2.5 Z" fill="#475569"/>
+    </marker>
+  </defs>
+  <g transform="translate(1030, 340)">
     <!-- Mamba SubCache Mechanics -->
-    <rect x="0" y="0" width="170" height="185" rx="3" fill="#ECFDF5" stroke="#10B981" stroke-width="1.5"/>
+    <rect x="0" y="0" width="170" height="192" rx="3" fill="#ECFDF5" stroke="#10B981" stroke-width="1.5"/>
     <text x="85" y="16" font-size="9" fill="#047857" text-anchor="middle" font-weight="700">Mamba Core Cache [O(1)]</text>
-    
+
     <text x="35" y="30" font-size="8" fill="#047857" font-family="serif" font-weight="bold" text-anchor="middle"><tspan font-style="italic">h</tspan><tspan dy="2" font-size="5">t-1</tspan><tspan dy="-2"> &#x2208; &#x211D;</tspan><tspan dy="-4" font-size="5">D&#x00D7;N</tspan></text>
     <rect x="20" y="35" width="30" height="30" fill="#A7F3D0" stroke="#059669" stroke-width="0.5"/>
     <line x1="30" y1="35" x2="30" y2="65" stroke="#059669" stroke-width="0.5"/>
@@ -123,9 +131,9 @@
     <line x1="20" y1="55" x2="50" y2="55" stroke="#059669" stroke-width="0.5"/>
 
     <circle cx="35" cy="80" r="6" fill="#D1FAE5" stroke="#059669"/>
-    <text x="35" y="83" font-size="9" fill="#047857" text-anchor="middle">×</text>
-    <path d="M 35 65 L 35 74" fill="none" stroke="#059669" marker-end="url(#arrow)"/>
-    <text x="27" y="83" font-size="8" fill="#047857" font-family="serif" text-anchor="end">Δ<tspan font-style="italic">A</tspan></text>
+    <text x="35" y="83" font-size="9" fill="#047857" text-anchor="middle">&#xd7;</text>
+    <path d="M 35 65 L 35 74" fill="none" stroke="#059669" stroke-width="1" marker-end="url(#arrowXsGreen)"/>
+    <text x="27" y="83" font-size="8" fill="#047857" font-family="serif" text-anchor="end">&#x394;<tspan font-style="italic">A</tspan></text>
 
     <!-- Bx_t Matrix -->
     <text x="135" y="30" font-size="8" fill="#059669" font-family="serif" font-weight="bold" text-anchor="middle">B<tspan font-style="italic" font-weight="normal">x</tspan><tspan dy="2" font-size="5" font-weight="normal">t</tspan><tspan dy="-2" font-weight="normal"> &#x2208; &#x211D;</tspan><tspan dy="-4" font-size="5" font-weight="normal">D&#x00D7;N</tspan></text>
@@ -138,8 +146,8 @@
     <!-- addition -->
     <circle cx="80" cy="80" r="6" fill="#D1FAE5" stroke="#059669"/>
     <text x="80" y="83" font-size="10" fill="#047857" text-anchor="middle">+</text>
-    <path d="M 41 80 L 74 80" fill="none" stroke="#059669" marker-end="url(#arrow)"/>
-    <path d="M 135 65 L 135 70 Q 135 80 125 80 L 86 80" fill="none" stroke="#059669" marker-end="url(#arrow)"/>
+    <path d="M 41 80 L 74 80" fill="none" stroke="#059669" stroke-width="1" marker-end="url(#arrowXsGreen)"/>
+    <path d="M 135 65 L 135 70 Q 135 80 125 80 L 86 80" fill="none" stroke="#059669" stroke-width="1" marker-end="url(#arrowXsGreen)"/>
 
     <!-- h_t -->
     <text x="101" y="112" font-size="8" fill="#047857" font-weight="bold" font-family="serif" text-anchor="middle"><tspan font-style="italic">h</tspan><tspan dy="2" font-size="5">t</tspan></text>
@@ -148,29 +156,31 @@
     <line x1="85" y1="100" x2="85" y2="130" stroke="#059669" stroke-width="0.5"/>
     <line x1="65" y1="110" x2="95" y2="110" stroke="#059669" stroke-width="0.5"/>
     <line x1="65" y1="120" x2="95" y2="120" stroke="#059669" stroke-width="0.5"/>
-    <path d="M 80 86 L 80 100" fill="none" stroke="#059669" marker-end="url(#arrow)"/>
+    <path d="M 80 86 L 80 100" fill="none" stroke="#059669" stroke-width="1" marker-end="url(#arrowXsGreen)"/>
 
-    <!-- Output branch -->
+    <!-- Output branch xC -->
     <circle cx="127" cy="115" r="6" fill="#D1FAE5" stroke="#059669"/>
-    <text x="127" y="118" font-size="9" fill="#047857" text-anchor="middle">×</text>
+    <text x="127" y="118" font-size="9" fill="#047857" text-anchor="middle">&#xd7;</text>
     <text x="135" y="118" font-size="8" fill="#047857" font-family="serif" font-weight="bold">C</text>
-    <path d="M 95 115 L 121 115" fill="none" stroke="#059669" marker-end="url(#arrow)"/>
-    
-    <text x="127" y="140" font-size="8" fill="#6D28D9" font-family="serif" font-weight="bold" text-anchor="middle"><tspan font-style="italic">o</tspan><tspan dy="2" font-size="5">t</tspan></text>
-    <rect x="115" y="145" width="24" height="8" fill="#EDE9FE" stroke="#7C3AED" stroke-width="0.5"/>
-    <line x1="123" y1="145" x2="123" y2="153" stroke="#7C3AED" stroke-width="0.5"/>
-    <line x1="131" y1="145" x2="131" y2="153" stroke="#7C3AED" stroke-width="0.5"/>
-    <path d="M 127 121 L 127 145" fill="none" stroke="#059669" marker-end="url(#arrow)"/>
+    <path d="M 95 115 L 121 115" fill="none" stroke="#059669" stroke-width="1" marker-end="url(#arrowXsGreen)"/>
 
-    <!-- Token -->
-    <text x="85" y="176" font-size="8" fill="#059669" font-style="italic" text-anchor="middle" font-weight="700">Memory fundamentally locked O(1)</text>
-    <circle cx="45" cy="155" r="4" fill="#F59E0B" />
-    <text x="45" y="165" font-size="8" fill="#78350F" font-weight="bold" font-family="serif" text-anchor="middle">Token <tspan font-style="italic">x</tspan><tspan dy="2" font-size="5">t</tspan></text>
-    <path d="M 45 151 L 45 145 Q 45 140 50 140 L 135 140 Q 145 140 145 130 L 145 65" stroke="#059669" stroke-width="1.0" fill="none" marker-end="url(#arrow)"/>
-    <text x="152" y="110" font-size="8" fill="#047857" font-family="serif" font-style="italic">W<tspan dy="2" font-size="5" font-style="normal">B</tspan></text>
+    <!-- o_t (moved down 5px vs original) -->
+    <text x="110" y="153" font-size="8" fill="#6D28D9" font-family="serif" font-weight="bold" text-anchor="middle"><tspan font-style="italic">o</tspan><tspan dy="2" font-size="5">t</tspan></text>
+    <rect x="115" y="148" width="24" height="8" fill="#EDE9FE" stroke="#7C3AED" stroke-width="0.5"/>
+    <line x1="123" y1="148" x2="123" y2="156" stroke="#7C3AED" stroke-width="0.5"/>
+    <line x1="131" y1="148" x2="131" y2="156" stroke="#7C3AED" stroke-width="0.5"/>
+    <path d="M 127 121 L 127 148" fill="none" stroke="#059669" stroke-width="1" marker-end="url(#arrowXsGreen)"/>
+
+    <!-- Token x_t (moved down, path rerouted along right edge) -->
+    <circle cx="42" cy="165" r="4" fill="#F59E0B"/>
+    <text x="42" y="174" font-size="8" fill="#78350F" font-weight="bold" font-family="serif" text-anchor="middle">Token <tspan font-style="italic">x</tspan><tspan dy="2" font-size="5">t</tspan></text>
+    <text x="85" y="186" font-size="8" fill="#059669" font-style="italic" text-anchor="middle" font-weight="700">Memory fundamentally locked O(1)</text>
+    <!-- Route right then up along right side, avoiding o_t area -->
+    <path d="M 46 165 L 157 165 Q 162 165 162 159 L 162 56 Q 162 50 156 50 L 150 50" stroke="#059669" stroke-width="1.0" fill="none" marker-end="url(#arrowXsGreen)"/>
+    <text x="149" y="105" font-size="8" fill="#047857" font-family="serif" font-style="italic">W<tspan dy="2" font-size="5" font-style="normal">B</tspan></text>
   </g>
 
-  <g transform="translate(1220, 315)">
+  <g transform="translate(1220, 345)">
     <!-- Transformer GQA SubCache Mechanics -->
     <rect x="0" y="0" width="170" height="185" rx="3" fill="#FEF3C7" stroke="#D97706" stroke-width="1.5"/>
     <text x="85" y="16" font-size="9" fill="#B45309" text-anchor="middle" font-weight="700">Transformer GQA [O(N)]</text>
@@ -182,21 +192,21 @@
     <line x1="39" y1="40" x2="39" y2="48" stroke="#DB2777" stroke-width="0.5"/>
 
     <!-- K^T Matrix -->
-    <text x="35" y="132" font-size="8" fill="#1D4ED8" font-weight="bold" font-family="serif" text-anchor="middle"><tspan font-style="italic">K</tspan><tspan dy="-4" font-size="5">T</tspan><tspan dy="4"> &#x2208; &#x211D;</tspan><tspan dy="-4" font-size="5">d&#x00D7;N</tspan></text>
-    <rect x="15" y="80" width="40" height="40" fill="#DBEAFE" stroke="#2563EB" stroke-width="0.5"/>
-    <rect x="45" y="80" width="10" height="40" fill="#93C5FD" stroke="#2563EB" stroke-width="1.0" />
-    <line x1="25" y1="80" x2="25" y2="120" stroke="#2563EB" stroke-width="0.5"/>
-    <line x1="35" y1="80" x2="35" y2="120" stroke="#2563EB" stroke-width="0.5"/>
-    <line x1="45" y1="80" x2="45" y2="120" stroke="#2563EB" stroke-width="0.5"/>
-    <line x1="15" y1="90" x2="55" y2="90" stroke="#2563EB" stroke-width="0.5"/>
-    <line x1="15" y1="100" x2="55" y2="100" stroke="#2563EB" stroke-width="0.5"/>
-    <line x1="15" y1="110" x2="55" y2="110" stroke="#2563EB" stroke-width="0.5"/>
+    <text x="67" y="144" font-size="8" fill="#1D4ED8" font-weight="bold" font-family="serif" text-anchor="middle"><tspan font-style="italic">K</tspan><tspan dy="-4" font-size="5">T</tspan><tspan dy="4"> &#x2208; &#x211D;</tspan><tspan dy="-4" font-size="5">d&#x00D7;N</tspan></text>
+    <rect x="30" y="80" width="40" height="40" fill="#DBEAFE" stroke="#2563EB" stroke-width="0.5"/>
+    <rect x="60" y="80" width="10" height="40" fill="#93C5FD" stroke="#2563EB" stroke-width="1.0" />
+    <line x1="40" y1="80" x2="40" y2="120" stroke="#2563EB" stroke-width="0.5"/>
+    <line x1="50" y1="80" x2="50" y2="120" stroke="#2563EB" stroke-width="0.5"/>
+    <line x1="60" y1="80" x2="60" y2="120" stroke="#2563EB" stroke-width="0.5"/>
+    <line x1="30" y1="90" x2="70" y2="90" stroke="#2563EB" stroke-width="0.5"/>
+    <line x1="30" y1="100" x2="70" y2="100" stroke="#2563EB" stroke-width="0.5"/>
+    <line x1="30" y1="110" x2="70" y2="110" stroke="#2563EB" stroke-width="0.5"/>
 
     <!-- Multiply -->
     <circle cx="65" cy="44" r="6" fill="#E2E8F0" stroke="#94A3B8"/>
     <text x="65" y="47" font-size="9" fill="#475569" text-anchor="middle">×</text>
-    <path d="M 47 44 L 59 44" fill="none" stroke="#64748B" marker-end="url(#arrow)"/>
-    <path d="M 55 95 L 65 95 Q 65 90 65 50" fill="none" stroke="#64748B" marker-end="url(#arrow)"/>
+    <path d="M 47 44 L 59 44" fill="none" stroke="#64748B" marker-end="url(#arrowXs)"/>
+    <path d="M 65 80 L 65 50" fill="none" stroke="#64748B" marker-end="url(#arrowXs)"/>
 
     <text x="105" y="32" font-size="7" fill="#4B5563" font-weight="bold" font-family="serif" text-anchor="middle">Softmax(<tspan font-style="italic">q</tspan><tspan dy="2" font-size="4">t</tspan><tspan dy="-2" font-style="italic">K</tspan><tspan dy="-3" font-size="4">T</tspan><tspan dy="3">)</tspan></text>
     <rect x="85" y="40" width="40" height="8" fill="#E2E8F0" stroke="#64748B" stroke-width="0.5"/>
@@ -205,9 +215,9 @@
     <line x1="101" y1="40" x2="101" y2="48" stroke="#64748B" stroke-width="0.5"/>
     <line x1="109" y1="40" x2="109" y2="48" stroke="#64748B" stroke-width="0.5"/>
     <line x1="117" y1="40" x2="117" y2="48" stroke="#64748B" stroke-width="0.5"/>
-    <path d="M 71 44 L 85 44" fill="none" stroke="#64748B" marker-end="url(#arrow)"/>
+    <path d="M 71 44 L 85 44" fill="none" stroke="#64748B" marker-end="url(#arrowXs)"/>
 
-    <text x="125" y="132" font-size="8" fill="#047857" font-weight="bold" font-family="serif" text-anchor="middle"><tspan font-style="italic">V</tspan><tspan dy="-2"> &#x2208; &#x211D;</tspan><tspan dy="-4" font-size="5">N&#x00D7;d</tspan></text>
+    <text x="107" y="152" font-size="8" fill="#047857" font-weight="bold" font-family="serif" text-anchor="middle"><tspan font-style="italic">V</tspan><tspan dy="-2"> &#x2208; &#x211D;</tspan><tspan dy="-4" font-size="5">N&#x00D7;d</tspan></text>
     <rect x="105" y="80" width="40" height="40" fill="#DCFCE7" stroke="#059669" stroke-width="0.5"/>
     <rect x="105" y="110" width="40" height="10" fill="#6EE7B7" stroke="#059669" stroke-width="1.0"/>
     <line x1="115" y1="80" x2="115" y2="120" stroke="#059669" stroke-width="0.5"/>
@@ -219,36 +229,37 @@
 
     <circle cx="140" cy="55" r="6" fill="#E2E8F0" stroke="#94A3B8"/>
     <text x="140" y="58" font-size="9" fill="#475569" text-anchor="middle">×</text>
-    <path d="M 125 44 L 140 44 L 140 49" fill="none" stroke="#64748B" marker-end="url(#arrow)"/>
-    <path d="M 125 80 L 140 80 Q 140 75 140 61" fill="none" stroke="#64748B" marker-end="url(#arrow)"/>
+    <path d="M 125 44 L 140 44 L 140 49" fill="none" stroke="#64748B" marker-end="url(#arrowXs)"/>
+    <path d="M 125 80 L 140 80 Q 140 75 140 61" fill="none" stroke="#64748B" marker-end="url(#arrowXs)"/>
 
     <text x="160" y="45" font-size="8" fill="#6D28D9" font-weight="bold" font-family="serif" text-anchor="middle"><tspan font-style="italic">o</tspan><tspan dy="2" font-size="5">t</tspan></text>
     <rect x="148" y="51" width="16" height="8" fill="#EDE9FE" stroke="#7C3AED" stroke-width="0.5"/>
     <line x1="156" y1="51" x2="156" y2="59" stroke="#7C3AED" stroke-width="0.5"/>
-    <path d="M 146 55 L 148 55" fill="none" stroke="#64748B" marker-end="url(#arrow)"/>
+    <path d="M 146 55 L 148 55" fill="none" stroke="#64748B" marker-end="url(#arrowXs)"/>
 
     <text x="85" y="176" font-size="8" fill="#DC2626" font-style="italic" text-anchor="middle" font-weight="700">Memory fundamentally expands O(N)</text>
     <circle cx="45" cy="155" r="4" fill="#F59E0B" />
     <text x="45" y="165" font-size="8" fill="#78350F" font-weight="bold" font-family="serif" text-anchor="middle">Token <tspan font-style="italic">x</tspan><tspan dy="2" font-size="5">t</tspan></text>
     
     <!-- Token projection routes carefully dodging grids -->
-    <path d="M 41 155 L 14 155 Q 9 155 9 145 L 9 55 Q 9 44 19 44 L 23 44" stroke="#DB2777" stroke-width="1.0" fill="none" marker-end="url(#arrow)"/>
-    <text x="14" y="100" font-size="8" fill="#BE185D" font-family="serif" font-style="italic">W<tspan dy="2" font-size="5" font-style="normal">q</tspan></text>
+    <path d="M 41 155 L 14 155 Q 9 155 9 145 L 9 55 Q 9 44 19 44 L 23 44" stroke="#DB2777" stroke-width="1.0" fill="none" marker-end="url(#arrowXs)"/>
+    <text x="12" y="100" font-size="8" fill="#BE185D" font-family="serif" font-style="italic">W<tspan dy="2" font-size="5" font-style="normal">q</tspan></text>
     
-    <path d="M 45 151 L 45 120" stroke="#2563EB" stroke-width="1.0" fill="none" marker-end="url(#arrow)"/>
-    <text x="48" y="135" font-size="8" fill="#2563EB" font-family="serif" font-style="italic">W<tspan dy="2" font-size="5" font-style="normal">k</tspan></text>
+    <path d="M 45 151 L 45 120" stroke="#2563EB" stroke-width="1.0" fill="none" marker-end="url(#arrowXs)"/>
+    <text x="32" y="135" font-size="8" fill="#2563EB" font-family="serif" font-style="italic">W<tspan dy="2" font-size="5" font-style="normal">k</tspan></text>
     
-    <path d="M 49 155 L 125 155 Q 130 155 130 145 L 130 120" stroke="#059669" stroke-width="1.0" fill="none" marker-end="url(#arrow)"/>
+    <path d="M 49 155 L 125 155 Q 130 155 130 145 L 130 120" stroke="#059669" stroke-width="1.0" fill="none" marker-end="url(#arrowXs)"/>
     <text x="133" y="140" font-size="8" fill="#059669" font-family="serif" font-style="italic">W<tspan dy="2" font-size="5" font-style="normal">v</tspan></text>
   </g>
 
   <!-- Output Engine Execution -->
-  <rect x="1020" y="555" width="380" height="50" rx="6" fill="#F0FDF4" stroke="#10B981" stroke-width="1.5" />
-  <text x="1210" y="575" font-size="11" fill="#065F46" text-anchor="middle" font-weight="700">Apple Unified Compute Engine</text>
-  <text x="1210" y="590" font-size="10" fill="#047857" text-anchor="middle">.npz Checkpoint + Stateful Core Iterators &#8594; JIT Target Acceleration</text>
+  <rect x="1020" y="560" width="380" height="50" rx="6" fill="#F0FDF4" stroke="#10B981" stroke-width="1.5" />
+  <text x="1210" y="580" font-size="11" fill="#065F46" text-anchor="middle" font-weight="700">Apple Unified Compute Engine</text>
+  <text x="1210" y="595" font-size="10" fill="#047857" text-anchor="middle">.npz Checkpoint + Stateful Core Iterators &#8594; JIT Target Acceleration</text>
+  </g><!-- end translate(0,-10) -->
 
   <!-- Phase label -->
-  <text x="1220" y="626" font-size="13" fill="#6B21A8"
+  <text x="1220" y="621" font-size="13" fill="#6B21A8"
         text-anchor="middle" font-weight="700">(c) Inference</text>
 </g>
 
