@@ -16,26 +16,31 @@
       crossorigin="anonymous"
     />
     <link rel="stylesheet" href="./presentation.css" />
+  
+    <style>
+      html, body { height: auto !important; overflow: visible !important; background: #fff !important; }
+      .stage { position: static !important; overflow: visible !important; min-height: 0 !important; }
+      .slide {
+        position: static !important;
+        inset: auto !important;
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: auto !important;
+        transform: none !important;
+        transition: none !important;
+        overflow: visible !important;
+        break-after: page;
+        page-break-after: always;
+        padding: 0.4in 0.5in 0.55in !important;
+      }
+      .slide:last-child { break-after: auto; page-break-after: auto; }
+      .slide.active .inner > * { animation: none !important; opacity: 1 !important; }
+      @page { size: A4 landscape; margin: 0.45in; }
+    </style>
   </head>
   <body>
-    <div class="shell">
-      <div class="topbar">
-        <span class="venue">ICLR 2026 · Conference Paper</span>
-        <span>TD-MoE: Tensor Decomposition for MoE Models</span>
-        <span
-          id="ctr-top"
-          style="
-            font-variant-numeric: tabular-nums;
-            min-width: 3rem;
-            text-align: right;
-          "
-          >01 / 23</span
-        >
-      </div>
-      <div class="top-progress" aria-hidden="true">
-        <div class="top-progress-fill" id="pgt"></div>
-      </div>
-      <div class="stage" id="stage">
+    <div class="stage" id="stage">
         <!-- ══ 01 封面 ══ -->
         <section class="slide active" data-idx="0">
           <div class="inner">
@@ -6430,28 +6435,5 @@
           </div>
         </section>
       </div>
-      <!-- end stage -->
-
-      <footer class="toolbar">
-        <button class="nb" id="bp">← 上一頁</button>
-        <button class="nb" id="bn">下一頁 →</button>
-        <button class="nb" id="bpa">自動播放</button>
-        <div class="pw"><div class="pb" id="pg"></div></div>
-        <div class="ct" id="ct">01 / 23</div>
-        <span class="hk"><kbd>←</kbd> <kbd>→</kbd> <kbd>Space</kbd></span>
-      </footer>
-    </div>
-
-    <script
-      defer
-      src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      defer
-      src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
-      crossorigin="anonymous"
-    ></script>
-    <script defer src="./presentation.js"></script>
   </body>
 </html>

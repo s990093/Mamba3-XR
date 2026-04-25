@@ -1,0 +1,28 @@
+\documentclass[varwidth=190mm,border=8pt]{standalone}
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage[T1]{fontenc}
+\usepackage[noend]{algpseudocode}
+\algrenewcommand\algorithmicrequire{\textbf{Input:}}
+\algrenewcommand\algorithmicensure{\textbf{Output:}}
+\algrenewcommand\algorithmicrequire{\textbf{Require:}}
+\algrenewcommand\algorithmicensure{\textbf{Ensure:}}
+\algrenewcommand\algorithmicreturn{\textbf{return}}
+\begin{document}
+\begin{minipage}{180mm}
+\small
+\noindent\textbf{Procedure 3} Router Temperature Annealing\par
+\vspace{2pt}\hrule\vspace{4pt}
+\begin{algorithmic}[1]
+\Require current step $s$, total steps $S_{\max}$, warmup steps $W$, $T_{\mathrm{start}}$, $T_{\mathrm{end}}$
+\Ensure $T(s)$
+\If{$s < W$}
+  \State \Return $T_{\mathrm{start}}$
+\Else
+  \State $p \gets \dfrac{s - W}{S_{\max} - W}$
+  \State $T(s) \gets T_{\mathrm{end}} + \dfrac{1}{2}(T_{\mathrm{start}} - T_{\mathrm{end}})\bigl(1 + \cos(\pi p)\bigr)$
+  \State \Return $T(s)$
+\EndIf
+\end{algorithmic}
+\vspace{4pt}\hrule
+\end{minipage}
+\end{document}

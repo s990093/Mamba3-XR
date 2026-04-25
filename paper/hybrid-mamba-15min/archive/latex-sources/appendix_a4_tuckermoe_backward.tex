@@ -1,0 +1,34 @@
+\documentclass[varwidth=190mm,border=8pt]{standalone}
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage[T1]{fontenc}
+\usepackage[noend]{algpseudocode}
+\algrenewcommand\algorithmicrequire{\textbf{Input:}}
+\algrenewcommand\algorithmicensure{\textbf{Output:}}
+\algrenewcommand\algorithmicrequire{\textbf{Require:}}
+\algrenewcommand\algorithmicensure{\textbf{Ensure:}}
+\algrenewcommand\algorithmicreturn{\textbf{return}}
+\begin{document}
+\begin{minipage}{180mm}
+\small
+\noindent\textbf{Procedure 4} TuckerMoE Backward Pass\par
+\vspace{2pt}\hrule\vspace{4pt}
+\begin{algorithmic}[1]
+\Require upstream gradient $\delta = \partial \mathcal{L}/\partial y$, $X_{\mathrm{shared}}$, $G_{\mathrm{exp}}$, selected indices $I$, routing weights $P$
+\Statex \hspace{\algorithmicindent} shared factors $U_{\mathrm{in}}, U_{\mathrm{exp}}, \mathcal{G}, U_{\mathrm{out}}$
+\Ensure $\partial \mathcal{L}/\partial x$, $\partial \mathcal{L}/\partial U_{\mathrm{in}}$, $\partial \mathcal{L}/\partial U_{\mathrm{exp}}$, $\partial \mathcal{L}/\partial \mathcal{G}$, $\partial \mathcal{L}/\partial U_{\mathrm{out}}$, $\partial \mathcal{L}/\partial P$
+\State $\partial \mathcal{L}/\partial X_{\mathrm{shared}} \gets 0$, $\partial \mathcal{L}/\partial G_{\mathrm{exp}} \gets 0$, $\partial \mathcal{L}/\partial U_{\mathrm{out}} \gets 0$
+\For{$k \gets 1$ to top-$k$}
+  \State $e \gets I[:, k]$
+  \State $\Delta_k \gets P[:, k] \odot \delta$
+  \State $\partial \mathcal{L}/\partial X_{\mathrm{shared}} \gets \partial \mathcal{L}/\partial X_{\mathrm{shared}} + \Delta_k G_{\mathrm{exp}}[e]^\top$
+  \State $\partial \mathcal{L}/\partial P[:, k] \gets \langle \delta, X_{\mathrm{shared}} G_{\mathrm{exp}}[e] U_{\mathrm{out}} \rangle$
+  \State $\partial \mathcal{L}/\partial G_{\mathrm{exp}}[e] \gets \partial \mathcal{L}/\partial G_{\mathrm{exp}}[e] + X_{\mathrm{shared}}^\top(\Delta_k U_{\mathrm{out}}^\top)$
+  \State $\partial \mathcal{L}/\partial U_{\mathrm{out}} \gets \partial \mathcal{L}/\partial U_{\mathrm{out}} + (X_{\mathrm{shared}} G_{\mathrm{exp}}[e])^\top \Delta_k$
+\EndFor
+\State $(\partial \mathcal{L}/\partial U_{\mathrm{exp}},\, \partial \mathcal{L}/\partial \mathcal{G}) \gets \operatorname{Mode1Backward}(\partial \mathcal{L}/\partial G_{\mathrm{exp}}, U_{\mathrm{exp}}, \mathcal{G})$
+\State $(\partial \mathcal{L}/\partial x,\, \partial \mathcal{L}/\partial U_{\mathrm{in}}) \gets \operatorname{BackpropSharedProjection}(X_{\mathrm{shared}}, \partial \mathcal{L}/\partial X_{\mathrm{shared}})$
+\State \Return all gradients
+\end{algorithmic}
+\vspace{4pt}\hrule
+\end{minipage}
+\end{document}

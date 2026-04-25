@@ -947,6 +947,7 @@ def train(
     # ── TuckerMoE
     KMOE_NUM_EXPERTS=8, KMOE_TOP_K=2,
     KMOE_R1=4, KMOE_R2=1024, KMOE_R3=256, FFN_EXPAND=6,
+    USE_KMOE=True,
     # ── 資料集與路徑
     DATA_PATH="data/train.bin",
     OUTPUT_DIR="output/",
@@ -979,7 +980,7 @@ def train(
 
     config = Mamba3Config(
         d_model=D_MODEL, d_state=D_STATE, d_head=D_HEAD, expand=EXPAND,
-        num_layers=NUM_LAYERS, use_parallel_scan=True, chunk_size=CHUNK_SIZE, use_kmoe=True,
+        num_layers=NUM_LAYERS, use_parallel_scan=True, chunk_size=CHUNK_SIZE, use_kmoe=USE_KMOE,
         kmoe_num_experts=KMOE_NUM_EXPERTS, kmoe_top_k=KMOE_TOP_K,
         kmoe_r1=KMOE_R1, kmoe_r2=KMOE_R2, kmoe_r3=KMOE_R3,
         ffn_expand=FFN_EXPAND, mimo_rank=MIMO_RANK, num_kv_heads=NUM_KV_HEADS,
@@ -1487,7 +1488,7 @@ if __name__ == "__main__":
 
     WARMUP = 400   # 4%
     STEPS                    = 60000 # 總訓練 steps
-    CHECKPOINT_EVERY         = 100   # 每 N steps 存一次
+    CHECKPOINT_EVERY         = 500   # 每 N steps 存一次
 
     # ════════════════════════════════════════════════
     # 【E】Router 退火設定
@@ -1511,7 +1512,7 @@ if __name__ == "__main__":
     # ════════════════════════════════════════════════
     # 【H】診斷設定
     # ════════════════════════════════════════════════
-    GRAD_CHECK_INTERVAL = 30      # 每 N steps 印出梯度診斷
+    GRAD_CHECK_INTERVAL = 100      # 每 N steps 印出梯度診斷
     SHOW_ALL_PROBLEM_GRADS = False
 
     # ── 啟動訓練 ────────────────────────────────────
@@ -1521,6 +1522,7 @@ if __name__ == "__main__":
         MIMO_RANK=MIMO_RANK, NUM_KV_HEADS=NUM_KV_HEADS, CHUNK_SIZE=CHUNK_SIZE,
         KMOE_NUM_EXPERTS=KMOE_NUM_EXPERTS, KMOE_TOP_K=KMOE_TOP_K,
         KMOE_R1=KMOE_R1, KMOE_R2=KMOE_R2, KMOE_R3=KMOE_R3, FFN_EXPAND=FFN_EXPAND,
+        USE_KMOE=True,
         DATA_PATH=DATA_PATH, OUTPUT_DIR=OUTPUT_DIR,
         LOG_FILE=LOG_FILE, CHECKPOINT_SAVE_PATH=CHECKPOINT_SAVE_PATH,
         PRETRAINED_EMBED_PATH=PRETRAINED_EMBED_PATH, VOCAB_SIZE=VOCAB_SIZE,

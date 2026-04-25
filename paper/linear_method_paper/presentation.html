@@ -1,0 +1,4161 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>From O(N²) to Linear · 學術簡報</title>
+    <meta
+      name="description"
+      content="從 Linear Attention 看序列生成模型的演化：為 SSM 與 GDN 鋪路"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;0,700;1,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css"
+      crossorigin="anonymous"
+    />
+    <link rel="stylesheet" href="./presentation.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <!-- ── Top Bar ── -->
+      <div class="topbar">
+        <span class="venue">學術報告 · Linear Attention</span>
+        <span>From O(N²) to Linear</span>
+        <span
+          id="ctr-top"
+          style="
+            font-variant-numeric: tabular-nums;
+            min-width: 3rem;
+            text-align: right;
+          "
+          >01 / 30</span
+        >
+      </div>
+      <div class="top-progress" aria-hidden="true">
+        <div class="top-progress-fill" id="pgt"></div>
+      </div>
+
+      <!-- ═══════════════════════════════════════════ -->
+      <!-- ██  STAGE: 30 SLIDES                     ██ -->
+      <!-- ═══════════════════════════════════════════ -->
+      <div class="stage" id="stage">
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 01 — Title Page
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide active" data-idx="0">
+          <div class="inner">
+            <div class="cover-wrap">
+              <div style="margin-bottom: 0.8rem">
+                <span class="tag">ICML 2020</span
+                ><span class="tag teal">Linear Attention</span
+                ><span class="tag green">Sequence Modeling</span>
+              </div>
+              <h1 class="t1">
+                From \(O(N^2)\) to Linear:<br />The Mathematical Bridge from
+                Transformers to Modern RNNs
+              </h1>
+              <p class="lead" style="max-width: 42rem; margin-top: 0.6rem">
+                以《Transformers are RNNs》為核心，解密 SSM 與 GDN 的起源<br />
+                <span
+                  style="
+                    font-size: 0.92rem;
+                    font-style: italic;
+                    color: var(--ink3);
+                  "
+                >
+                  從 Linear Attention 看序列生成模型的演化：為 SSM 與 GDN 鋪路
+                </span>
+              </p>
+
+              <!-- Evolution mini-timeline -->
+              <div style="margin-top: 1.5rem">
+                <div class="pipe" style="justify-content: center">
+                  <div
+                    class="pipe-s"
+                    style="border-color: var(--red); color: var(--red)"
+                  >
+                    Transformer<br /><span
+                      style="font-size: 0.6rem; opacity: 0.7"
+                      >2017</span
+                    >
+                  </div>
+                  <span class="pa">→</span>
+                  <div class="pipe-s hi">
+                    Linear Attention<br /><span
+                      style="font-size: 0.6rem; opacity: 0.8"
+                      >2020 ★</span
+                    >
+                  </div>
+                  <span class="pa">→</span>
+                  <div class="pipe-s">
+                    RetNet<br /><span style="font-size: 0.6rem; opacity: 0.7"
+                      >2023</span
+                    >
+                  </div>
+                  <span class="pa">→</span>
+                  <div
+                    class="pipe-s"
+                    style="border-color: var(--teal); color: var(--teal)"
+                  >
+                    Mamba / SSM<br /><span
+                      style="font-size: 0.6rem; opacity: 0.7"
+                      >2023</span
+                    >
+                  </div>
+                  <span class="pa">→</span>
+                  <div
+                    class="pipe-s"
+                    style="border-color: var(--purple); color: var(--purple)"
+                  >
+                    GDN<br /><span style="font-size: 0.6rem; opacity: 0.7"
+                      >2024+</span
+                    >
+                  </div>
+                </div>
+              </div>
+
+              <div class="cm">
+                <span style="color: var(--ink2)">賴泓瑋</span><br />
+                <span style="display: block; margin-top: 0.3rem"
+                  >核心文獻：<a href="#" style="color: var(--blue)"
+                    >Katharopoulos et al., ICML 2020</a
+                  >
+                  —
+                  <em
+                    >Transformers are RNNs: Fast Autoregressive Transformers
+                    with Linear Attention</em
+                  ></span
+                >
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 02 — Outline
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="1">
+          <div class="inner outline-page">
+            <header class="outline-head">
+              <h2 class="t2">簡報大綱（Outline）</h2>
+              <div class="outline-subline" aria-hidden="true"></div>
+              <div class="outline-deck">
+                <p class="outline-deck-main">
+                  主線：<strong>破題與痛點</strong>
+                  <span style="color: var(--ink3); margin: 0 0.3rem">→</span>
+                  <strong>Linear Attention 數學推演</strong>
+                  <span style="color: var(--ink3); margin: 0 0.3rem">→</span>
+                  <strong>Transformers are RNNs</strong>
+                  <span style="color: var(--ink3); margin: 0 0.3rem">→</span>
+                  <strong>實驗證明</strong>
+                  <span style="color: var(--ink3); margin: 0 0.3rem">→</span>
+                  <strong>啟發與未來</strong>
+                </p>
+              </div>
+            </header>
+
+            <!-- Rail SVG -->
+            <svg
+              class="outline-rail"
+              viewBox="0 0 900 64"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden="true"
+              style="
+                max-width: 56rem;
+                height: 64px;
+                margin: 0 auto 0.85rem;
+                display: block;
+              "
+            >
+              <defs>
+                <linearGradient id="oRG" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#1E3A8A" />
+                  <stop offset="25%" stop-color="#0D9488" />
+                  <stop offset="50%" stop-color="#059669" />
+                  <stop offset="75%" stop-color="#D97706" />
+                  <stop offset="100%" stop-color="#7C3AED" />
+                </linearGradient>
+              </defs>
+              <line
+                x1="90"
+                y1="28"
+                x2="810"
+                y2="28"
+                stroke="url(#oRG)"
+                stroke-width="3.5"
+                stroke-linecap="round"
+                opacity="0.35"
+              />
+              <circle
+                cx="90"
+                cy="28"
+                r="10"
+                fill="#1E3A8A"
+                stroke="#fff"
+                stroke-width="2.5"
+              />
+              <circle
+                cx="270"
+                cy="28"
+                r="10"
+                fill="#0D9488"
+                stroke="#fff"
+                stroke-width="2.5"
+              />
+              <circle
+                cx="450"
+                cy="28"
+                r="10"
+                fill="#059669"
+                stroke="#fff"
+                stroke-width="2.5"
+              />
+              <circle
+                cx="630"
+                cy="28"
+                r="10"
+                fill="#D97706"
+                stroke="#fff"
+                stroke-width="2.5"
+              />
+              <circle
+                cx="810"
+                cy="28"
+                r="10"
+                fill="#7C3AED"
+                stroke="#fff"
+                stroke-width="2.5"
+              />
+              <text
+                x="90"
+                y="54"
+                text-anchor="middle"
+                font-size="12"
+                fill="#4b5563"
+                font-family="Inter,sans-serif"
+                font-weight="600"
+              >
+                破題
+              </text>
+              <text
+                x="270"
+                y="54"
+                text-anchor="middle"
+                font-size="12"
+                fill="#4b5563"
+                font-family="Inter,sans-serif"
+                font-weight="600"
+              >
+                推演
+              </text>
+              <text
+                x="450"
+                y="54"
+                text-anchor="middle"
+                font-size="12"
+                fill="#4b5563"
+                font-family="Inter,sans-serif"
+                font-weight="600"
+              >
+                RNN
+              </text>
+              <text
+                x="630"
+                y="54"
+                text-anchor="middle"
+                font-size="12"
+                fill="#4b5563"
+                font-family="Inter,sans-serif"
+                font-weight="600"
+              >
+                實驗
+              </text>
+              <text
+                x="810"
+                y="54"
+                text-anchor="middle"
+                font-size="12"
+                fill="#4b5563"
+                font-family="Inter,sans-serif"
+                font-weight="600"
+              >
+                未來
+              </text>
+            </svg>
+
+            <div
+              class="outline-grid"
+              style="grid-template-columns: repeat(5, 1fr)"
+            >
+              <article class="outline-card oc-a" data-oc="1">
+                <span class="oc-badge" style="margin: 0 0 0.5rem">Part 1</span>
+                <h3 class="t3">破題與痛點</h3>
+                <ol class="n">
+                  <li>Softmax Attention 瓶頸</li>
+                  <li>FlashAttention 的極限</li>
+                  <li>KV Cache 問題</li>
+                  <li>核心提問</li>
+                </ol>
+              </article>
+              <article class="outline-card oc-b" data-oc="2">
+                <span class="oc-badge" style="margin: 0 0 0.5rem">Part 2</span>
+                <h3 class="t3">核心解密</h3>
+                <ol class="n" start="5">
+                  <li>Kernel Trick</li>
+                  <li>結合律魔法</li>
+                  <li>O(N) 達成</li>
+                </ol>
+              </article>
+              <article class="outline-card oc-c" data-oc="3">
+                <span class="oc-badge" style="margin: 0 0 0.5rem">Part 3</span>
+                <h3 class="t3">RNN 誕生</h3>
+                <ol class="n" start="8">
+                  <li>隱藏狀態定義</li>
+                  <li>遞迴更新公式</li>
+                  <li>推論優勢</li>
+                </ol>
+              </article>
+              <article class="outline-card oc-d" data-oc="4">
+                <span class="oc-badge" style="margin: 0 0 0.5rem">Part 4</span>
+                <h3 class="t3">實驗證明</h3>
+                <ol class="n" start="11">
+                  <li>記憶體與速度</li>
+                  <li>PPL 對比</li>
+                  <li>效能分析</li>
+                </ol>
+              </article>
+              <article class="outline-card oc-e" data-oc="5">
+                <span class="oc-badge" style="margin: 0 0 0.5rem">Part 5</span>
+                <h3 class="t3">啟發與未來</h3>
+                <ol class="n" start="14">
+                  <li>RetNet + Mamba-2/SSD</li>
+                  <li>Delta Rule + GDN</li>
+                  <li>Q&A</li>
+                </ol>
+              </article>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 03 — Papers Reference
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="2">
+          <div class="inner">
+            <h2 class="t2">本次報告涵蓋文獻 (Papers Covered)</h2>
+            <p class="lead">
+              以 2020 年的 <strong>Linear Attention</strong> 為核心
+              (80%)，串聯前後多篇重要研究 (20%)，勾勒完整演化史。
+            </p>
+
+            <div
+              class="box accent"
+              style="margin-bottom: 1rem; border-color: var(--blue)"
+            >
+              <div
+                style="
+                  font-weight: 700;
+                  color: var(--blue);
+                  font-size: 1.1rem;
+                  margin-bottom: 0.4rem;
+                "
+              >
+                🎯 核心主力 (本場報告主角)
+              </div>
+              <ul class="b" style="margin: 0; font-size: 0.95rem">
+                <li>
+                  <strong><em>Transformers are RNNs</em></strong>
+                  <em style="color: var(--ink3)"
+                    >(Katharopoulos et al., 2020)</em
+                  ><br />
+                  <span style="color: var(--ink2)"
+                    >👉 透過 Kernel Trick 與矩陣結合律，在數學上證明 Attention
+                    可以等價於 RNN 模型，達到推論 \(O(1)\) 複雜度。</span
+                  >
+                </li>
+              </ul>
+            </div>
+
+            <div class="cols" style="gap: 1rem">
+              <div
+                class="box"
+                style="
+                  border-width: 1px 1px 1px 4px;
+                  border-left-color: var(--red);
+                "
+              >
+                <div
+                  style="
+                    font-weight: 700;
+                    color: var(--red);
+                    margin-bottom: 0.4rem;
+                  "
+                >
+                  ⏳ 前傳：Baseline & Bottleneck
+                </div>
+                <ul
+                  class="b"
+                  style="font-size: 0.8rem; margin: 0; padding-left: 1.2rem"
+                >
+                  <li style="margin-bottom: 0.4rem">
+                    <strong><em>Attention Is All You Need</em></strong>
+                    <em style="color: var(--ink3)">(2017)</em><br /><span
+                      style="color: var(--ink2)"
+                      >👉 奠定 \(O(N^2)\) 自注意力機制基礎。</span
+                    >
+                  </li>
+                  <li>
+                    <strong><em>FlashAttention</em></strong>
+                    <em style="color: var(--ink3)">(2022)</em><br /><span
+                      style="color: var(--ink2)"
+                      >👉 運用硬體 IO
+                      優化極致加速，但仍無法改變二次方的數學本質。</span
+                    >
+                  </li>
+                </ul>
+              </div>
+
+              <div
+                class="box"
+                style="
+                  border-width: 1px 1px 1px 4px;
+                  border-left-color: var(--green);
+                "
+              >
+                <div
+                  style="
+                    font-weight: 700;
+                    color: var(--green);
+                    margin-bottom: 0.4rem;
+                  "
+                >
+                  🚀 演進：The Modern Era
+                </div>
+                <ul
+                  class="b"
+                  style="font-size: 0.8rem; margin: 0; padding-left: 1.2rem"
+                >
+                  <li style="margin-bottom: 0.4rem">
+                    <strong><em>RetNet</em></strong> 與
+                    <strong><em>Mamba-1</em></strong>
+                    <em style="color: var(--ink3)">(2023)</em><br /><span
+                      style="color: var(--ink2)"
+                      >👉 加入記憶衰減與輸入依賴的選擇性狀態 (Selective
+                      Scan)。</span
+                    >
+                  </li>
+                  <li>
+                    <strong><em>Mamba-2 / SSD</em></strong>
+                    <em style="color: var(--ink3)">(2024)</em><br /><span
+                      style="color: var(--ink2)"
+                      >👉 跨越理論障礙，證明 SSM 狀態與 Linear Attention
+                      神奇等價。</span
+                    >
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div
+              class="box"
+              style="
+                margin-top: 1rem;
+                border-width: 1px 1px 1px 4px;
+                border-left-color: var(--purple);
+              "
+            >
+              <div
+                style="
+                  font-weight: 700;
+                  color: var(--purple);
+                  margin-bottom: 0.4rem;
+                "
+              >
+                🔮 終局：Optimization as Memory Update
+              </div>
+              <ul
+                class="b"
+                style="font-size: 0.8rem; margin: 0; padding-left: 1.2rem"
+              >
+                <li style="margin-bottom: 0.4rem">
+                  <strong><em>Gated Delta Networks</em></strong>
+                  <em style="color: var(--ink3)">(2024)</em><br /><span
+                    style="color: var(--ink2)"
+                    >👉
+                    將狀態更新顛覆為「對模型權重的即時線上梯度下降微調」。</span
+                  >
+                </li>
+                <li>
+                  <strong><em>Test-Time Regression (TTR)</em></strong>
+                  <em style="color: var(--ink3)">(Stanford, 2025)</em
+                  ><br /><span style="color: var(--ink2)"
+                    >👉
+                    提出大一統框架，將上述所有架構完美收斂為推論時的迴歸優化問題。</span
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 04 — The Evolution Map
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="3">
+          <div class="inner">
+            <h2 class="t2">演化地圖 (The Evolution Map)</h2>
+            <p class="lead">
+              今天這篇論文是打破傳統 Attention
+              運算瓶頸的<strong>「萬物起源」</strong>。
+            </p>
+
+            <!-- SVG Timeline -->
+            <svg
+              viewBox="0 0 960 340"
+              width="100%"
+              style="
+                font-family: var(--sans);
+                max-width: 58rem;
+                display: block;
+                margin: 1rem auto;
+              "
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <!-- Axis Gradient matching the evolution -->
+                <linearGradient id="axisG" x1="0%" x2="100%" y1="0%" y2="0%">
+                  <stop offset="5%" stop-color="#DC2626" />
+                  <stop offset="25%" stop-color="#1E3A8A" />
+                  <stop offset="40%" stop-color="#EA580C" />
+                  <stop offset="55%" stop-color="#0D9488" />
+                  <stop offset="70%" stop-color="#059669" />
+                  <stop offset="90%" stop-color="#7C3AED" />
+                </linearGradient>
+                <filter id="glow">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+
+              <!-- Main Axis Line -->
+              <line
+                x1="40"
+                y1="170"
+                x2="915"
+                y2="170"
+                stroke="url(#axisG)"
+                stroke-width="5"
+                stroke-linecap="round"
+                opacity="0.35"
+              />
+              <!-- Axis Arrow -->
+              <path
+                d="M 910 160 L 930 170 L 910 180 Z"
+                fill="#7C3AED"
+                opacity="0.8"
+              />
+
+              <!-- ════════════ NODE 1: 2017 Transformer (Above) ════════════ -->
+              <g>
+                <!-- Stem & Tick -->
+                <line
+                  x1="100"
+                  y1="170"
+                  x2="100"
+                  y2="120"
+                  stroke="#DC2626"
+                  stroke-width="2"
+                  stroke-dasharray="4 2"
+                />
+                <circle cx="100" cy="170" r="5" fill="#DC2626" />
+                <!-- Year -->
+                <text
+                  x="100"
+                  y="195"
+                  text-anchor="middle"
+                  font-size="14"
+                  font-weight="700"
+                  fill="#DC2626"
+                >
+                  2017
+                </text>
+                <!-- Dot & Icon -->
+                <circle
+                  cx="100"
+                  cy="120"
+                  r="16"
+                  fill="#FEE2E2"
+                  stroke="#DC2626"
+                  stroke-width="2.5"
+                />
+                <text
+                  x="100"
+                  y="124"
+                  text-anchor="middle"
+                  font-size="11"
+                  fill="#DC2626"
+                  font-weight="700"
+                >
+                  T
+                </text>
+                <!-- Titles -->
+                <text
+                  x="100"
+                  y="90"
+                  text-anchor="middle"
+                  font-size="14"
+                  fill="#1A202C"
+                  font-weight="700"
+                >
+                  Transformer
+                </text>
+                <rect
+                  x="55"
+                  y="60"
+                  width="90"
+                  height="20"
+                  rx="4"
+                  fill="#FEE2E2"
+                  stroke="#DC2626"
+                  stroke-width="1"
+                />
+                <text
+                  x="100"
+                  y="74"
+                  text-anchor="middle"
+                  font-size="10"
+                  fill="#DC2626"
+                  font-weight="700"
+                >
+                  \(O(N^2)\) Baseline
+                </text>
+              </g>
+
+              <!-- ════════════ NODE 2: 2020 Linear Attention (Below - HIGHLIGHT) ════════════ -->
+              <g>
+                <!-- Stem & Tick -->
+                <line
+                  x1="250"
+                  y1="170"
+                  x2="250"
+                  y2="230"
+                  stroke="#1E3A8A"
+                  stroke-width="3.5"
+                />
+                <circle
+                  cx="250"
+                  cy="170"
+                  r="7"
+                  fill="#1E3A8A"
+                  filter="url(#glow)"
+                />
+                <!-- Year -->
+                <text
+                  x="250"
+                  y="152"
+                  text-anchor="middle"
+                  font-size="15"
+                  font-weight="700"
+                  fill="#1E3A8A"
+                >
+                  2020
+                </text>
+                <!-- Dot & Icon -->
+                <circle
+                  cx="250"
+                  cy="230"
+                  r="22"
+                  fill="#1E3A8A"
+                  stroke="#3B82F6"
+                  stroke-width="3"
+                  filter="url(#glow)"
+                />
+                <text
+                  x="250"
+                  y="235"
+                  text-anchor="middle"
+                  font-size="13"
+                  fill="#fff"
+                  font-weight="700"
+                >
+                  LA
+                </text>
+                <!-- Titles -->
+                <text
+                  x="250"
+                  y="275"
+                  text-anchor="middle"
+                  font-size="15"
+                  fill="#1E3A8A"
+                  font-weight="700"
+                >
+                  Linear Attention
+                </text>
+                <rect
+                  x="180"
+                  y="285"
+                  width="140"
+                  height="24"
+                  rx="4"
+                  fill="#DBEAFE"
+                  stroke="#1E3A8A"
+                  stroke-width="1.5"
+                />
+                <text
+                  x="250"
+                  y="301"
+                  text-anchor="middle"
+                  font-size="11"
+                  fill="#1E3A8A"
+                  font-weight="700"
+                >
+                  萬物起源 (O(N) 突破) ★
+                </text>
+              </g>
+
+              <!-- ════════════ NODE 3: 2022 FlashAttention (Above) ════════════ -->
+              <g>
+                <!-- Stem & Tick -->
+                <line
+                  x1="400"
+                  y1="170"
+                  x2="400"
+                  y2="120"
+                  stroke="#EA580C"
+                  stroke-width="2"
+                  stroke-dasharray="4 2"
+                />
+                <circle cx="400" cy="170" r="5" fill="#EA580C" />
+                <!-- Year -->
+                <text
+                  x="400"
+                  y="195"
+                  text-anchor="middle"
+                  font-size="14"
+                  font-weight="700"
+                  fill="#EA580C"
+                >
+                  2022
+                </text>
+                <!-- Dot & Icon -->
+                <circle
+                  cx="400"
+                  cy="120"
+                  r="16"
+                  fill="#FFEDD5"
+                  stroke="#EA580C"
+                  stroke-width="2.5"
+                />
+                <text
+                  x="400"
+                  y="124"
+                  text-anchor="middle"
+                  font-size="11"
+                  fill="#EA580C"
+                  font-weight="700"
+                >
+                  FA
+                </text>
+                <!-- Titles -->
+                <text
+                  x="400"
+                  y="90"
+                  text-anchor="middle"
+                  font-size="14"
+                  fill="#1A202C"
+                  font-weight="700"
+                >
+                  FlashAttention
+                </text>
+                <rect
+                  x="350"
+                  y="60"
+                  width="100"
+                  height="20"
+                  rx="4"
+                  fill="#FFEDD5"
+                  stroke="#EA580C"
+                  stroke-width="1"
+                />
+                <text
+                  x="400"
+                  y="74"
+                  text-anchor="middle"
+                  font-size="10"
+                  fill="#EA580C"
+                  font-weight="700"
+                >
+                  硬體 IO 極致優化
+                </text>
+              </g>
+
+              <!-- ════════════ NODE 4: 2023 RetNet/Mamba (Below) ════════════ -->
+              <g>
+                <!-- Stem & Tick -->
+                <line
+                  x1="550"
+                  y1="170"
+                  x2="550"
+                  y2="230"
+                  stroke="#0D9488"
+                  stroke-width="2"
+                  stroke-dasharray="4 2"
+                />
+                <circle cx="550" cy="170" r="5" fill="#0D9488" />
+                <!-- Year -->
+                <text
+                  x="550"
+                  y="152"
+                  text-anchor="middle"
+                  font-size="14"
+                  font-weight="700"
+                  fill="#0D9488"
+                >
+                  2023
+                </text>
+                <!-- Dot & Icon -->
+                <circle
+                  cx="550"
+                  cy="230"
+                  r="16"
+                  fill="#CCFBF1"
+                  stroke="#0D9488"
+                  stroke-width="2.5"
+                />
+                <text
+                  x="550"
+                  y="234"
+                  text-anchor="middle"
+                  font-size="11"
+                  fill="#0D9488"
+                  font-weight="700"
+                >
+                  R/M
+                </text>
+                <!-- Titles -->
+                <text
+                  x="550"
+                  y="270"
+                  text-anchor="middle"
+                  font-size="14"
+                  fill="#1A202C"
+                  font-weight="700"
+                >
+                  RetNet / Mamba
+                </text>
+                <rect
+                  x="495"
+                  y="280"
+                  width="110"
+                  height="20"
+                  rx="4"
+                  fill="#CCFBF1"
+                  stroke="#0D9488"
+                  stroke-width="1"
+                />
+                <text
+                  x="550"
+                  y="294"
+                  text-anchor="middle"
+                  font-size="10"
+                  fill="#0D9488"
+                  font-weight="700"
+                >
+                  衰減與選擇性掃描
+                </text>
+              </g>
+
+              <!-- ════════════ NODE 5: 2024 GDN/Mamba-2 (Above) ════════════ -->
+              <g>
+                <!-- Stem & Tick -->
+                <line
+                  x1="700"
+                  y1="170"
+                  x2="700"
+                  y2="120"
+                  stroke="#059669"
+                  stroke-width="2"
+                  stroke-dasharray="4 2"
+                />
+                <circle cx="700" cy="170" r="5" fill="#059669" />
+                <!-- Year -->
+                <text
+                  x="700"
+                  y="195"
+                  text-anchor="middle"
+                  font-size="14"
+                  font-weight="700"
+                  fill="#059669"
+                >
+                  2024
+                </text>
+                <!-- Dot & Icon -->
+                <circle
+                  cx="700"
+                  cy="120"
+                  r="16"
+                  fill="#D1FAE5"
+                  stroke="#059669"
+                  stroke-width="2.5"
+                />
+                <text
+                  x="700"
+                  y="124"
+                  text-anchor="middle"
+                  font-size="11"
+                  fill="#059669"
+                  font-weight="700"
+                >
+                  Δ
+                </text>
+                <!-- Titles -->
+                <text
+                  x="700"
+                  y="90"
+                  text-anchor="middle"
+                  font-size="14"
+                  fill="#1A202C"
+                  font-weight="700"
+                >
+                  Mamba-2 / GDN
+                </text>
+                <rect
+                  x="645"
+                  y="60"
+                  width="110"
+                  height="20"
+                  rx="4"
+                  fill="#D1FAE5"
+                  stroke="#059669"
+                  stroke-width="1"
+                />
+                <text
+                  x="700"
+                  y="74"
+                  text-anchor="middle"
+                  font-size="10"
+                  fill="#059669"
+                  font-weight="700"
+                >
+                  等價證明與線上 GD
+                </text>
+              </g>
+
+              <!-- ════════════ NODE 6: 2025 Test-Time Reg (Below) ════════════ -->
+              <g>
+                <!-- Stem & Tick -->
+                <line
+                  x1="850"
+                  y1="170"
+                  x2="850"
+                  y2="230"
+                  stroke="#7C3AED"
+                  stroke-width="3"
+                />
+                <circle
+                  cx="850"
+                  cy="170"
+                  r="6"
+                  fill="#7C3AED"
+                  filter="url(#glow)"
+                />
+                <!-- Year -->
+                <text
+                  x="850"
+                  y="152"
+                  text-anchor="middle"
+                  font-size="15"
+                  font-weight="700"
+                  fill="#7C3AED"
+                >
+                  2025
+                </text>
+                <!-- Dot & Icon -->
+                <circle
+                  cx="850"
+                  cy="230"
+                  r="18"
+                  fill="#EDE9FE"
+                  stroke="#7C3AED"
+                  stroke-width="3"
+                  filter="url(#glow)"
+                />
+                <text
+                  x="850"
+                  y="235"
+                  text-anchor="middle"
+                  font-size="12"
+                  fill="#7C3AED"
+                  font-weight="700"
+                >
+                  TTR
+                </text>
+                <!-- Titles -->
+                <text
+                  x="850"
+                  y="275"
+                  text-anchor="middle"
+                  font-size="14"
+                  fill="#1A202C"
+                  font-weight="700"
+                >
+                  Test-Time Reg.
+                </text>
+                <rect
+                  x="795"
+                  y="285"
+                  width="110"
+                  height="22"
+                  rx="4"
+                  fill="#EDE9FE"
+                  stroke="#7C3AED"
+                  stroke-width="1.5"
+                />
+                <text
+                  x="850"
+                  y="300"
+                  text-anchor="middle"
+                  font-size="11"
+                  fill="#7C3AED"
+                  font-weight="700"
+                >
+                  終局：大一統框架
+                </text>
+              </g>
+            </svg>
+
+            <div class="insight">
+              <span class="insight-icon">💡</span>
+              <strong>一句話總結：</strong>2020 年的 Linear Attention
+              是這條演化鏈的<strong>「萬物起源」</strong>。理解它，就理解了通往
+              Mamba、GDN 的完整數學脈絡。
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 04 — Softmax Attention 公式
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="3">
+          <div class="inner">
+            <h2 class="t2">萬惡的起源：Softmax Attention</h2>
+            <p class="lead">
+              一切故事的起點——<strong>Vaswani et al. (2017)</strong> 提出的
+              Attention 機制，統治了 NLP 長達數年。
+            </p>
+
+            <div class="eq-highlight">
+              <div class="eq-label">Standard Softmax Attention</div>
+              \[\text{Attention}(Q, K, V) =
+              \text{softmax}\!\left(\frac{QK^T}{\sqrt{d_k}}\right) V\]
+            </div>
+
+            <div class="cols" style="margin-top: 1rem">
+              <div>
+                <h3 class="t3">公式拆解</h3>
+                <ul class="b">
+                  <li>
+                    \(Q \in \mathbb{R}^{N \times d_k}\)：Query 矩陣，\(N\)
+                    為序列長度
+                  </li>
+                  <li>\(K \in \mathbb{R}^{N \times d_k}\)：Key 矩陣</li>
+                  <li>\(V \in \mathbb{R}^{N \times d_v}\)：Value 矩陣</li>
+                  <li>
+                    \(QK^T\) 產生
+                    <strong style="color: var(--red)">\(N \times N\)</strong>
+                    的注意力矩陣
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h3 class="t3" style="color: var(--red)">致命瓶頸</h3>
+                <div class="box red">
+                  <p>
+                    <strong>矩陣相乘 \(QK^T\)</strong> 強制綁定了 Sequence
+                    Length \(N\)：
+                  </p>
+                  <ul class="b">
+                    <li>
+                      時間複雜度：<strong style="color: var(--red)"
+                        >\(O(N^2 d_k)\)</strong
+                      >
+                    </li>
+                    <li>
+                      空間複雜度：<strong style="color: var(--red)"
+                        >\(O(N^2)\)</strong
+                      >
+                    </li>
+                    <li>
+                      當 \(N = 16\text{k}\) 時，注意力矩陣佔
+                      <strong>~1 GB</strong> (FP16)
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 05 — 複雜度災難
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="4">
+          <div class="inner">
+            <h2 class="t2">複雜度災難：\(QK^T\) 的代價</h2>
+            <p class="lead">
+              矩陣相乘 \(QK^T\) 產生的 \(N \times N\) 矩陣，是所有問題的根源。
+            </p>
+
+            <!-- SVG: Matrix multiplication visualization -->
+            <svg
+              viewBox="0 0 700 260"
+              width="100%"
+              style="
+                font-family: var(--sans);
+                max-width: 44rem;
+                display: block;
+                margin: 0.8rem auto;
+              "
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <defs>
+                <linearGradient id="qG" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#3B82F6" />
+                  <stop offset="100%" stop-color="#1E3A8A" />
+                </linearGradient>
+                <linearGradient id="kG" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="#059669" />
+                  <stop offset="100%" stop-color="#0D9488" />
+                </linearGradient>
+                <linearGradient id="nG" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#DC2626" />
+                  <stop offset="100%" stop-color="#FCA5A5" />
+                </linearGradient>
+              </defs>
+              <!-- Q matrix -->
+              <rect
+                x="30"
+                y="40"
+                width="60"
+                height="140"
+                rx="4"
+                fill="url(#qG)"
+                opacity="0.85"
+              />
+              <text
+                x="60"
+                y="115"
+                text-anchor="middle"
+                font-size="16"
+                fill="#fff"
+                font-weight="700"
+              >
+                Q
+              </text>
+              <text
+                x="60"
+                y="30"
+                text-anchor="middle"
+                font-size="10"
+                fill="#1E3A8A"
+                font-weight="600"
+              >
+                \(N \times d_k\)
+              </text>
+              <!-- × symbol -->
+              <text
+                x="115"
+                y="115"
+                text-anchor="middle"
+                font-size="22"
+                fill="#718096"
+                font-weight="700"
+              >
+                ×
+              </text>
+              <!-- K^T matrix -->
+              <rect
+                x="140"
+                y="60"
+                width="140"
+                height="60"
+                rx="4"
+                fill="url(#kG)"
+                opacity="0.85"
+              />
+              <text
+                x="210"
+                y="97"
+                text-anchor="middle"
+                font-size="16"
+                fill="#fff"
+                font-weight="700"
+              >
+                \(K^T\)
+              </text>
+              <text
+                x="210"
+                y="50"
+                text-anchor="middle"
+                font-size="10"
+                fill="#059669"
+                font-weight="600"
+              >
+                \(d_k \times N\)
+              </text>
+              <!-- = symbol -->
+              <text
+                x="310"
+                y="115"
+                text-anchor="middle"
+                font-size="22"
+                fill="#718096"
+                font-weight="700"
+              >
+                =
+              </text>
+              <!-- N×N result -->
+              <rect
+                x="340"
+                y="40"
+                width="140"
+                height="140"
+                rx="4"
+                fill="url(#nG)"
+                opacity="0.2"
+                stroke="#DC2626"
+                stroke-width="2"
+                stroke-dasharray="4 3"
+              />
+              <text
+                x="410"
+                y="115"
+                text-anchor="middle"
+                font-size="16"
+                fill="#DC2626"
+                font-weight="700"
+              >
+                \(N \times N\)
+              </text>
+              <text
+                x="410"
+                y="200"
+                text-anchor="middle"
+                font-size="11"
+                fill="#DC2626"
+                font-weight="600"
+              >
+                ⚠ 記憶體爆炸區
+              </text>
+              <!-- Annotations -->
+              <rect
+                x="520"
+                y="50"
+                width="160"
+                height="100"
+                rx="6"
+                fill="#FEE2E2"
+                stroke="#DC2626"
+                stroke-width="1"
+              />
+              <text
+                x="600"
+                y="75"
+                text-anchor="middle"
+                font-size="10"
+                fill="#DC2626"
+                font-weight="700"
+              >
+                N = 4,096
+              </text>
+              <text
+                x="600"
+                y="95"
+                text-anchor="middle"
+                font-size="10"
+                fill="#991B1B"
+              >
+                矩陣大小 = 16M 元素
+              </text>
+              <text
+                x="600"
+                y="115"
+                text-anchor="middle"
+                font-size="10"
+                fill="#DC2626"
+                font-weight="700"
+              >
+                N = 16,384
+              </text>
+              <text
+                x="600"
+                y="135"
+                text-anchor="middle"
+                font-size="10"
+                fill="#991B1B"
+              >
+                矩陣大小 = 268M 元素
+              </text>
+              <!-- Bottom note -->
+              <text
+                x="350"
+                y="245"
+                text-anchor="middle"
+                font-size="11"
+                fill="#2D3748"
+                font-weight="600"
+              >
+                序列長度 N 每翻倍，記憶體與計算量增長 4 倍 (二次方增長)
+              </text>
+            </svg>
+
+            <div class="box red" style="margin-top: 0.5rem">
+              <strong>💥 二次方的詛咒：</strong>當序列長度從 1k 增加到
+              16k，計算量暴增 <strong>256 倍</strong>。這使得長文本處理在標準
+              Transformer 上幾乎不可行。
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 05b — FlashAttention：硬體優化的極限
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="5">
+          <div class="inner">
+            <h2 class="t2">FlashAttention：硬體優化的極限</h2>
+            <p class="lead">
+              在從數學上解決 \(O(N^2)\)
+              之前，有人嘗試從<strong>硬體層級</strong>極致優化——但這條路有其天花板。
+            </p>
+
+            <div class="cols">
+              <div>
+                <h3 class="t3">🔧 FlashAttention 的核心思想</h3>
+                <div class="box accent">
+                  <p><strong>IO-Awareness（記憶體感知）</strong></p>
+                  <ul class="b">
+                    <li>
+                      真正的瓶頸不在算力 (FLOPs)，而在 GPU
+                      <strong>HBM ↔ SRAM</strong> 之間的資料搬移
+                    </li>
+                    <li>
+                      透過 <strong>Tiling（區塊化）</strong>技術，將 \(QK^T\)
+                      的計算切成小塊，保留在高速 SRAM 內完成
+                    </li>
+                    <li>
+                      大幅減少記憶體讀寫次數，實現 <strong>2-4× 加速</strong>
+                    </li>
+                    <li>
+                      數學上仍是
+                      <strong>Exact Attention</strong>（精確計算，非近似）
+                    </li>
+                  </ul>
+                </div>
+
+                <div class="box" style="margin-top: 0.6rem">
+                  <h3 class="t3">📊 Linformer 的替代路線</h3>
+                  <p style="font-size: 0.85rem">
+                    Wang et al. (2020)
+                    證明注意力矩陣本質是<strong>低秩矩陣</strong>，透過投影矩陣
+                    \(E, F\) 壓縮 Key/Value 維度到固定 \(k\)，達成
+                    \(O(N)\)。但它<strong>無法</strong>像 RNN 一樣做 \(O(1)\)
+                    推論。
+                  </p>
+                </div>
+              </div>
+              <div>
+                <h3 class="t3" style="color: var(--red)">
+                  ⚠️ 但 FlashAttention 解決不了...
+                </h3>
+                <div class="box red">
+                  <ul class="b">
+                    <li>
+                      \(O(N^2)\) 的<strong>數學本質</strong>沒有改變 —
+                      計算量依然是二次方
+                    </li>
+                    <li>自迴歸推論的 <strong>KV Cache 仍然線性增長</strong></li>
+                    <li>序列長度超過硬體極限時依然 OOM</li>
+                    <li>無法在邊緣裝置 (Edge) 部署超長序列</li>
+                  </ul>
+                </div>
+
+                <!-- SVG: Two approaches comparison -->
+                <svg
+                  viewBox="0 0 300 130"
+                  width="100%"
+                  style="font-family: var(--sans); margin-top: 0.8rem"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <rect
+                    x="5"
+                    y="10"
+                    width="130"
+                    height="110"
+                    rx="8"
+                    fill="#FEF3C7"
+                    stroke="#D97706"
+                    stroke-width="1.5"
+                  />
+                  <text
+                    x="70"
+                    y="32"
+                    text-anchor="middle"
+                    font-size="9"
+                    fill="#92400E"
+                    font-weight="700"
+                  >
+                    硬體優化路線
+                  </text>
+                  <text
+                    x="70"
+                    y="50"
+                    text-anchor="middle"
+                    font-size="8"
+                    fill="#92400E"
+                  >
+                    FlashAttention
+                  </text>
+                  <text
+                    x="70"
+                    y="65"
+                    text-anchor="middle"
+                    font-size="7.5"
+                    fill="#B45309"
+                  >
+                    ✓ 加速 2-4×
+                  </text>
+                  <text
+                    x="70"
+                    y="80"
+                    text-anchor="middle"
+                    font-size="7.5"
+                    fill="#DC2626"
+                  >
+                    ✗ 仍是 O(N²)
+                  </text>
+                  <text
+                    x="70"
+                    y="95"
+                    text-anchor="middle"
+                    font-size="7.5"
+                    fill="#DC2626"
+                  >
+                    ✗ KV Cache 不變
+                  </text>
+                  <text
+                    x="70"
+                    y="110"
+                    text-anchor="middle"
+                    font-size="7"
+                    fill="#92400E"
+                  >
+                    常數加速
+                  </text>
+
+                  <rect
+                    x="165"
+                    y="10"
+                    width="130"
+                    height="110"
+                    rx="8"
+                    fill="#DBEAFE"
+                    stroke="#1E3A8A"
+                    stroke-width="1.5"
+                  />
+                  <text
+                    x="230"
+                    y="32"
+                    text-anchor="middle"
+                    font-size="9"
+                    fill="#1E3A8A"
+                    font-weight="700"
+                  >
+                    數學架構路線
+                  </text>
+                  <text
+                    x="230"
+                    y="50"
+                    text-anchor="middle"
+                    font-size="8"
+                    fill="#1E3A8A"
+                  >
+                    Linear Attention
+                  </text>
+                  <text
+                    x="230"
+                    y="65"
+                    text-anchor="middle"
+                    font-size="7.5"
+                    fill="#059669"
+                  >
+                    ✓ O(N) 訓練
+                  </text>
+                  <text
+                    x="230"
+                    y="80"
+                    text-anchor="middle"
+                    font-size="7.5"
+                    fill="#059669"
+                  >
+                    ✓ O(1) 推論
+                  </text>
+                  <text
+                    x="230"
+                    y="95"
+                    text-anchor="middle"
+                    font-size="7.5"
+                    fill="#059669"
+                  >
+                    ✓ 零 KV Cache
+                  </text>
+                  <text
+                    x="230"
+                    y="110"
+                    text-anchor="middle"
+                    font-size="7"
+                    fill="#1E3A8A"
+                  >
+                    根本性改變
+                  </text>
+                </svg>
+              </div>
+            </div>
+
+            <div class="insight" style="margin-top: 0.5rem">
+              <span class="insight-icon">💡</span>
+              <strong>結論：</strong>即使有 FlashAttention
+              這樣的底層系統優化，KV Cache
+              問題依然無解。因此我們需要從<strong>數學架構</strong>上根本解決 —
+              這就是 Linear Attention 的使命。
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 06 — AR 推論的夢魘
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="6">
+          <div class="inner">
+            <h2 class="t2">推論的夢魘：KV Cache 問題</h2>
+            <p class="lead">
+              在自迴歸 (Autoregressive) 生成時，每產生一個
+              token，都需要與<strong>所有過去的 KV</strong> 重新計算注意力。
+            </p>
+
+            <div class="cols">
+              <div>
+                <h3 class="t3">KV Cache 機制</h3>
+                <ul class="b">
+                  <li>
+                    生成第 \(i\) 個 token 時，需要 \(K_1, K_2, \ldots, K_i\) 和
+                    \(V_1, V_2, \ldots, V_i\)
+                  </li>
+                  <li>
+                    KV Cache 大小隨序列長度
+                    <strong style="color: var(--red)">線性增長</strong>
+                  </li>
+                  <li>每一步推論的計算量也隨之<strong>線性增長</strong></li>
+                  <li>記憶體佔用：\(O(N \cdot d_k)\) per layer</li>
+                </ul>
+
+                <div class="box red" style="margin-top: 0.8rem">
+                  <strong>實際影響：</strong>LLaMA-2 70B 在 4k context 時，KV
+                  Cache 就佔用 <strong>~5GB</strong>。擴展到 128k 時完全不可行。
+                </div>
+              </div>
+              <div>
+                <!-- SVG: KV Cache growth -->
+                <svg
+                  viewBox="0 0 320 250"
+                  width="100%"
+                  style="font-family: var(--sans)"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <text
+                    x="160"
+                    y="18"
+                    text-anchor="middle"
+                    font-size="11"
+                    fill="#1E3A8A"
+                    font-weight="700"
+                  >
+                    KV Cache 記憶體消耗
+                  </text>
+                  <!-- Axes -->
+                  <line
+                    x1="50"
+                    y1="210"
+                    x2="300"
+                    y2="210"
+                    stroke="#718096"
+                    stroke-width="1.5"
+                  />
+                  <line
+                    x1="50"
+                    y1="210"
+                    x2="50"
+                    y2="30"
+                    stroke="#718096"
+                    stroke-width="1.5"
+                  />
+                  <text
+                    x="175"
+                    y="240"
+                    text-anchor="middle"
+                    font-size="9"
+                    fill="#718096"
+                  >
+                    序列長度 N
+                  </text>
+                  <text
+                    x="20"
+                    y="120"
+                    text-anchor="middle"
+                    font-size="9"
+                    fill="#718096"
+                    transform="rotate(-90,20,120)"
+                  >
+                    Memory
+                  </text>
+                  <!-- Linear growth line (KV Cache) -->
+                  <polyline
+                    points="50,200 100,175 150,150 200,120 250,90 300,55"
+                    fill="none"
+                    stroke="#DC2626"
+                    stroke-width="2.5"
+                  />
+                  <text
+                    x="305"
+                    y="50"
+                    font-size="9"
+                    fill="#DC2626"
+                    font-weight="600"
+                  >
+                    Std. Transformer
+                  </text>
+                  <!-- Constant line (ideal) -->
+                  <line
+                    x1="50"
+                    y1="190"
+                    x2="300"
+                    y2="190"
+                    stroke="#059669"
+                    stroke-width="2.5"
+                    stroke-dasharray="5 3"
+                  />
+                  <text
+                    x="305"
+                    y="194"
+                    font-size="9"
+                    fill="#059669"
+                    font-weight="600"
+                  >
+                    理想 O(1)
+                  </text>
+                  <!-- X-axis labels -->
+                  <text
+                    x="50"
+                    y="225"
+                    text-anchor="middle"
+                    font-size="8"
+                    fill="#718096"
+                  >
+                    1k
+                  </text>
+                  <text
+                    x="100"
+                    y="225"
+                    text-anchor="middle"
+                    font-size="8"
+                    fill="#718096"
+                  >
+                    4k
+                  </text>
+                  <text
+                    x="150"
+                    y="225"
+                    text-anchor="middle"
+                    font-size="8"
+                    fill="#718096"
+                  >
+                    8k
+                  </text>
+                  <text
+                    x="200"
+                    y="225"
+                    text-anchor="middle"
+                    font-size="8"
+                    fill="#718096"
+                  >
+                    16k
+                  </text>
+                  <text
+                    x="250"
+                    y="225"
+                    text-anchor="middle"
+                    font-size="8"
+                    fill="#718096"
+                  >
+                    32k
+                  </text>
+                  <text
+                    x="300"
+                    y="225"
+                    text-anchor="middle"
+                    font-size="8"
+                    fill="#718096"
+                  >
+                    64k
+                  </text>
+                </svg>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 07 — 核心提問
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="6">
+          <div class="inner">
+            <div class="section-divider">
+              <div class="part-num">Core Question</div>
+              <h2>我們能不能解開 \(Q\) 和 \(K\) 的綁定？</h2>
+              <p class="section-sub" style="margin-top: 1rem">
+                把<strong>訓練</strong>時的複雜度降到 \(O(N)\)，<br />
+                且在<strong>推論</strong>時變成像 RNN 一樣 \(O(1)\) 的狀態更新？
+              </p>
+              <div
+                style="
+                  margin-top: 2rem;
+                  display: flex;
+                  gap: 1.5rem;
+                  justify-content: center;
+                  flex-wrap: wrap;
+                "
+              >
+                <div
+                  class="box red"
+                  style="text-align: center; min-width: 160px"
+                >
+                  <div
+                    style="
+                      font-size: 1.6rem;
+                      font-weight: 700;
+                      color: var(--red);
+                    "
+                  >
+                    \(O(N^2)\)
+                  </div>
+                  <div
+                    style="
+                      font-size: 0.78rem;
+                      color: var(--ink3);
+                      margin-top: 0.2rem;
+                    "
+                  >
+                    Softmax Attention
+                  </div>
+                </div>
+                <div
+                  style="
+                    align-self: center;
+                    font-size: 2rem;
+                    color: var(--ink3);
+                  "
+                >
+                  →
+                </div>
+                <div
+                  class="box accent"
+                  style="text-align: center; min-width: 160px"
+                >
+                  <div
+                    style="
+                      font-size: 1.6rem;
+                      font-weight: 700;
+                      color: var(--blue);
+                    "
+                  >
+                    \(O(N)\)
+                  </div>
+                  <div
+                    style="
+                      font-size: 0.78rem;
+                      color: var(--ink3);
+                      margin-top: 0.2rem;
+                    "
+                  >
+                    Linear Attention
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 08 — Part 2 Divider
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="7">
+          <div class="inner">
+            <div class="section-divider">
+              <div class="part-num">Part 2</div>
+              <h2>核心解密：Linear Attention 的數學推演</h2>
+              <p class="section-sub">
+                從 Softmax 到 Kernel Trick，一步一步推導 \(O(N)\) 的魔法
+              </p>
+              <div
+                class="outline-subline"
+                style="width: 8rem; margin: 1.5rem auto 0"
+                aria-hidden="true"
+              ></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 09 — 重新審視 Attention 求和
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="8">
+          <div class="inner">
+            <h2 class="t2">Step 1：重新審視 Attention 公式</h2>
+            <p class="lead">
+              把矩陣形式拆解為第 \(i\) 個 Query
+              的<strong>求和形式</strong>——這是理解一切的關鍵。
+            </p>
+
+            <div class="deriv-step">
+              <span class="ds-num">1</span>
+              <strong>矩陣形式</strong>（我們已知的）
+              <div class="eq" style="margin-top: 0.4rem">
+                \[\text{Attention}(Q,K,V) =
+                \text{softmax}\!\left(\frac{QK^T}{\sqrt{d_k}}\right) V\]
+              </div>
+            </div>
+
+            <div class="deriv-step">
+              <span class="ds-num">2</span>
+              <strong>逐元素展開</strong>：聚焦第 \(i\) 個 query 的輸出
+              <div class="eq-highlight" style="margin-top: 0.4rem">
+                \[V_i = \frac{\displaystyle\sum_{j=1}^{N} \text{sim}(q_i, k_j)
+                \cdot v_j}{\displaystyle\sum_{j=1}^{N} \text{sim}(q_i, k_j)}\]
+              </div>
+            </div>
+
+            <div class="cols" style="margin-top: 0.8rem">
+              <div class="box">
+                <h3 class="t3">變數定義</h3>
+                <ul class="b">
+                  <li>
+                    \(q_i \in \mathbb{R}^{d_k}\)：第 \(i\) 個位置的 Query 向量
+                  </li>
+                  <li>\(k_j, v_j\)：第 \(j\) 個位置的 Key 與 Value</li>
+                  <li>\(\text{sim}(q_i, k_j)\)：相似度函數</li>
+                </ul>
+              </div>
+              <div class="box red">
+                <h3 class="t3" style="color: var(--red)">傳統的 sim 函數</h3>
+                <p>
+                  \(\text{sim}(q_i, k_j) = \exp\!\left(\frac{q_i^T
+                  k_j}{\sqrt{d_k}}\right)\)
+                </p>
+                <p style="margin-top: 0.3rem">
+                  因為有<strong style="color: var(--red)"
+                    >指數函數 \(\exp\)</strong
+                  >，你<strong>無法</strong>把 \(q_i\) 從求和中提出來！
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 10 — Softmax 的限制
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="9">
+          <div class="inner">
+            <h2 class="t2">Step 2：Softmax 的限制</h2>
+            <p class="lead">
+              指數函數 \(e^{q_i^Tk_j}\) 讓 \(q_i\) 和 \(k_j\)
+              <strong>緊密耦合</strong>，阻礙了變數分離。
+            </p>
+
+            <div class="eq-danger">
+              <div class="eq-label" style="color: var(--red)">
+                PROBLEM: INSEPARABLE
+              </div>
+              \[\text{sim}(q_i, k_j) = \exp\!\bigl(q_i^T k_j\bigr) \neq f(q_i)
+              \cdot g(k_j)\]
+            </div>
+
+            <div class="box" style="margin-top: 1rem">
+              <h3 class="t3">為什麼不能分離？</h3>
+              <ul class="b">
+                <li>
+                  指數函數的特性：\(\exp(a + b) = \exp(a) \cdot \exp(b)\)，但
+                  \(\exp(a^Tb)\) <strong>不能</strong>簡單拆解
+                </li>
+                <li>因為 \(q_i^T k_j\) 是內積，不是簡單的加法</li>
+                <li>
+                  這代表每個 \(q_i\) 都必須和<strong>所有</strong> \(k_j\)
+                  配對計算 → \(O(N^2)\)
+                </li>
+              </ul>
+            </div>
+
+            <div class="insight" style="margin-top: 0.8rem">
+              <span class="insight-icon">🤔</span>
+              <strong>關鍵問題：</strong>如果我們把 \(\text{sim}(q,k)\)
+              換成一個<strong>可分離</strong>的函數呢？這就是
+              <strong>Kernel Trick</strong> 的核心思想。
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 11 — Kernel Trick
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="10">
+          <div class="inner">
+            <h2 class="t2">Step 3：Kernel Trick（核方法）</h2>
+            <p class="lead">
+              引入<strong>特徵映射 (Feature Map)</strong>
+              \(\phi(\cdot)\)，替換掉 Softmax。
+            </p>
+
+            <div class="deriv-step">
+              <span class="ds-num">1</span>
+              <strong>核方法的核心思想</strong>：用可分離的內積替代指數函數
+              <div class="eq-highlight" style="margin-top: 0.5rem">
+                \[\text{sim}(q_i, k_j) = \phi(q_i)^T \phi(k_j)\]
+              </div>
+            </div>
+
+            <div class="cols" style="margin-top: 0.8rem">
+              <div class="vs-card bad">
+                <h3 class="t3" style="color: var(--red)">❌ 原始 Softmax</h3>
+                <div
+                  class="eq"
+                  style="
+                    background: transparent;
+                    border: none;
+                    padding: 0.3rem 0;
+                  "
+                >
+                  \[\exp(q_i^T k_j)\]
+                </div>
+                <p style="font-size: 0.85rem">
+                  \(q_i\) 和 \(k_j\) <strong>不可分離</strong><br />→
+                  必須逐對計算 → \(O(N^2)\)
+                </p>
+              </div>
+              <div class="vs-card good">
+                <h3 class="t3" style="color: var(--green)">✓ Kernel 形式</h3>
+                <div
+                  class="eq"
+                  style="
+                    background: transparent;
+                    border: none;
+                    padding: 0.3rem 0;
+                  "
+                >
+                  \[\phi(q_i)^T \phi(k_j)\]
+                </div>
+                <p style="font-size: 0.85rem">
+                  \(\phi(q_i)\) 和 \(\phi(k_j)\) <strong>獨立計算</strong
+                  ><br />→ 可以重新排列運算順序！
+                </p>
+              </div>
+            </div>
+
+            <div class="box accent" style="margin-top: 0.8rem">
+              <strong>📌 Key Insight：</strong>只要 \(\phi(\cdot)\)
+              是一個合法的特徵映射函數，那麼 \(\phi(q_i)^T \phi(k_j)\)
+              就定義了一個合法的核函數 (Kernel
+              Function)，可以近似任何正定的相似度度量。
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 12 — 結合律的魔法
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="11">
+          <div class="inner">
+            <h2 class="t2">Step 4：結合律的魔法 ✨</h2>
+            <p class="lead">
+              將 Kernel
+              形式代入原式——這是整場報告的<strong>最高光時刻</strong>。
+            </p>
+
+            <div class="deriv-step">
+              <span class="ds-num">1</span>
+              <strong>代入 Kernel 形式</strong>
+              <div class="eq" style="margin-top: 0.4rem">
+                \[V_i = \frac{\displaystyle\sum_{j=1}^{N} \bigl(\phi(q_i)^T
+                \phi(k_j)\bigr) \cdot v_j}{\displaystyle\sum_{j=1}^{N}
+                \phi(q_i)^T \phi(k_j)}\]
+              </div>
+            </div>
+
+            <div class="deriv-step" style="border-color: var(--teal)">
+              <span class="ds-num" style="background: var(--teal)">2</span>
+              <strong>關鍵觀察</strong>：\(\phi(q_i)^T\) 對求和變數 \(j\)
+              來說是<strong>常數</strong>！
+              <p
+                style="
+                  font-size: 0.9rem;
+                  margin-top: 0.3rem;
+                  color: var(--teal);
+                  font-weight: 600;
+                "
+              >
+                → 因此可以提出求和符號 \(\sum\) 外面
+              </p>
+            </div>
+
+            <div class="eq-highlight" style="margin-top: 0.5rem">
+              <div class="eq-label">THE MAGIC: ASSOCIATIVE PROPERTY</div>
+              \[V_i = \frac{\phi(q_i)^T \displaystyle\sum_{j=1}^{N} \phi(k_j) \,
+              v_j^T}{\phi(q_i)^T \displaystyle\sum_{j=1}^{N} \phi(k_j)}\]
+            </div>
+
+            <div class="insight">
+              <span class="insight-icon">🎯</span>
+              <strong>矩陣乘法的結合律：</strong>運算順序從
+              \(\underbrace{(QK^T)}_{N \times N}V\) 變成
+              \(Q\underbrace{(K^TV)}_{d_k \times d_v}\)。前者產生 \(N \times N\)
+              矩陣，後者只產生 <strong>\(d_k \times d_v\)</strong> 矩陣！
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 13 — 提取 Query
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="12">
+          <div class="inner">
+            <h2 class="t2">Step 5：提取 Query — 降維打擊</h2>
+            <p class="lead">
+              把 \(\phi(q_i)\) 提出後，求和內部只剩下<strong
+                >與 \(N\) 無關的固定維度</strong
+              >。
+            </p>
+
+            <div class="cols">
+              <div>
+                <h3 class="t3">分子部分</h3>
+                <div class="eq">
+                  \[\underbrace{\sum_{j=1}^{N} \phi(k_j) \, v_j^T}_{d_k \times
+                  d_v \text{ 矩陣}}\]
+                </div>
+                <ul class="b">
+                  <li>
+                    \(\phi(k_j) \in \mathbb{R}^{d_k}\)，\(v_j \in
+                    \mathbb{R}^{d_v}\)
+                  </li>
+                  <li>外積 \(\phi(k_j) v_j^T\) 為 \(d_k \times d_v\) 矩陣</li>
+                  <li>
+                    對 \(N\) 個這樣的矩陣求和 → 結果<strong
+                      >仍是 \(d_k \times d_v\)</strong
+                    >
+                  </li>
+                  <li style="color: var(--green); font-weight: 600">
+                    ✓ 與序列長度 \(N\) 無關！
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h3 class="t3">分母部分</h3>
+                <div class="eq">
+                  \[\underbrace{\sum_{j=1}^{N} \phi(k_j)}_{d_k \text{ 向量}}\]
+                </div>
+                <ul class="b">
+                  <li>\(\phi(k_j) \in \mathbb{R}^{d_k}\)</li>
+                  <li>對 \(N\) 個向量求和 → 結果仍是 \(d_k\) 維向量</li>
+                  <li style="color: var(--green); font-weight: 600">
+                    ✓ 同樣與 \(N\) 無關！
+                  </li>
+                </ul>
+
+                <div class="box green" style="margin-top: 0.8rem">
+                  <strong>計算一次</strong>，對所有 \(i\) 共享。<br />
+                  遍歷 \(N\) 個 token 的成本：\(O(N \cdot d_k \cdot d_v)\)
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 14 — O(N) 達成
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="13">
+          <div class="inner">
+            <h2 class="t2">Step 6：\(O(N)\) 複雜度正式達成 🎉</h2>
+            <p class="lead">
+              整體計算複雜度從二次方<strong>驟降</strong>為線性。
+            </p>
+
+            <div class="cols" style="margin-top: 0.8rem">
+              <div class="vs-card bad" style="text-align: center">
+                <div
+                  style="
+                    font-size: 0.72rem;
+                    letter-spacing: 0.08em;
+                    text-transform: uppercase;
+                    color: var(--red);
+                    font-weight: 600;
+                    margin-bottom: 0.3rem;
+                  "
+                >
+                  Standard Attention
+                </div>
+                <div class="stat" style="color: var(--red); font-size: 2.6rem">
+                  \(O(N^2 d)\)
+                </div>
+                <div
+                  style="
+                    font-size: 0.82rem;
+                    color: var(--ink3);
+                    margin-top: 0.4rem;
+                  "
+                >
+                  先算 \(QK^T\)（\(N \times N\)），再乘以 \(V\)
+                </div>
+              </div>
+              <div class="vs-card good" style="text-align: center">
+                <div
+                  style="
+                    font-size: 0.72rem;
+                    letter-spacing: 0.08em;
+                    text-transform: uppercase;
+                    color: var(--green);
+                    font-weight: 600;
+                    margin-bottom: 0.3rem;
+                  "
+                >
+                  Linear Attention
+                </div>
+                <div
+                  class="stat"
+                  style="color: var(--green); font-size: 2.6rem"
+                >
+                  \(O(N d^2)\)
+                </div>
+                <div
+                  style="
+                    font-size: 0.82rem;
+                    color: var(--ink3);
+                    margin-top: 0.4rem;
+                  "
+                >
+                  先算 \(K^TV\)（\(d \times d\)），再乘以 \(Q\)
+                </div>
+              </div>
+            </div>
+
+            <table class="j data-lg" style="margin-top: 1rem">
+              <thead>
+                <tr>
+                  <th>比較項目</th>
+                  <th>Standard Attention</th>
+                  <th>Linear Attention</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>時間複雜度</td>
+                  <td style="color: var(--red); font-weight: 600">
+                    \(O(N^2 d_k)\)
+                  </td>
+                  <td class="up">\(O(N d_k d_v)\)</td>
+                </tr>
+                <tr>
+                  <td>空間複雜度</td>
+                  <td style="color: var(--red); font-weight: 600">
+                    \(O(N^2 + N d_v)\)
+                  </td>
+                  <td class="up">\(O(N d_k + d_k d_v)\)</td>
+                </tr>
+                <tr>
+                  <td>中間矩陣大小</td>
+                  <td style="color: var(--red)">\(N \times N\)</td>
+                  <td class="up">\(d_k \times d_v\)</td>
+                </tr>
+                <tr class="hi">
+                  <td>當 \(N \gg d\) 時</td>
+                  <td>二次方爆炸 💥</td>
+                  <td>線性增長 ✓</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 15 — 特徵映射 φ(x)
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="14">
+          <div class="inner">
+            <h2 class="t2">Step 7：特徵映射 \(\phi(x)\) 的選擇</h2>
+            <p class="lead">
+              Katharopoulos
+              等人提出了一個<strong>簡單有效</strong>的特徵映射函數。
+            </p>
+
+            <div class="eq-highlight">
+              <div class="eq-label">FEATURE MAP</div>
+              \[\phi(x) = \text{elu}(x) + 1\]
+            </div>
+
+            <div class="cols" style="margin-top: 0.8rem">
+              <div>
+                <h3 class="t3">為什麼選 ELU + 1？</h3>
+                <ul class="b">
+                  <li>
+                    <strong>非負性保證</strong>：\(\text{elu}(x) + 1 > 0\)
+                    對所有 \(x\)，確保分母不為零
+                  </li>
+                  <li>
+                    <strong>計算高效</strong>：比 Random Fourier Features
+                    等方法便宜得多
+                  </li>
+                  <li>
+                    <strong>梯度友善</strong>：ELU
+                    本身就是常用的激活函數，梯度穩定
+                  </li>
+                  <li><strong>簡潔</strong>：不需要額外的隨機投影或高維映射</li>
+                </ul>
+              </div>
+              <div>
+                <h3 class="t3">ELU 函數定義</h3>
+                <div class="eq">
+                  \[\text{elu}(x) = \begin{cases} x & \text{if } x > 0 \\ e^x -
+                  1 & \text{if } x \leq 0 \end{cases}\]
+                </div>
+                <div class="box" style="margin-top: 0.5rem">
+                  <p style="font-size: 0.85rem">
+                    <strong>直覺理解：</strong>加 1 把 ELU 的值域從 \([-1,
+                    +\infty)\) 平移到 \((0, +\infty)\)，保證 Kernel 值恆正。
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="box gold" style="margin-top: 0.8rem">
+              <strong>⚠️ 注意：</strong>這個簡單的 \(\phi(x)\) 是 Linear
+              Attention 效能略低於 Softmax
+              的<strong>主要原因之一</strong>。後續研究（如
+              cosFormer、Performer）致力於設計更好的特徵映射。
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 16 — 雙重視角
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="15">
+          <div class="inner">
+            <h2 class="t2">Step 8：雙重視角 — Training vs. Inference</h2>
+            <p class="lead">
+              Linear Attention 的精妙之處：根據使用場景切換計算模式。
+            </p>
+
+            <div class="cols">
+              <div
+                class="vs-card good"
+                style="
+                  border-left-color: var(--blue);
+                  background: linear-gradient(135deg, var(--blue-lt), #fff);
+                "
+              >
+                <h3 class="t3" style="color: var(--blue)">
+                  🏋️ Training Mode（平行化）
+                </h3>
+                <div class="eq" style="margin: 0.5rem 0">
+                  \[V = \phi(Q) \cdot \bigl(\phi(K)^T V\bigr)\]
+                </div>
+                <ul class="b">
+                  <li><strong>整個序列一次處理</strong></li>
+                  <li>先算 \(\phi(K)^T V\)（\(d_k \times d_v\)）</li>
+                  <li>再與 \(\phi(Q)\) 相乘</li>
+                  <li>完全平行化，適合 GPU</li>
+                  <li>複雜度：\(O(N d_k d_v)\)</li>
+                </ul>
+              </div>
+              <div
+                class="vs-card good"
+                style="
+                  border-left-color: var(--teal);
+                  background: linear-gradient(135deg, var(--teal-lt), #fff);
+                "
+              >
+                <h3 class="t3" style="color: var(--teal)">
+                  🚀 Inference Mode（遞迴）
+                </h3>
+                <div class="eq" style="margin: 0.5rem 0">
+                  \[S_i = S_{i-1} + \phi(k_i) v_i^T\]
+                </div>
+                <ul class="b">
+                  <li><strong>逐 token 遞迴更新</strong></li>
+                  <li>維護固定大小的隱藏狀態 \(S_i\)</li>
+                  <li>每步只需一個外積 + 加法</li>
+                  <li>不需要 KV Cache！</li>
+                  <li>
+                    複雜度：<strong style="color: var(--teal)"
+                      >\(O(d_k d_v)\) per step</strong
+                    >
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="insight" style="margin-top: 0.8rem">
+              <span class="insight-icon">🔑</span>
+              <strong>這就是「Transformers are RNNs」的精髓：</strong
+              >同一個模型，訓練時像 Transformer（平行化），推論時像
+              RNN（遞迴）。下一部分，我們正式推導這個 RNN 形式。
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 17 — Part 3 Divider
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="16">
+          <div class="inner">
+            <div class="section-divider">
+              <div class="part-num">Part 3</div>
+              <h2>Transformers are RNNs</h2>
+              <p class="section-sub">
+                將 Linear Attention 無縫轉換為 RNN 的狀態更新形式<br />
+                <span style="font-size: 0.9rem"
+                  >— 這是通往現代 SSM/Mamba 的關鍵橋樑</span
+                >
+              </p>
+              <div
+                class="outline-subline"
+                style="width: 8rem; margin: 1.5rem auto 0"
+                aria-hidden="true"
+              ></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 18 — Causal Masking
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="17">
+          <div class="inner">
+            <h2 class="t2">因果遮罩（Causal Masking）的影響</h2>
+            <p class="lead">
+              在自迴歸生成中，第 \(i\) 個 token
+              <strong>只能看到過去</strong>的資訊。
+            </p>
+
+            <div class="deriv-step">
+              <span class="ds-num">1</span>
+              <strong>完整的 Attention（雙向）</strong>：求和範圍 \(j = 1\) 到
+              \(N\)
+              <div class="eq" style="margin-top: 0.3rem">
+                \[V_i = \frac{\phi(q_i)^T \sum_{j=1}^{\color{red}N} \phi(k_j)
+                v_j^T}{\phi(q_i)^T \sum_{j=1}^{\color{red}N} \phi(k_j)}\]
+              </div>
+            </div>
+
+            <div class="deriv-step" style="border-color: var(--teal)">
+              <span class="ds-num" style="background: var(--teal)">2</span>
+              <strong>因果 Attention（單向）</strong>：求和範圍變成 \(j = 1\) 到
+              \(\mathbf{i}\)
+              <div class="eq-highlight" style="margin-top: 0.3rem">
+                \[V_i = \frac{\phi(q_i)^T \sum_{j=1}^{\color{#0D9488}i}
+                \phi(k_j) v_j^T}{\phi(q_i)^T \sum_{j=1}^{\color{#0D9488}i}
+                \phi(k_j)}\]
+              </div>
+            </div>
+
+            <div class="insight">
+              <span class="insight-icon">💡</span>
+              <strong>核心觀察：</strong>因為求和範圍的<strong
+                >上界隨 \(i\) 遞增</strong
+              >，我們可以把這個求和寫成<strong>遞迴形式</strong> —— 「第 \(i\)
+              步的求和 = 第 \(i{-}1\) 步的求和 + 第 \(i\) 步的新項」。
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 19 — 定義隱藏狀態
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="18">
+          <div class="inner">
+            <h2 class="t2">定義 RNN 的隱藏狀態 (Hidden States)</h2>
+            <p class="lead">
+              為了把求和寫成遞迴，我們定義兩個<strong>隱藏狀態</strong>。
+            </p>
+
+            <div class="cols">
+              <div class="eq-highlight" style="text-align: center">
+                <div class="eq-label" style="color: var(--blue)">
+                  分子狀態 (Numerator State)
+                </div>
+                \[S_i = \sum_{j=1}^{i} \phi(k_j) \, v_j^T \;\in\;
+                \mathbb{R}^{d_k \times d_v}\]
+              </div>
+              <div class="eq-highlight" style="text-align: center">
+                <div class="eq-label" style="color: var(--teal)">
+                  分母狀態 (Denominator State)
+                </div>
+                \[Z_i = \sum_{j=1}^{i} \phi(k_j) \;\in\; \mathbb{R}^{d_k}\]
+              </div>
+            </div>
+
+            <div style="margin-top: 1rem">
+              <h3 class="t3">用隱藏狀態表示輸出</h3>
+              <div class="eq-highlight" style="border-color: var(--green)">
+                \[V_i = \frac{\phi(q_i)^T \cdot S_i}{\phi(q_i)^T \cdot Z_i}\]
+              </div>
+            </div>
+
+            <div class="box accent" style="margin-top: 0.8rem">
+              <strong>直覺理解：</strong>
+              <ul class="b">
+                <li>
+                  \(S_i\) 是一個 \(d_k \times d_v\)
+                  的「<strong>記憶矩陣</strong>」，累積了從第 1 到第 \(i\) 個
+                  token 的所有 Key-Value 資訊
+                </li>
+                <li>
+                  \(Z_i\) 是一個用來做歸一化的「<strong>計數向量</strong>」
+                </li>
+                <li>
+                  每當新 token
+                  到來，只需要<strong>更新</strong>這兩個狀態，而非重新計算整個序列
+                </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 20 — 遞迴更新 (S_i)
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="19">
+          <div class="inner">
+            <h2 class="t2">遞迴更新公式 — 分子 \(S_i\)</h2>
+            <p class="lead">
+              把求和拆解為「前一步的結果」加上「新 token 的貢獻」。
+            </p>
+
+            <div class="deriv-step">
+              <span class="ds-num">1</span>
+              <strong>定義展開</strong>
+              <div class="eq" style="margin-top: 0.3rem">
+                \[S_i = \sum_{j=1}^{i} \phi(k_j) v_j^T =
+                \underbrace{\sum_{j=1}^{i-1} \phi(k_j) v_j^T}_{= \, S_{i-1}} +
+                \;\phi(k_i) v_i^T\]
+              </div>
+            </div>
+
+            <div class="eq-highlight" style="margin-top: 0.8rem">
+              <div class="eq-label">RECURRENCE — NUMERATOR STATE UPDATE</div>
+              \[\boxed{S_i = S_{i-1} + \phi(k_i) \, v_i^T}\]
+            </div>
+
+            <div class="cols" style="margin-top: 1rem">
+              <div class="box">
+                <h3 class="t3">運算分析</h3>
+                <ul class="b">
+                  <li>
+                    \(\phi(k_i) \in \mathbb{R}^{d_k}\)，\(v_i \in
+                    \mathbb{R}^{d_v}\)
+                  </li>
+                  <li>外積 \(\phi(k_i) v_i^T\) → \(d_k \times d_v\) 矩陣</li>
+                  <li>加法 \(S_{i-1} + \cdots\) → 逐元素相加</li>
+                  <li>
+                    每步計算量：\(O(d_k \cdot d_v)\) — <strong>常數！</strong>
+                  </li>
+                </ul>
+              </div>
+              <div class="box green">
+                <h3 class="t3" style="color: var(--green)">與 RNN 的對照</h3>
+                <p style="font-size: 0.88rem">
+                  傳統 RNN：\(h_i = f(h_{i-1}, x_i)\)
+                </p>
+                <p style="font-size: 0.88rem; margin-top: 0.3rem">
+                  Linear Attention：\(S_i = S_{i-1} + g(k_i, v_i)\)
+                </p>
+                <p
+                  style="
+                    font-size: 0.85rem;
+                    margin-top: 0.4rem;
+                    color: var(--green);
+                  "
+                >
+                  ✓ 完全相同的遞迴結構！<br />狀態 \(S_{i-1}\)
+                  加上新輸入的貢獻。
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 21 — 遞迴更新 (Z_i)
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="20">
+          <div class="inner">
+            <h2 class="t2">遞迴更新公式 — 分母 \(Z_i\) 與輸出</h2>
+
+            <div class="cols">
+              <div>
+                <h3 class="t3">分母狀態更新</h3>
+                <div class="eq-highlight">
+                  <div class="eq-label">DENOMINATOR STATE UPDATE</div>
+                  \[\boxed{Z_i = Z_{i-1} + \phi(k_i)}\]
+                </div>
+                <p style="margin-top: 0.5rem; font-size: 0.88rem">
+                  同理，分母的求和也可以寫成遞迴：每步只需加上新的 \(\phi(k_i)\)
+                  向量。
+                </p>
+              </div>
+              <div>
+                <h3 class="t3">最終輸出</h3>
+                <div class="eq-highlight" style="border-color: var(--green)">
+                  <div class="eq-label" style="color: var(--green)">
+                    OUTPUT COMPUTATION
+                  </div>
+                  \[\boxed{V_i = \frac{\phi(q_i)^T \cdot S_i}{\phi(q_i)^T \cdot
+                  Z_i}}\]
+                </div>
+                <p style="margin-top: 0.5rem; font-size: 0.88rem">
+                  用當前 Query 的特徵映射，去「查詢」隱藏狀態中的記憶。
+                </p>
+              </div>
+            </div>
+
+            <div style="margin-top: 1.2rem">
+              <h3 class="t3">完整的 RNN 更新流程</h3>
+              <div
+                class="pipe"
+                style="justify-content: center; margin-top: 0.5rem"
+              >
+                <div class="pipe-s">輸入<br />\(k_i, v_i, q_i\)</div>
+                <span class="pa">→</span>
+                <div
+                  class="pipe-s"
+                  style="border-color: var(--blue); color: var(--blue)"
+                >
+                  映射<br />\(\phi(k_i), \phi(q_i)\)
+                </div>
+                <span class="pa">→</span>
+                <div
+                  class="pipe-s hi"
+                  style="background: var(--teal); border-color: var(--teal)"
+                >
+                  更新<br />\(S_i, Z_i\)
+                </div>
+                <span class="pa">→</span>
+                <div
+                  class="pipe-s"
+                  style="border-color: var(--green); color: var(--green)"
+                >
+                  輸出<br />\(V_i\)
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 22 — 真正的 RNN 誕生
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="21">
+          <div class="inner">
+            <h2 class="t2">真正的 RNN 誕生！</h2>
+            <p class="lead">
+              Linear Attention
+              的因果版本，在數學上<strong>完全等價</strong>於一個 RNN。
+            </p>
+
+            <div class="cols">
+              <div>
+                <h3 class="t3" style="color: var(--red)">
+                  傳統 RNN (Elman, 1990)
+                </h3>
+                <div class="eq" style="border-color: var(--red)">
+                  \[h_i = \sigma(W_h \cdot h_{i-1} + W_x \cdot x_i + b)\]
+                </div>
+                <ul class="b" style="font-size: 0.85rem">
+                  <li>非線性激活 → 梯度消失/爆炸</li>
+                  <li>隱藏狀態維度受限</li>
+                  <li>無法平行化訓練</li>
+                </ul>
+              </div>
+              <div>
+                <h3 class="t3" style="color: var(--blue)">
+                  Linear Attention RNN (2020)
+                </h3>
+                <div class="eq" style="border-color: var(--blue)">
+                  \[S_i = S_{i-1} + \phi(k_i) v_i^T\] \[V_i = \phi(q_i)^T S_i
+                  \,/\, \phi(q_i)^T Z_i\]
+                </div>
+                <ul class="b" style="font-size: 0.85rem">
+                  <li>線性更新 → 穩定的梯度傳播</li>
+                  <li>矩陣狀態 \(d_k \times d_v\) → 高容量</li>
+                  <li><strong>可同時平行化訓練！</strong></li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="insight" style="margin-top: 0.8rem">
+              <span class="insight-icon">📌</span>
+              <strong>Key Insight：</strong>Katharopoulos
+              等人從數學上證明了——只要替換掉 Softmax 中的指數項，<strong
+                >Attention 機制本質上就可以被等價轉換為一種 RNN
+                的狀態更新</strong
+              >。
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 23 — 推論優勢
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="22">
+          <div class="inner">
+            <h2 class="t2">推論階段的巨大優勢</h2>
+            <p class="lead">
+              不再需要儲存無限增長的 KV Cache，只需維護固定大小的狀態。
+            </p>
+
+            <div class="cols3">
+              <div class="sg">
+                <div class="stat" style="color: var(--red)">\(O(N)\)</div>
+                <div class="stat-l">標準 Transformer<br />KV Cache 空間</div>
+              </div>
+              <div class="sg">
+                <div style="font-size: 2.2rem; color: var(--ink3)">→</div>
+              </div>
+              <div class="sg">
+                <div class="stat" style="color: var(--green)">\(O(1)\)</div>
+                <div class="stat-l">Linear Attention<br />固定狀態空間</div>
+              </div>
+            </div>
+
+            <table class="j data-lg" style="margin-top: 1rem">
+              <thead>
+                <tr>
+                  <th>比較項目</th>
+                  <th>Standard Transformer</th>
+                  <th>Linear Attention (RNN)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>推論記憶體</td>
+                  <td style="color: var(--red)">\(O(N \cdot d)\) per layer</td>
+                  <td class="up">\(O(d_k \cdot d_v)\) 固定</td>
+                </tr>
+                <tr>
+                  <td>每步計算量</td>
+                  <td style="color: var(--red)">\(O(N \cdot d)\) 隨序列增長</td>
+                  <td class="up">\(O(d_k \cdot d_v)\) 常數</td>
+                </tr>
+                <tr>
+                  <td>需要 KV Cache</td>
+                  <td style="color: var(--red)">是 — 線性增長</td>
+                  <td class="up">否 — 固定大小狀態</td>
+                </tr>
+                <tr class="hi">
+                  <td>推論延遲 (Latency)</td>
+                  <td>隨上下文線性增加</td>
+                  <td><strong>恆定</strong> ✓</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 24 — 小結：雙重性
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="23">
+          <div class="inner">
+            <h2 class="t2">小結：Linear Attention 的雙重性</h2>
+            <p class="lead">一個模型，兩種面貌——這正是它的優雅之處。</p>
+
+            <div class="cols" style="margin-top: 0.8rem">
+              <div style="text-align: center">
+                <div style="font-size: 3.5rem; margin-bottom: 0.3rem">🏋️</div>
+                <h3 class="t3" style="font-size: 1rem; text-transform: none">
+                  Training — Transformer 模式
+                </h3>
+                <div class="eq" style="margin: 0.5rem 0">
+                  \[V = \phi(Q) \cdot \bigl(\phi(K)^T V_{\text{in}}\bigr)\]
+                </div>
+                <ul class="b" style="text-align: left">
+                  <li>完全平行化的矩陣運算</li>
+                  <li>適合 GPU 大批量訓練</li>
+                  <li>複雜度：\(O(N d^2)\)</li>
+                </ul>
+              </div>
+              <div style="text-align: center">
+                <div style="font-size: 3.5rem; margin-bottom: 0.3rem">🚀</div>
+                <h3
+                  class="t3"
+                  style="
+                    font-size: 1rem;
+                    text-transform: none;
+                    color: var(--teal);
+                  "
+                >
+                  Inference — RNN 模式
+                </h3>
+                <div
+                  class="eq"
+                  style="margin: 0.5rem 0; border-color: var(--teal)"
+                >
+                  \[S_i = S_{i-1} + \phi(k_i)v_i^T\]
+                </div>
+                <ul class="b" style="text-align: left">
+                  <li>逐 token 遞迴狀態更新</li>
+                  <li>固定記憶體、恆定延遲</li>
+                  <li>每步複雜度：\(O(d^2)\)</li>
+                </ul>
+              </div>
+            </div>
+
+            <div
+              class="box accent"
+              style="margin-top: 1.2rem; text-align: center; font-size: 1.02rem"
+            >
+              <strong>🎓 「Transformers are RNNs」</strong> — 訓練時是
+              Transformer，推論時是 RNN。<br />
+              這不是近似，而是<strong>數學上的等價</strong>。
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 25 — Part 4 Divider
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="24">
+          <div class="inner">
+            <div class="section-divider">
+              <div class="part-num">Part 4</div>
+              <h2>實驗與效能證明</h2>
+              <p class="section-sub">
+                用數據說話：記憶體、吞吐量、Perplexity 的全面對比
+              </p>
+              <div
+                class="outline-subline"
+                style="width: 8rem; margin: 1.5rem auto 0"
+                aria-hidden="true"
+              ></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 26 — 實驗設定
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="25">
+          <div class="inner">
+            <h2 class="t2">實驗設定 (Datasets &amp; Tasks)</h2>
+            <p class="lead">
+              在兩個經典的自迴歸任務上驗證 Linear Attention 的效果。
+            </p>
+
+            <div class="cols">
+              <div class="box">
+                <h3 class="t3">📝 WikiText-103</h3>
+                <ul class="b">
+                  <li>經典的<strong>語言模型</strong>基準</li>
+                  <li>~103M tokens 的英語維基百科文本</li>
+                  <li>衡量指標：<strong>Perplexity (PPL)</strong></li>
+                  <li>PPL 越低 → 語言模型越好</li>
+                  <li>使用 Transformer 架構（4-8 層，256-512 維）</li>
+                </ul>
+              </div>
+              <div class="box">
+                <h3 class="t3">🖼️ CIFAR-10 (Image Generation)</h3>
+                <ul class="b">
+                  <li><strong>像素級自迴歸生成</strong></li>
+                  <li>32×32 圖片 → 序列長度 3,072</li>
+                  <li>衡量指標：<strong>Bits per dim (BPD)</strong></li>
+                  <li>BPD 越低 → 生成品質越好</li>
+                  <li>驗證長序列場景下的表現</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="box teal" style="margin-top: 1rem">
+              <strong>📊 驗證目標：</strong>Linear Attention 能否在保持<strong
+                >接近</strong
+              >
+              Softmax 效能的同時，實現數量級的速度與記憶體改善？
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 27 — 記憶體消耗對比
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="26">
+          <div class="inner">
+            <h2 class="t2">記憶體消耗與運算速度</h2>
+            <p class="lead">
+              當序列長度飆升時，標準 Transformer <strong>OOM</strong>，Linear
+              Transformer 保持平穩。
+            </p>
+
+            <!-- SVG: Memory comparison chart -->
+            <svg
+              viewBox="0 0 700 280"
+              width="100%"
+              style="
+                font-family: var(--sans);
+                max-width: 48rem;
+                display: block;
+                margin: 0.5rem auto;
+              "
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <text
+                x="350"
+                y="20"
+                text-anchor="middle"
+                font-size="13"
+                fill="#1A202C"
+                font-weight="700"
+              >
+                記憶體消耗 vs. 序列長度 (單位: GB)
+              </text>
+              <!-- Axes -->
+              <line
+                x1="80"
+                y1="240"
+                x2="650"
+                y2="240"
+                stroke="#718096"
+                stroke-width="1.5"
+              />
+              <line
+                x1="80"
+                y1="240"
+                x2="80"
+                y2="40"
+                stroke="#718096"
+                stroke-width="1.5"
+              />
+              <text
+                x="365"
+                y="270"
+                text-anchor="middle"
+                font-size="11"
+                fill="#718096"
+              >
+                Sequence Length
+              </text>
+              <text
+                x="30"
+                y="140"
+                text-anchor="middle"
+                font-size="11"
+                fill="#718096"
+                transform="rotate(-90,30,140)"
+              >
+                Memory (GB)
+              </text>
+
+              <!-- Grid lines -->
+              <line
+                x1="80"
+                y1="190"
+                x2="650"
+                y2="190"
+                stroke="#E2E8F0"
+                stroke-width="0.5"
+                stroke-dasharray="4 3"
+              />
+              <line
+                x1="80"
+                y1="140"
+                x2="650"
+                y2="140"
+                stroke="#E2E8F0"
+                stroke-width="0.5"
+                stroke-dasharray="4 3"
+              />
+              <line
+                x1="80"
+                y1="90"
+                x2="650"
+                y2="90"
+                stroke="#E2E8F0"
+                stroke-width="0.5"
+                stroke-dasharray="4 3"
+              />
+
+              <!-- Y-axis labels -->
+              <text
+                x="70"
+                y="244"
+                text-anchor="end"
+                font-size="9"
+                fill="#718096"
+              >
+                0
+              </text>
+              <text
+                x="70"
+                y="194"
+                text-anchor="end"
+                font-size="9"
+                fill="#718096"
+              >
+                4
+              </text>
+              <text
+                x="70"
+                y="144"
+                text-anchor="end"
+                font-size="9"
+                fill="#718096"
+              >
+                8
+              </text>
+              <text
+                x="70"
+                y="94"
+                text-anchor="end"
+                font-size="9"
+                fill="#718096"
+              >
+                12
+              </text>
+              <text
+                x="70"
+                y="47"
+                text-anchor="end"
+                font-size="9"
+                fill="#718096"
+              >
+                16
+              </text>
+
+              <!-- X-axis labels -->
+              <text
+                x="130"
+                y="255"
+                text-anchor="middle"
+                font-size="9"
+                fill="#718096"
+              >
+                512
+              </text>
+              <text
+                x="230"
+                y="255"
+                text-anchor="middle"
+                font-size="9"
+                fill="#718096"
+              >
+                1k
+              </text>
+              <text
+                x="330"
+                y="255"
+                text-anchor="middle"
+                font-size="9"
+                fill="#718096"
+              >
+                2k
+              </text>
+              <text
+                x="430"
+                y="255"
+                text-anchor="middle"
+                font-size="9"
+                fill="#718096"
+              >
+                4k
+              </text>
+              <text
+                x="530"
+                y="255"
+                text-anchor="middle"
+                font-size="9"
+                fill="#718096"
+              >
+                8k
+              </text>
+              <text
+                x="620"
+                y="255"
+                text-anchor="middle"
+                font-size="9"
+                fill="#718096"
+              >
+                16k
+              </text>
+
+              <!-- Standard Transformer — quadratic growth -->
+              <polyline
+                points="130,232 230,218 330,195 430,140 530,70"
+                fill="none"
+                stroke="#DC2626"
+                stroke-width="3"
+                stroke-linecap="round"
+              />
+              <circle cx="130" cy="232" r="4" fill="#DC2626" />
+              <circle cx="230" cy="218" r="4" fill="#DC2626" />
+              <circle cx="330" cy="195" r="4" fill="#DC2626" />
+              <circle cx="430" cy="140" r="4" fill="#DC2626" />
+              <circle cx="530" cy="70" r="4" fill="#DC2626" />
+              <!-- OOM marker -->
+              <text
+                x="590"
+                y="55"
+                font-size="12"
+                fill="#DC2626"
+                font-weight="700"
+              >
+                OOM! 💥
+              </text>
+              <line
+                x1="560"
+                y1="60"
+                x2="580"
+                y2="60"
+                stroke="#DC2626"
+                stroke-width="2"
+                stroke-dasharray="3 2"
+              />
+
+              <!-- Linear Transformer — nearly flat -->
+              <polyline
+                points="130,233 230,230 330,228 430,225 530,222 620,219"
+                fill="none"
+                stroke="#059669"
+                stroke-width="3"
+                stroke-linecap="round"
+              />
+              <circle cx="130" cy="233" r="4" fill="#059669" />
+              <circle cx="230" cy="230" r="4" fill="#059669" />
+              <circle cx="330" cy="228" r="4" fill="#059669" />
+              <circle cx="430" cy="225" r="4" fill="#059669" />
+              <circle cx="530" cy="222" r="4" fill="#059669" />
+              <circle cx="620" cy="219" r="4" fill="#059669" />
+
+              <!-- Legend -->
+              <rect
+                x="440"
+                y="95"
+                width="200"
+                height="50"
+                rx="6"
+                fill="#F7FAFC"
+                stroke="#E2E8F0"
+                stroke-width="1"
+              />
+              <line
+                x1="455"
+                y1="112"
+                x2="480"
+                y2="112"
+                stroke="#DC2626"
+                stroke-width="3"
+              />
+              <text x="488" y="116" font-size="10" fill="#1A202C">
+                Standard Transformer
+              </text>
+              <line
+                x1="455"
+                y1="132"
+                x2="480"
+                y2="132"
+                stroke="#059669"
+                stroke-width="3"
+              />
+              <text x="488" y="136" font-size="10" fill="#1A202C">
+                Linear Transformer
+              </text>
+            </svg>
+
+            <div class="box green">
+              <strong>結論：</strong>在序列長度 >4k 的場景下，Linear Transformer
+              的記憶體消耗<strong>幾乎不增長</strong>，而標準 Transformer 已經
+              OOM。
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 28 — 推論吞吐量
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="27">
+          <div class="inner">
+            <h2 class="t2">推論吞吐量 (Throughput)</h2>
+            <p class="lead">
+              RNN 模式的推論速度，比標準 Transformer
+              <strong>快達成千倍</strong>。
+            </p>
+
+            <div class="cols3" style="margin-top: 1rem">
+              <div class="sg">
+                <div class="stat" style="font-size: 2.8rem">~1000×</div>
+                <div class="stat-l">推論速度提升<br />(長序列場景)</div>
+              </div>
+              <div class="sg">
+                <div
+                  class="stat"
+                  style="color: var(--green); font-size: 2.8rem"
+                >
+                  \(O(1)\)
+                </div>
+                <div class="stat-l">
+                  每步推論計算量<br />(固定，不隨序列增長)
+                </div>
+              </div>
+              <div class="sg">
+                <div class="stat" style="color: var(--teal); font-size: 2.8rem">
+                  0
+                </div>
+                <div class="stat-l">KV Cache<br />記憶體需求</div>
+              </div>
+            </div>
+
+            <table class="j data-lg" style="margin-top: 1.2rem">
+              <thead>
+                <tr>
+                  <th>推論設定</th>
+                  <th>Standard Transformer</th>
+                  <th>Linear Transformer (RNN)</th>
+                  <th>加速比</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>序列長度 1k</td>
+                  <td>1.0×</td>
+                  <td class="up">~10×</td>
+                  <td class="up">10×</td>
+                </tr>
+                <tr>
+                  <td>序列長度 4k</td>
+                  <td>1.0×</td>
+                  <td class="up">~100×</td>
+                  <td class="up">100×</td>
+                </tr>
+                <tr class="hi">
+                  <td>序列長度 16k+</td>
+                  <td>OOM / 極慢</td>
+                  <td><strong>~1000× faster</strong></td>
+                  <td><strong>1000×+</strong></td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="insight">
+              <span class="insight-icon">⚡</span>
+              <strong>為什麼這麼快？</strong>因為每生成一個 token，Linear
+              Attention 只需：<strong>(1)</strong> 計算 \(\phi(k_i)\) 和
+              \(\phi(q_i)\)；<strong>(2)</strong> 更新固定大小的 \(S_i\)
+              矩陣；<strong>(3)</strong>
+              做一個矩陣-向量乘法。整個過程與歷史序列長度<strong>完全無關</strong>。
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 29 — 效能權衡
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="28">
+          <div class="inner">
+            <h2 class="t2">效能權衡 (Performance Trade-off)</h2>
+            <p class="lead">
+              誠實面對：Linear Attention
+              在<strong>品質指標</strong>上會有微小的退步。
+            </p>
+
+            <div class="cols">
+              <div>
+                <h3 class="t3">📊 WikiText-103 結果</h3>
+                <table class="j data-lg">
+                  <thead>
+                    <tr>
+                      <th>Model</th>
+                      <th>PPL ↓</th>
+                      <th>Time</th>
+                      <th>Memory</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr class="hi">
+                      <td><strong>Standard Transformer</strong></td>
+                      <td><strong>18.5</strong></td>
+                      <td style="color: var(--red)">\(O(N^2)\)</td>
+                      <td style="color: var(--red)">\(O(N^2)\)</td>
+                    </tr>
+                    <tr>
+                      <td>Linformer</td>
+                      <td>21.3</td>
+                      <td>\(O(N)\)</td>
+                      <td>\(O(N)\)</td>
+                    </tr>
+                    <tr>
+                      <td>
+                        <strong style="color: var(--blue)"
+                          >Linear Transformer</strong
+                        >
+                      </td>
+                      <td>19.2</td>
+                      <td class="up">\(O(N)\)</td>
+                      <td class="up">\(O(1)\) inf.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div>
+                <h3 class="t3">為什麼會掉效能？</h3>
+                <div class="box red">
+                  <p><strong>Softmax 的「尖銳度」</strong></p>
+                  <ul class="b">
+                    <li>
+                      Softmax 可以產生極度<strong>尖銳 (sharp)</strong>
+                      的分佈：幾乎只關注一個 token
+                    </li>
+                    <li>
+                      \(\phi(x) = \text{elu}(x)+1\)
+                      這種簡單映射，<strong>無法</strong>完美重構這種尖銳度
+                    </li>
+                    <li>
+                      Linear kernel 的注意力更「<strong>模糊 (blurry)</strong
+                      >」—— 所有位置的權重更平均
+                    </li>
+                  </ul>
+                </div>
+
+                <div class="box gold" style="margin-top: 0.6rem">
+                  <strong>💡 後續改進方向：</strong>
+                  <ul class="b" style="font-size: 0.85rem">
+                    <li>cosFormer：用 cos 映射提升銳度</li>
+                    <li>Performer：Random Fourier Features</li>
+                    <li>RWKV：加入位置衰減</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 30 — Part 5 Divider: 啟發與未來
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="29">
+          <div class="inner">
+            <div class="section-divider">
+              <div class="part-num">Part 5</div>
+              <h2>啟發與未來</h2>
+              <p class="section-sub">
+                從 Linear Attention 到 SSM 與 GDN —— 通往現代架構的最後拼圖
+              </p>
+              <div
+                class="outline-subline"
+                style="width: 8rem; margin: 1.5rem auto 0"
+                aria-hidden="true"
+              ></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 31 — 致命傷：沒有遺忘機制
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="30">
+          <div class="inner">
+            <h2 class="t2">Linear Attention 的致命傷</h2>
+            <p class="lead">
+              這篇論文證明了
+              <strong>Attention = Memory Update</strong>。但它有一個致命缺點。
+            </p>
+
+            <div class="eq-danger">
+              <div class="eq-label" style="color: var(--red)">
+                NO FORGET GATE / NO DECAY
+              </div>
+              \[S_i = S_{i-1} + \phi(k_i) v_i^T\]
+            </div>
+
+            <div class="cols" style="margin-top: 0.8rem">
+              <div class="box red">
+                <h3 class="t3" style="color: var(--red)">❌ 問題</h3>
+                <ul class="b">
+                  <li>
+                    所有過去的資訊都是<strong>同等權重</strong>加進 \(S_i\) 裡
+                  </li>
+                  <li>
+                    沒有機制讓模型「<strong>遺忘</strong>」不重要的過去資訊
+                  </li>
+                  <li>狀態矩陣 \(S_i\) 會持續<strong>無限累積</strong></li>
+                  <li>長序列下，新資訊被舊資訊「<strong>稀釋</strong>」</li>
+                </ul>
+              </div>
+              <div class="box green">
+                <h3 class="t3" style="color: var(--green)">✓ 理想的狀態更新</h3>
+                <div
+                  class="eq"
+                  style="margin: 0.3rem 0; border-color: var(--green)"
+                >
+                  \[S_i = \underbrace{\gamma \cdot S_{i-1}}_{\text{遺忘舊資訊}}
+                  + \underbrace{\phi(k_i) v_i^T}_{\text{加入新資訊}}\]
+                </div>
+                <ul class="b">
+                  <li>\(\gamma \in (0,1)\) → 指數衰減過去的記憶</li>
+                  <li>允許模型「<strong>選擇性保留</strong>」重要資訊</li>
+                  <li>類比 LSTM 的 Forget Gate</li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="insight">
+              <span class="insight-icon">🧩</span>
+              <strong>缺少的拼圖：</strong>如果我們能在 Linear Attention 的 RNN
+              公式上加入「遺忘機制」，就能解決長序列的記憶退化問題。這正是後續所有研究的起點。
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 32 — RetNet + Mamba-1：記憶機制的進化
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="31">
+          <div class="inner">
+            <h2 class="t2">第二階段：記憶機制的進化</h2>
+            <p class="lead">
+              Linear Attention
+              的致命傷是「缺乏遺忘」。接下來的架構都在解決<strong>如何管理記憶</strong>。
+            </p>
+
+            <div class="cols" style="margin-top: 0.8rem">
+              <!-- RetNet -->
+              <div>
+                <div class="deriv-step" style="border-color: var(--teal)">
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 0.5rem;
+                      margin-bottom: 0.3rem;
+                    "
+                  >
+                    <span class="tag teal">2023</span>
+                    <strong>RetNet — 指數衰減</strong>
+                  </div>
+                  <div
+                    class="eq"
+                    style="margin: 0.3rem 0; border-color: var(--teal)"
+                  >
+                    \[S_i = \gamma \cdot S_{i-1} + \phi(k_i) v_i^T\]
+                  </div>
+                  <ul class="b" style="font-size: 0.85rem">
+                    <li>引入固定衰減矩陣 \(\gamma\) → 逐漸遺忘過去</li>
+                    <li>
+                      定義三種計算模式：<strong>Parallel</strong>（訓練）、<strong>Recurrent</strong>（推論）、<strong>Chunkwise</strong>（長文本）
+                    </li>
+                    <li>
+                      📌 將 Attention
+                      轉化為「<strong>可控記憶體</strong>」的重要過渡
+                    </li>
+                  </ul>
+                  <p
+                    style="
+                      font-size: 0.78rem;
+                      color: var(--ink3);
+                      margin-top: 0.3rem;
+                    "
+                  >
+                    [Sun et al., 2023]
+                  </p>
+                </div>
+              </div>
+              <!-- Mamba-1 -->
+              <div>
+                <div class="deriv-step" style="border-color: var(--green)">
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 0.5rem;
+                      margin-bottom: 0.3rem;
+                    "
+                  >
+                    <span class="tag green">2023</span>
+                    <strong>Mamba-1 — Selective State Space</strong>
+                  </div>
+                  <div
+                    class="eq"
+                    style="margin: 0.3rem 0; border-color: var(--green)"
+                  >
+                    \[h_t = \overline{A}(x_t) \cdot h_{t-1} + \overline{B}(x_t)
+                    \cdot x_t\]
+                  </div>
+                  <ul class="b" style="font-size: 0.85rem">
+                    <li>離散更新 → <strong>連續時間動態系統</strong></li>
+                    <li>
+                      衰減係數 \(\overline{A}\)
+                      <strong>依賴於輸入</strong>（Data-dependent Gating）
+                    </li>
+                    <li>
+                      Selective Scan：模型能<strong>選擇性記憶</strong>重要資訊
+                    </li>
+                    <li>
+                      推論速度比 Transformer 快 <strong>5×</strong>，線性擴展
+                    </li>
+                  </ul>
+                  <p
+                    style="
+                      font-size: 0.78rem;
+                      color: var(--ink3);
+                      margin-top: 0.3rem;
+                    "
+                  >
+                    [Gu &amp; Dao, 2023]
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="box accent" style="margin-top: 0.6rem">
+              <strong>演進脈絡：</strong>Linear Attention \(S_i = S_{i-1} +
+              \dots\) → RetNet 加入固定衰減 \(\gamma\) → Mamba 讓衰減<strong
+                >依賴輸入</strong
+              >
+              \(\overline{A}(x_t)\)。每一步都讓「記憶管理」更加智慧。
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 33 — Mamba-2 / SSD：理論統一
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="32">
+          <div class="inner">
+            <h2 class="t2">Mamba-2：狀態空間對偶性 (SSD)</h2>
+            <p class="lead">
+              Dao &amp; Gu (2024) 在數學上證明了一個驚人的結論：<strong
+                >SSM 和 Linear Attention 是同一件事</strong
+              >。
+            </p>
+
+            <div class="eq-highlight">
+              <div class="eq-label">STATE SPACE DUALITY (SSD)</div>
+              \[\text{SSM (Recurrent)} \;\equiv\; \text{Linear Attention
+              (Parallel)} \;\equiv\; \text{Semiseparable Matrices}\]
+            </div>
+
+            <div class="cols" style="margin-top: 0.8rem">
+              <div>
+                <h3 class="t3">📐 理論貢獻</h3>
+                <ul class="b">
+                  <li>
+                    三者本質上都是操作同一類<strong
+                      >「半可分矩陣 (Semiseparable Matrices)」</strong
+                    >
+                  </li>
+                  <li>
+                    Recurrent（RNN 視角）= Parallel（Attention 視角）=
+                    矩陣分解視角
+                  </li>
+                  <li>統一了 Linear Attention、SSM、以及結構化矩陣理論</li>
+                </ul>
+
+                <div
+                  class="pipe"
+                  style="margin-top: 0.6rem; justify-content: center"
+                >
+                  <div
+                    class="pipe-s"
+                    style="
+                      font-size: 0.65rem;
+                      border-color: var(--blue);
+                      color: var(--blue);
+                    "
+                  >
+                    Linear Attn<br />Parallel
+                  </div>
+                  <span class="pa" style="font-size: 0.8rem">≡</span>
+                  <div
+                    class="pipe-s"
+                    style="
+                      font-size: 0.65rem;
+                      border-color: var(--green);
+                      color: var(--green);
+                    "
+                  >
+                    SSM<br />Recurrent
+                  </div>
+                  <span class="pa" style="font-size: 0.8rem">≡</span>
+                  <div
+                    class="pipe-s"
+                    style="
+                      font-size: 0.65rem;
+                      border-color: var(--teal);
+                      color: var(--teal);
+                    "
+                  >
+                    Semisep.<br />Matrix
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h3 class="t3">⚡ 硬體加速突破</h3>
+                <ul class="b">
+                  <li>
+                    利用對偶性，設計類似
+                    <strong>FlashAttention 的區塊矩陣乘法</strong>
+                  </li>
+                  <li>
+                    用 <strong>Triton Kernel</strong> 實現極度高效的 GPU 運算
+                  </li>
+                  <li>
+                    硬體利用率從 Mamba-1 的 ~30% 提升至 <strong>~75%</strong>
+                  </li>
+                  <li>
+                    比 Mamba-1 快 <strong>2-8×</strong>，同時保持線性複雜度
+                  </li>
+                </ul>
+
+                <div class="box green" style="margin-top: 0.5rem">
+                  <strong>意義：</strong>理論統一 + 硬體極致優化。從 Linear
+                  Attention 出發，在 Mamba-2
+                  達成了<strong>理論與工程的完美統一</strong>。
+                </div>
+              </div>
+            </div>
+
+            <p
+              style="
+                font-size: 0.78rem;
+                color: var(--ink3);
+                margin-top: 0.4rem;
+                text-align: right;
+              "
+            >
+              [Dao &amp; Gu, 2024] —
+              <em
+                >Transformers are SSMs: Generalized Models and Efficient
+                Algorithms Through Structured State Space Duality</em
+              >
+            </p>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 34 — Delta Rule + GDN
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="33">
+          <div class="inner">
+            <h2 class="t2">第三階段：Delta Rule 與 Gated Delta Networks</h2>
+            <p class="lead">
+              最前沿的研究：把狀態更新看作「<strong>微型神經網路的訓練過程</strong>」。
+            </p>
+
+            <div class="cols" style="margin-top: 0.6rem">
+              <div>
+                <h3 class="t3" style="color: var(--gold)">
+                  🔄 Delta Rule — 精準記憶更新
+                </h3>
+                <div class="eq" style="border-color: var(--gold)">
+                  \[S_i = S_{i-1} + \beta_i \cdot \phi(k_i)\bigl(v_i^T -
+                  \phi(k_i)^T S_{i-1}\bigr)\]
+                </div>
+                <ul class="b" style="font-size: 0.85rem">
+                  <li>
+                    不是盲目地「加入」新資訊，而是先計算<strong>預測誤差</strong>：\(v_i^T
+                    - \phi(k_i)^T S_{i-1}\)
+                  </li>
+                  <li>像 <strong>SGD 梯度下降</strong>一樣修正狀態矩陣</li>
+                  <li>
+                    <strong>[Yang et al., NeurIPS 2024]</strong> 解決了 Delta
+                    Rule 在 GPU 上<strong>跨序列平行化</strong>的難題
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h3 class="t3" style="color: var(--purple)">
+                  🚀 GDN — 門控 + Delta Rule
+                </h3>
+                <div class="eq" style="border-color: var(--purple)">
+                  \[S_i = \underbrace{\alpha_i \odot S_{i-1}}_{\text{Gating
+                  (清除)}} + \underbrace{\beta_i \cdot \phi(k_i)(v_i^T -
+                  \phi(k_i)^T S_{i-1})}_{\text{Delta Rule (精準寫入)}}\]
+                </div>
+                <ul class="b" style="font-size: 0.85rem">
+                  <li>
+                    結合 Mamba-2 的<strong>資料依賴門控</strong> + Delta Rule
+                    的<strong>精準更新</strong>
+                  </li>
+                  <li>
+                    <strong>Gating \(\alpha_i\)</strong
+                    >：負責快速清除不需要的記憶
+                  </li>
+                  <li>
+                    <strong>Delta Rule</strong
+                    >：負責精準寫入新記憶（非盲目累加）
+                  </li>
+                  <li>
+                    目前 SOTA：<strong
+                      >Memory Update = Gated Gradient Descent</strong
+                    >
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="insight" style="margin-top: 0.8rem">
+              <span class="insight-icon">🏆</span>
+              <strong>最終形態：</strong>從 Linear Attention 的簡單加法 \(S_i =
+              S_{i-1} + \phi(k)v^T\)，到 GDN
+              的「門控梯度下降」——<strong>記憶體管理從被動累積演變為主動的、精準的、選擇性的更新</strong>。
+            </div>
+
+            <p
+              style="
+                font-size: 0.78rem;
+                color: var(--ink3);
+                margin-top: 0.3rem;
+                text-align: right;
+              "
+            >
+              [Yang et al., 2024] —
+              <em>Gated Delta Networks: Improving Mamba2 with Delta Rule</em>
+            </p>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE — Grand Unification: Test-Time Regression
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="34">
+          <div class="inner">
+            <h2 class="t2">大一統視角：Test-Time Regression (2025)</h2>
+            <p class="lead">
+              Stanford
+              最新研究揭示：我們今天講的所有架構，都是<strong>同一件事</strong>的不同形式。
+            </p>
+
+            <div class="eq-highlight" style="border-color: var(--purple)">
+              <div class="eq-label" style="color: var(--purple)">
+                THE GRAND UNIFICATION
+              </div>
+              \[\text{Sequence Layer} =
+              \underbrace{\text{Memorization}}_{\text{Test-Time Regression}} +
+              \underbrace{\text{Retrieval}}_{\text{Query Lookup}}\]
+            </div>
+
+            <!-- Funnel diagram -->
+            <svg
+              viewBox="0 0 820 220"
+              width="100%"
+              style="
+                font-family: var(--sans);
+                max-width: 54rem;
+                display: block;
+                margin: 0.6rem auto;
+              "
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <!-- Top row: architectures -->
+              <rect
+                x="10"
+                y="10"
+                width="150"
+                height="52"
+                rx="6"
+                fill="#DBEAFE"
+                stroke="#1E3A8A"
+                stroke-width="1.5"
+              />
+              <text
+                x="85"
+                y="32"
+                text-anchor="middle"
+                font-size="10"
+                fill="#1E3A8A"
+                font-weight="700"
+              >
+                Linear Attention
+              </text>
+              <text
+                x="85"
+                y="50"
+                text-anchor="middle"
+                font-size="8"
+                fill="#3B82F6"
+              >
+                固定步長 SGD
+              </text>
+
+              <rect
+                x="175"
+                y="10"
+                width="150"
+                height="52"
+                rx="6"
+                fill="#CCFBF1"
+                stroke="#0D9488"
+                stroke-width="1.5"
+              />
+              <text
+                x="250"
+                y="32"
+                text-anchor="middle"
+                font-size="10"
+                fill="#0D9488"
+                font-weight="700"
+              >
+                RetNet / Mamba
+              </text>
+              <text
+                x="250"
+                y="50"
+                text-anchor="middle"
+                font-size="8"
+                fill="#0D9488"
+              >
+                加權迴歸 + 衰減
+              </text>
+
+              <rect
+                x="340"
+                y="10"
+                width="150"
+                height="52"
+                rx="6"
+                fill="#EDE9FE"
+                stroke="#7C3AED"
+                stroke-width="1.5"
+              />
+              <text
+                x="415"
+                y="32"
+                text-anchor="middle"
+                font-size="10"
+                fill="#7C3AED"
+                font-weight="700"
+              >
+                DeltaNet / GDN
+              </text>
+              <text
+                x="415"
+                y="50"
+                text-anchor="middle"
+                font-size="8"
+                fill="#7C3AED"
+              >
+                完整線上 GD
+              </text>
+
+              <rect
+                x="505"
+                y="10"
+                width="150"
+                height="52"
+                rx="6"
+                fill="#FEE2E2"
+                stroke="#DC2626"
+                stroke-width="1.5"
+              />
+              <text
+                x="580"
+                y="32"
+                text-anchor="middle"
+                font-size="10"
+                fill="#DC2626"
+                font-weight="700"
+              >
+                Softmax Attention
+              </text>
+              <text
+                x="580"
+                y="50"
+                text-anchor="middle"
+                font-size="8"
+                fill="#DC2626"
+              >
+                非參數核迴歸
+              </text>
+
+              <rect
+                x="670"
+                y="10"
+                width="140"
+                height="52"
+                rx="6"
+                fill="#FEF3C7"
+                stroke="#D97706"
+                stroke-width="1.5"
+              />
+              <text
+                x="740"
+                y="32"
+                text-anchor="middle"
+                font-size="10"
+                fill="#D97706"
+                font-weight="700"
+              >
+                TTT Layer
+              </text>
+              <text
+                x="740"
+                y="50"
+                text-anchor="middle"
+                font-size="8"
+                fill="#D97706"
+              >
+                多步 GD + 非線性
+              </text>
+
+              <!-- Funnel arrows -->
+              <line
+                x1="85"
+                y1="62"
+                x2="410"
+                y2="100"
+                stroke="#1E3A8A"
+                stroke-width="1.5"
+                opacity="0.4"
+              />
+              <line
+                x1="250"
+                y1="62"
+                x2="410"
+                y2="100"
+                stroke="#0D9488"
+                stroke-width="1.5"
+                opacity="0.4"
+              />
+              <line
+                x1="415"
+                y1="62"
+                x2="410"
+                y2="100"
+                stroke="#7C3AED"
+                stroke-width="1.5"
+                opacity="0.4"
+              />
+              <line
+                x1="580"
+                y1="62"
+                x2="410"
+                y2="100"
+                stroke="#DC2626"
+                stroke-width="1.5"
+                opacity="0.4"
+              />
+              <line
+                x1="740"
+                y1="62"
+                x2="410"
+                y2="100"
+                stroke="#D97706"
+                stroke-width="1.5"
+                opacity="0.4"
+              />
+
+              <!-- Unified box -->
+              <rect
+                x="260"
+                y="95"
+                width="300"
+                height="55"
+                rx="10"
+                fill="linear-gradient(135deg,#1E3A8A,#7C3AED)"
+                opacity="0.12"
+                stroke="#1E3A8A"
+                stroke-width="2"
+              />
+              <text
+                x="410"
+                y="118"
+                text-anchor="middle"
+                font-size="14"
+                fill="#1E3A8A"
+                font-weight="700"
+              >
+                Test-Time Regression
+              </text>
+              <text
+                x="410"
+                y="138"
+                text-anchor="middle"
+                font-size="9.5"
+                fill="#4B5563"
+              >
+                Memorization = Regression · Retrieval = Query
+              </text>
+
+              <!-- Bottom -->
+              <text
+                x="410"
+                y="175"
+                text-anchor="middle"
+                font-size="10"
+                fill="#1E3A8A"
+                font-weight="600"
+              >
+                選擇 3 個要素即可定義任何序列模型：
+              </text>
+              <text
+                x="185"
+                y="200"
+                text-anchor="middle"
+                font-size="9.5"
+                fill="#059669"
+                font-weight="600"
+              >
+                ① 迴歸權重 γ
+              </text>
+              <text
+                x="410"
+                y="200"
+                text-anchor="middle"
+                font-size="9.5"
+                fill="#7C3AED"
+                font-weight="600"
+              >
+                ② 記憶參數化 M
+              </text>
+              <text
+                x="635"
+                y="200"
+                text-anchor="middle"
+                font-size="9.5"
+                fill="#D97706"
+                font-weight="600"
+              >
+                ③ 優化演算法
+              </text>
+            </svg>
+
+            <div class="insight">
+              <span class="insight-icon">🎓</span>
+              <strong>一句話總結：</strong>我們今天從 \(O(N^2)\)
+              走到線性的這條路，並非工程上的隨機嘗試，而是一場<strong>「如何讓模型在推論時，更有效率地進行自我迴歸訓練」</strong>的數學演化史。<br />
+              <span style="font-size: 0.78rem; color: var(--ink3)"
+                >[Sun et al., 2025] —
+                <em
+                  >Test-Time Regression: a Unifying Framework for Sequence
+                  Layers</em
+                >. Stanford.</span
+              >
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE — 終局 & References & Q&A
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="35">
+          <div class="inner">
+            <h2 class="t2">終局：從一篇論文看整個架構演進</h2>
+
+            <!-- Final timeline pipe -->
+            <div
+              class="pipe"
+              style="justify-content: center; margin-bottom: 1rem"
+            >
+              <div
+                class="pipe-s"
+                style="
+                  border-color: var(--red);
+                  color: var(--red);
+                  font-size: 0.65rem;
+                "
+              >
+                Softmax<br />\(O(N^2)\)
+              </div>
+              <span class="pa">→</span>
+              <div class="pipe-s hi" style="font-size: 0.65rem">
+                Linear Attn<br />Kernel Trick
+              </div>
+              <span class="pa">→</span>
+              <div
+                class="pipe-s"
+                style="
+                  border-color: var(--teal);
+                  color: var(--teal);
+                  font-size: 0.65rem;
+                "
+              >
+                RetNet<br />+ Decay
+              </div>
+              <span class="pa">→</span>
+              <div
+                class="pipe-s"
+                style="
+                  border-color: var(--green);
+                  color: var(--green);
+                  font-size: 0.65rem;
+                "
+              >
+                Mamba<br />Selective
+              </div>
+              <span class="pa">→</span>
+              <div
+                class="pipe-s"
+                style="
+                  border-color: var(--purple);
+                  color: var(--purple);
+                  font-size: 0.65rem;
+                "
+              >
+                GDN<br />Delta Rule
+              </div>
+            </div>
+
+            <div class="insight" style="margin-bottom: 1rem">
+              <span class="insight-icon">🎯</span>
+              <strong>核心 Takeaway：</strong>Katharopoulos et al. (2020)
+              從數學上揭示了
+              <strong>Attention 的本質就是 Memory Update</strong>。所有後續的
+              SSM、Mamba、GDN 都是在這個基礎上，加入更聰明的「記憶管理」機制。
+            </div>
+
+            <div style="margin-top: 0.5rem">
+              <h3 class="t3">📚 References</h3>
+              <div class="box" style="font-size: 0.82rem; line-height: 1.7">
+                <ol class="n" style="font-size: 0.82rem">
+                  <li>
+                    <strong>[Vaswani et al., 2017]</strong>
+                    <em>Attention Is All You Need</em>. NeurIPS. — The
+                    \(O(N^2)\) Baseline
+                  </li>
+                  <li>
+                    <strong>[Dao et al., 2022]</strong>
+                    <em
+                      >FlashAttention: Fast and Memory-Efficient Exact Attention
+                      with IO-Awareness</em
+                    >. NeurIPS.
+                  </li>
+                  <li>
+                    <strong>[Katharopoulos et al., 2020]</strong>
+                    <em
+                      >Transformers are RNNs: Fast Autoregressive Transformers
+                      with Linear Attention</em
+                    >. ICML. — <strong style="color: var(--blue)">Core</strong>
+                  </li>
+                  <li>
+                    <strong>[Wang et al., 2020]</strong>
+                    <em>Linformer: Self-Attention with Linear Complexity</em>.
+                    arXiv.
+                  </li>
+                  <li>
+                    <strong>[Sun et al., 2023]</strong>
+                    <em
+                      >RetNet: A Successor to Transformer for Large Language
+                      Models</em
+                    >. arXiv.
+                  </li>
+                  <li>
+                    <strong>[Gu &amp; Dao, 2023]</strong>
+                    <em
+                      >Mamba: Linear-Time Sequence Modeling with Selective State
+                      Spaces</em
+                    >. arXiv.
+                  </li>
+                  <li>
+                    <strong>[Dao &amp; Gu, 2024]</strong>
+                    <em
+                      >Transformers are SSMs: Structured State Space Duality</em
+                    >. — Mamba-2/SSD
+                  </li>
+                  <li>
+                    <strong>[Yang et al., 2024]</strong>
+                    <em
+                      >Parallelizing Linear Transformers with the Delta Rule</em
+                    >. NeurIPS.
+                  </li>
+                  <li>
+                    <strong>[Yang et al., 2024]</strong>
+                    <em
+                      >Gated Delta Networks: Improving Mamba2 with Delta
+                      Rule</em
+                    >. — SOTA
+                  </li>
+                  <li>
+                    <strong>[Sun et al., 2025]</strong>
+                    <em
+                      >Test-Time Regression: a Unifying Framework for Sequence
+                      Layers</em
+                    >. Stanford. —
+                    <strong style="color: var(--purple)"
+                      >Grand Unification</strong
+                    >
+                  </li>
+                </ol>
+              </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 1.5rem">
+              <div
+                style="
+                  font-family: var(--serif);
+                  font-size: 1.5rem;
+                  color: var(--blue);
+                  font-weight: 700;
+                "
+              >
+                感謝聆聽 · Q&A
+              </div>
+              <p style="color: var(--ink3); margin-top: 0.3rem">
+                歡迎提問與討論 🙋
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+      <!-- /stage -->
+
+      <!-- ── Toolbar ── -->
+      <div class="toolbar">
+        <button class="nb" id="bp" disabled>← Prev</button>
+        <button class="nb" id="bn">Next →</button>
+        <button class="nb" id="bpa">自動播放</button>
+        <div class="pw"><div class="pb" id="pg" style="width: 3.3%"></div></div>
+        <span class="ct" id="ct">01 / 30</span>
+        <span class="hk"
+          ><kbd>←</kbd><kbd>→</kbd> 或 <kbd>Space</kbd> 切換</span
+        >
+      </div>
+    </div>
+    <!-- /shell -->
+
+    <!-- ── Scripts ── -->
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+      crossorigin="anonymous"
+    ></script>
+    <script defer src="./presentation.js"></script>
+  </body>
+</html>

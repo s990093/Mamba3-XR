@@ -39,7 +39,7 @@ SEQ_ARG = $(if $(strip $(SEQ_LEN)), --seq-len $(SEQ_LEN),)
 # Extra benchmark args, e.g. BENCH_EXTRA='--prompt "Hello" --decode-tokens 64' or --no-show-io
 BENCH_EXTRA ?=
 
-.PHONY: help mlx-bench mlx-bench-quick mlx-stream mlx-profile mlx-export-npz mlx-force-pt deps-mlx frontend-dev frontend backend-dev backend up
+.PHONY: help mlx-bench mlx-bench-quick mlx-stream mlx-stream-spec mlx-stream-spec-debug mlx-stream-spec-sweep mlx-stream-spec-ab-quant mlx-profile mlx-export-npz mlx-force-pt deps-mlx frontend-dev frontend backend-dev backend up
 
 help:
 	@echo "Mamba3-XR Makefile"
@@ -47,6 +47,10 @@ help:
 	@echo "  make mlx-bench          MLX prefill/decode benchmark (default tokenizer + seq)"
 	@echo "  make mlx-bench-quick    Shorter run (SEQ_LEN=128, DECODE_TOK=32)"
 	@echo "  make mlx-stream         Stream tokens to stdout (default includes full compile + 4-bit quant)"
+	@echo "  make mlx-stream-spec    Stream with single-model speculative decode (draft/target split)"
+	@echo "  make mlx-stream-spec-debug  Spec debug mode: no-eos-stop + show special tokens"
+	@echo "  make mlx-stream-spec-sweep  Sweep speculative draft layers (6/8/10/12)"
+	@echo "  make mlx-stream-spec-ab-quant  A/B speculative quality: quant=8 vs quant=0"
 	@echo "  make mlx-export-npz     Load .pt, write .npz cache next to checkpoint (set CHECKPOINT=...)"
 	@echo "  make mlx-force-pt       Same as mlx-bench but --force-pt"
 	@echo "  make mlx-profile        Layer/host-GPU proxy profiler (see inference/profile_mlx_infer.py)"
@@ -57,7 +61,7 @@ help:
 	@echo "  make up                Start backend-dev + frontend-dev together"
 	@echo "  make deps-mlx           pip install mlx numpy transformers torch"
 	@echo ""
-	@echo "Variables: CHECKPOINT, SEQ_LEN(optional), DECODE_TOK, MAX_NEW_TOK, WARMUP, DTYPE, KV_DTYPE, ROUTER_TEMP, INFER_TYPE, BENCH_EXTRA, STREAM_EXTRA, STREAM_QUANT, BACKEND_HOST, BACKEND_PORT, BACKEND_EXTRA, FRONTEND_PORT, FRONTEND_EXTRA, FRONTEND_API_BASE, FRONTEND_WS_BASE, PYTHON"
+	@echo "Variables: CHECKPOINT, SEQ_LEN(optional), DECODE_TOK, MAX_NEW_TOK, WARMUP, DTYPE, KV_DTYPE, ROUTER_TEMP, INFER_TYPE, BENCH_EXTRA, STREAM_EXTRA, STREAM_QUANT, SPEC_DRAFT_LAYERS, SPEC_MAX_DRAFT, SPEC_NO_EOS_STOP, SPEC_EXTRA, SPEC_SWEEP_LAYERS, SPEC_DEBUG_PROMPT, BACKEND_HOST, BACKEND_PORT, BACKEND_EXTRA, FRONTEND_PORT, FRONTEND_EXTRA, FRONTEND_API_BASE, FRONTEND_WS_BASE, PYTHON"
 	@echo "Example:   make mlx-bench CHECKPOINT=checkpoint.pt SEQ_LEN=1024"
 	@echo "Example:   make mlx-bench BENCH_EXTRA='--prompt \"Hi\" --decode-tokens 32'"
 
@@ -69,14 +73,42 @@ mlx-bench-quick:
 	$(MAKE) mlx-bench SEQ_LEN=128 DECODE_TOK=512 WARMUP=2
 
 # Streaming generation (same checkpoint/tokenizer vars as mlx-bench; MAX_NEW_TOK replaces decode length)
-MAX_NEW_TOK ?= 2048
+MAX_NEW_TOK ?= 512
 # Default stream mode: full decode compile + continue on EOS + 4-bit quant for speed.
-STREAM_QUANT ?= 4
+STREAM_QUANT ?= 8
 STREAM_QUANT_ARG = $(if $(strip $(STREAM_QUANT)), --quantize $(STREAM_QUANT),)
 STREAM_EXTRA ?= --full-decode-compile
+SPEC_DRAFT_LAYERS ?= 8
+SPEC_MAX_DRAFT ?= 4
+SPEC_NO_EOS_STOP ?= 0
+SPEC_EOS_ARG = $(if $(filter 1 true TRUE yes YES,$(SPEC_NO_EOS_STOP)), --no-eos-stop,)
+SPEC_EXTRA ?= --temp 0 --max-consecutive-special 32
+SPEC_SWEEP_LAYERS ?= 6 8 10 12
+SPEC_DEBUG_PROMPT ?= Hello! Write one short sentence about MLX on Apple Silicon.
 
 mlx-stream:
 	$(PYTHON) $(STREAM)$(CKPT_ARG) --tokenizer $(TOK) --inference-type $(INFER_TYPE) --dtype $(DTYPE)$(SEQ_ARG) --max-new-tokens $(MAX_NEW_TOK) --warmup $(WARMUP) --kv-dtype $(KV_DTYPE) --router-temp $(ROUTER_TEMP)$(STREAM_QUANT_ARG) $(STREAM_EXTRA) --no-eos-stop
+
+mlx-stream-spec:
+	$(PYTHON) $(STREAM)$(CKPT_ARG) --tokenizer $(TOK) --inference-type $(INFER_TYPE) --dtype $(DTYPE)$(SEQ_ARG) --max-new-tokens $(MAX_NEW_TOK) --warmup $(WARMUP) --kv-dtype $(KV_DTYPE) --router-temp $(ROUTER_TEMP)$(STREAM_QUANT_ARG) --speculative --spec-draft-layers $(SPEC_DRAFT_LAYERS) --spec-max-draft $(SPEC_MAX_DRAFT) $(SPEC_EXTRA)$(SPEC_EOS_ARG)
+
+mlx-stream-spec-debug:
+	$(MAKE) mlx-stream-spec SPEC_NO_EOS_STOP=1 SPEC_EXTRA='$(SPEC_EXTRA) --show-special-tokens --prompt "$(SPEC_DEBUG_PROMPT)"'
+
+mlx-stream-spec-sweep:
+	@for L in $(SPEC_SWEEP_LAYERS); do \
+		echo ""; \
+		echo "===== speculative draft_layers=$$L ====="; \
+		$(PYTHON) $(STREAM)$(CKPT_ARG) --tokenizer $(TOK) --inference-type $(INFER_TYPE) --dtype $(DTYPE)$(SEQ_ARG) --max-new-tokens $(MAX_NEW_TOK) --warmup $(WARMUP) --kv-dtype $(KV_DTYPE) --router-temp $(ROUTER_TEMP)$(STREAM_QUANT_ARG) --speculative --spec-draft-layers $$L --spec-max-draft $(SPEC_MAX_DRAFT) $(SPEC_EXTRA)$(SPEC_EOS_ARG); \
+	done
+
+mlx-stream-spec-ab-quant:
+	@echo ""
+	@echo "===== speculative quant=8 ====="
+	@$(MAKE) mlx-stream-spec STREAM_QUANT=8
+	@echo ""
+	@echo "===== speculative quant=0 ====="
+	@$(MAKE) mlx-stream-spec STREAM_QUANT=0
 
 # Bottleneck report: wall vs thread CPU, MLX peak memory (does not modify mlx_hybrid_infer.py)
 mlx-profile:

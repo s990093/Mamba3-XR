@@ -1,0 +1,236 @@
+{
+  "checkpoint": "/Users/hungwei/Desktop/Proj/Mamba3-XR/checkpoint.npz",
+  "num_representative_modules": 4,
+  "weighted_module_count": 66,
+  "dense_total_params": 2434793472,
+  "deployed_tucker_total_params": 417002496,
+  "deployed_compression_ratio": 0.8287318818636951,
+  "shape_breakdown": {
+    "768x768": {
+      "count": 24,
+      "dense_params": 113246208.0,
+      "deployed_tucker_params": 114991104.0,
+      "label": "Mamba out projection",
+      "compression_ratio": -0.01540798611111116
+    },
+    "1536x6144": {
+      "count": 24,
+      "dense_params": 1811939328.0,
+      "deployed_tucker_params": 186046464.0,
+      "label": "Mamba x_up projection",
+      "compression_ratio": 0.8973219129774306
+    },
+    "4608x768": {
+      "count": 6,
+      "dense_params": 169869312.0,
+      "deployed_tucker_params": 34830336.0,
+      "label": "Transformer FFN down projection",
+      "compression_ratio": 0.7949580439814815
+    },
+    "768x4608": {
+      "count": 12,
+      "dense_params": 339738624.0,
+      "deployed_tucker_params": 81134592.0,
+      "label": "Transformer FFN up/gate projection",
+      "compression_ratio": 0.7611852575231481
+    }
+  },
+  "representative_modules": [
+    {
+      "name": "backbone.layers.0.out_proj",
+      "label": "Mamba out projection",
+      "shape": "768x768",
+      "family_count": 24
+    },
+    {
+      "name": "backbone.layers.14.ffn.gate_proj",
+      "label": "Transformer FFN up/gate projection",
+      "shape": "768x4608",
+      "family_count": 12
+    },
+    {
+      "name": "backbone.layers.0.x_up_proj",
+      "label": "Mamba x_up projection",
+      "shape": "1536x6144",
+      "family_count": 24
+    },
+    {
+      "name": "backbone.layers.14.ffn.down_proj",
+      "label": "Transformer FFN down projection",
+      "shape": "4608x768",
+      "family_count": 6
+    }
+  ],
+  "compression_frontier": [
+    {
+      "compression_ratio": 0.8,
+      "tucker_relative_error": 0.03136661749535414,
+      "svd_relative_error": 0.04542142095590171,
+      "tucker_energy_retention": 0.9990161353069001,
+      "svd_energy_retention": 0.9979368945183468
+    },
+    {
+      "compression_ratio": 0.8287,
+      "tucker_relative_error": 0.03675780551531893,
+      "svd_relative_error": 0.04965286360047328,
+      "tucker_energy_retention": 0.998648863733698,
+      "svd_energy_retention": 0.9975345931362728
+    },
+    {
+      "compression_ratio": 0.85,
+      "tucker_relative_error": 0.039953585414405815,
+      "svd_relative_error": 0.053010161268475305,
+      "tucker_energy_retention": 0.9984037110125338,
+      "svd_energy_retention": 0.9971899228022902
+    },
+    {
+      "compression_ratio": 0.9,
+      "tucker_relative_error": 0.0515764085390961,
+      "svd_relative_error": 0.06221710039504161,
+      "tucker_energy_retention": 0.9973398740822083,
+      "svd_energy_retention": 0.9961290324184333
+    },
+    {
+      "compression_ratio": 0.93,
+      "tucker_relative_error": 0.05844914787312645,
+      "svd_relative_error": 0.06925946671961195,
+      "tucker_energy_retention": 0.9965836971129054,
+      "svd_energy_retention": 0.995203126269715
+    },
+    {
+      "compression_ratio": 0.95,
+      "tucker_relative_error": 0.06530119897868321,
+      "svd_relative_error": 0.074372396357032,
+      "tucker_energy_retention": 0.9957357534119464,
+      "svd_energy_retention": 0.9944687466601125
+    }
+  ],
+  "rank_sensitivity": {
+    "expert_mode": [
+      {
+        "rank": 1,
+        "energy_retention": 0.9159362861870325,
+        "relative_error": 0.2899374308587415
+      },
+      {
+        "rank": 2,
+        "energy_retention": 0.9571932629982863,
+        "relative_error": 0.206897890278547
+      },
+      {
+        "rank": 3,
+        "energy_retention": 0.9724681094505248,
+        "relative_error": 0.1659273652821476
+      },
+      {
+        "rank": 4,
+        "energy_retention": 0.981504576691663,
+        "relative_error": 0.13599787979353567
+      },
+      {
+        "rank": 5,
+        "energy_retention": 0.9882863517712019,
+        "relative_error": 0.10822960883602073
+      },
+      {
+        "rank": 6,
+        "energy_retention": 0.9932942096442925,
+        "relative_error": 0.08188889030697331
+      },
+      {
+        "rank": 7,
+        "energy_retention": 0.9974177657952351,
+        "relative_error": 0.05081568856922917
+      },
+      {
+        "rank": 8,
+        "energy_retention": 0.999999999999999,
+        "relative_error": 3.161013638317052e-08
+      }
+    ],
+    "input_mode": [
+      {
+        "rank": 32,
+        "energy_retention": 0.9936823502550935,
+        "relative_error": 0.07948364451197774
+      },
+      {
+        "rank": 64,
+        "energy_retention": 0.9956630743546938,
+        "relative_error": 0.06585533877603386
+      },
+      {
+        "rank": 96,
+        "energy_retention": 0.996934137244888,
+        "relative_error": 0.05537023347532502
+      },
+      {
+        "rank": 128,
+        "energy_retention": 0.9978802088558621,
+        "relative_error": 0.04604118964729137
+      },
+      {
+        "rank": 160,
+        "energy_retention": 0.9986183460237108,
+        "relative_error": 0.03717060634815094
+      },
+      {
+        "rank": 192,
+        "energy_retention": 0.9992028431602139,
+        "relative_error": 0.02823396606546971
+      },
+      {
+        "rank": 224,
+        "energy_retention": 0.9996614400630416,
+        "relative_error": 0.018399998286913393
+      },
+      {
+        "rank": 256,
+        "energy_retention": 0.999999999999999,
+        "relative_error": 3.161013638317052e-08
+      }
+    ],
+    "output_mode": [
+      {
+        "rank": 64,
+        "energy_retention": 0.9949883493580783,
+        "relative_error": 0.07079301266312701
+      },
+      {
+        "rank": 128,
+        "energy_retention": 0.9968941323551187,
+        "relative_error": 0.055730311724243024
+      },
+      {
+        "rank": 192,
+        "energy_retention": 0.9980091455750132,
+        "relative_error": 0.04461899175224391
+      },
+      {
+        "rank": 256,
+        "energy_retention": 0.9987490647060918,
+        "relative_error": 0.03536856363931371
+      },
+      {
+        "rank": 320,
+        "energy_retention": 0.9992586837543296,
+        "relative_error": 0.02722712334548805
+      },
+      {
+        "rank": 384,
+        "energy_retention": 0.9996116689160612,
+        "relative_error": 0.01970611793171766
+      },
+      {
+        "rank": 448,
+        "energy_retention": 0.9998517309489071,
+        "relative_error": 0.012176577971371363
+      },
+      {
+        "rank": 512,
+        "energy_retention": 0.999999999999999,
+        "relative_error": 3.161013638317052e-08
+      }
+    ]
+  }
+}

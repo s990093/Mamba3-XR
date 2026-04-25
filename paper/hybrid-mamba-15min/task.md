@@ -1,67 +1,46 @@
-#1. 減少 `report.md` 正文中的 `.py` 路徑寫法，改為方法導向敘述
+1. 需要做 mim說明 也就是在 之前文獻那塊做加強 像是rope 跟mimo等等還有數據 加強 1:4 混合 也是從那逼來的需要說明等等
 
-#2 補上 Mamba 與 GQA 的原理解釋，強調兩者在 Hybrid 架構中的互補角色。
+需要補上 為何還可以保持 tucker 嚴格證明等等 與實驗等等， 先畫出 html
 
-#3 補強 NCU 分析，說明 `_fused_latent_moe_fwd` 與 `_chunk_scan_fwd_kernel` 的不同瓶頸。
+在加入上 on the fly 圖示 就是 tucker 不需要轉換成原本架構， 也是html
 
-#4 補上 Weight Decay 分組理由，以及 TuckerMoE 的正交初始化與 Xavier 初始化說明。 需要數學是說明
+需要說 mamba 在 pareller 那塊 的結合律 很重要
 
-#5 layerScale 設計？ 數學公式說明
-#6 整以不像論文說明 需要以段落式撰寫 以及不會說到什麼公式 api之類的很怪
+可以tucker 反響傳播 步驟圖 跟 透過類似九宮做稀疏矩陣
 
-#7 需要書到 tucker 反向傳播怎麼做跟演算法
+不過，身為你的「教授」，我得拿放大鏡來幫你檢視這份草稿。在學術寫作中，**術語的嚴謹度**與**符號的連貫性**是決定讀者（特別是 Reviewer）能否順暢理解的關鍵。以下是我為你整理的結構、術語與符號修正建議：
 
-#8 用 Jacobian 驗證模型
+### 一、 整體架構檢查
 
-#9. layerScale 需要獨立小節 說因為面對 fp16 65536 太小overflow跟 怎麼壓縮的 跟之後怎麼放寬的 需要去看代碼
+這份報告的骨幹（摘要 $\rightarrow$ 簡介 $\rightarrow$ 相關工作 $\rightarrow$ 方法 $\rightarrow$ 系統實作 $\rightarrow$ 實驗）非常符合主流的 Machine Learning 系統論文格式。
 
-#10. 5.3 Grouped-Query Attention Block 需要說明基本公式等等
+- **建議微調的位置：** 你的「§8 複雜度分析與時間複雜度完整證明」目前放在推論優化 (§7) 與實驗 (§9) 之間。我建議將其**往前移**，放在「§5 模型架構」的最後，或是獨立為 §6，然後再接著講訓練 (§6 $\rightarrow$ 新 §7) 與推論 (§7 $\rightarrow$ 新 §8)。因為複雜度（$O(N^2 d)$ 降至 $O(N)$ 等）是支撐你模型設計合理性的核心理論，讀者在看完架構後會立刻想知道理論複雜度，之後再看具體的系統加速與實驗會更順暢。
+- **「尚待補齊」的寫法：** 在 §9.3.4 中，你很誠實地寫了「尚待補齊的任務級實驗」。在正式交稿或發表時，建議將這段語氣轉換為客觀的「本實驗的限制（Limitations）」或是直接整併到 §10.3 的 Future Work 中。
 
-#11. Figure 1: Method Pipeline 跑版
+### 二、 專業術語（Terminology）的一致性與幽靈詞彙
 
-#12. 在 𝑧′ = 30 ⋅ tanh(𝑧/(30√𝑑)) 那塊也需說明
+報告中出現了幾個「幽靈詞彙」（前面從未定義，後面突然冒出來）以及稱呼不統一的狀況，必須修正：
 
-#13. 所有流程架構圖薛要改高精度SVG
+- **TD-MoE 是什麼？** 在 §10.3 節的 Future Work 中，你突然提到了「**TD-MoE** On-the-fly Inference Pipeline」。這在正文前 9 節從未出現過。我猜測 TD 是 Tucker Decomposition 的縮寫？請在摘要或簡介首次提到 TuckerMoE 時，明確給出這個縮寫，否則讀者會一頭霧水。
+- **Mamba3-XR 是什麼？** 同樣在 §10.3 節，你寫道「**Mamba3-XR** 為 CoT 任務的 backbone」。正文中你一直稱呼它為 Mamba-3 或 Hybrid Mamba-TuckerMoE，這個 "-XR" 標籤是第一次出現，必須刪除或在 §5.2 補上定義。
+- **Macro Block vs. Super-layer：** 在「符號表」中，你將 $L_\text{macro}$ 定義為「super-layer 數」。然而在 §5.1 的標題與內文中，你又全程使用「Macro Block」這個詞。請在全文統一使用其中一種（建議統一名為 Macro Block）。
 
-#14. 一些地方可以圖更多
+### 三、 符號定義與過載問題
 
-#15 資料及使用 fineweb
+數學符號的使用是這份報告需要大修的地方，有許多未解釋的符號與衝突：
 
-#16 詞彙表去參考 設計 有修改 使用lamma 去改的 多了7個 cot 跟 ｉｎｓ mode 特殊token
+- **定義了卻沒用到的符號（Dangling Symbols）：** 在 §5.2 介紹 Mamba-3 Block 時，你寫道模型產生了「$(z, x', B, C, \Delta, A, \lambda)$」這幾個變數。但是，在緊接著的單步遞迴公式 $h_t = \bar{A}_t h_{t-1} + u_t$ 中，$\lambda$ 和 $x'$ 完全沒有出現！如果 $\lambda$ 沒用到，請直接拿掉；如果 $u_t$ 是從 $x'$ 轉換來的，請把公式寫清楚。
+- **序列長度符號大亂鬥（Symbol Overloading）：**
+  - 在符號表中，$N$ 被定義為「序列長度（generation 步數）」。
+  - 在 §5 中，你使用 $L$ 作為張量的序列軸（如 $X \in \mathbb{R}^{L \times d}$）。
+  - 在 §7.1 推論優化時，你突然用 $S>1$ 來代表「初次輸入長度」，並用 $L=1$ 來代表 decode 步數。
+  - 在 §7.3 的表格中，你又用 $D$ 來代表 Decode 步數。
+  - **修改建議：** 請嚴格統一！預訓練/Prefill 的總長度統一代號（例如 $N$），Decode 的當前步數統一代號（例如 $t$），不要讓讀者在 $L, N, S, D$ 之間玩猜謎遊戲。
+- **Tucker 分解的視覺輔助：** 在 §5.4.1 講解 Tucker 分解的公式 $\mathcal{W} \approx \mathcal{G} \times_1 U^{(1)} \times_2 U^{(2)} \times_3 U^{(3)}$ 時，對於不熟悉張量分解的讀者來說，純看 mode-$n$ 乘積會非常抽象。 加入一張類似這種核心張量與三個因子矩陣的 3D 幾何示意圖，會讓這段「為何 Tucker 能捕捉跨專家冗餘」的論述說服力大幅提升。
+- **附錄中的神祕超參數：** 在附錄 B 的完整超參數表中，Model 群組裡出現了一個 `mimo_rank: 4`。什麼是 MIMO Rank？全文正文完全沒有提過這個機制（多輸入多輸出？）。如果這是你實驗程式碼裡留下來的過時參數，請刪除；如果是重要機制，請在 §5 補上說明。
 
-泓瑋你好，這份 Mamba3-XR 的期中報告非常扎實，不僅涵蓋了理論推導，還深入到了 Triton Kernel 加速與 Apple Silicon 的推論優化，展現了很強的底層系統開發能力，這非常符合陽明交大 AI 學院對於高階研究生的期待。
+### 總結
 
-我現在切換到「指導教授」的視角，從學術論文的嚴謹度來幫你檢視這份期中技術報告。以下是針對排版、內容補充、用詞統一性以及數學公式的具體審查意見：
+整體來說，這是一份品質極佳的研究報告。你的問題定義清楚，數學推導與系統優化（NCU Profiling 分析寫得特別好）都有兼顧。把上述的「名詞統一」與「幽靈符號/變數」清乾淨，這份報告的專業度會再往上提升一個檔次。
 
-### 一、 數學公式審查與修正建議
-
-整體的數學推導脈絡清晰，但有幾個公式在符號對齊與排版上存在明顯瑕疵，必須修正以符合學術規範：
-
-- [cite_start]**符號未統一定義 (Mamba 離散化)：** 在符號表與 5.2 節中，對於狀態轉移矩陣的標示不一致。符號表寫道離散化後的矩陣為 $A=exp(\Delta A)$ [cite: 72][cite_start]，但在具體的單步遞迴公式中卻使用了 $\overline{A}_{t}$ 來表示：$h_{t}=\overline{A}_{t}h_{t-1}+u_{t}$ [cite: 156]。建議全篇統一使用標準的 $\overline{A}$ 符號來代表離散化後的連續矩陣。
-- [cite_start]**公式排版破損 (Router Z-loss)：** 6.1 節中的 Router Z-loss 公式出現了嚴重的文字與數學符號混雜：`LzE(logsumexp(capped logits))2]` [cite: 249]。你必須將其替換為正規的 LaTeX 數學表達式，例如：$\mathcal{L}_{Z}=\mathbb{E}[(\log\sum\exp(z_{capped}))^{2}]$。
-- [cite_start]**不當的文字嵌入公式 (複雜度分析)：** 在 8.3 節描述 Hybrid 架構的 per-token 成本時，公式分母處直接塞入了英文解釋 $\frac{\alpha~c_{1}d^{2}+(1-\alpha)c_{2}td}{linear~in~t}$ [cite: 333][cite_start]。學術寫作中，公式內不應直接寫出 `linear in t` 這種敘述 [cite: 333]。建議將公式寫乾淨，並在公式後方用文字補充說明「該項相對於 $t$ 呈線性成長」。
-- [cite_start]**Tucker 分解公式的下標說明：** 5.4.1 節中的元素層面重建公式 $\mathcal{W}_{e,i,j}\approx\sum_{j_{1},j_{2},j_{3}}\mathcal{G}_{j_{1}j_{2}j_{3}}\cdot U_{e,j_{1}}^{(1)}\cdot U_{i,j_{2}}^{(2)}\cdot U_{j,j_{3}}^{(3)}$ 是正確的 [cite: 193]，但建議在下方簡單宣告一下 $j_{1},j_{2},j_{3}$ 的迭代範圍分別對應到秩 $r_{1},r_{2},r_{3}$，這樣會讓數學定義更無懈可擊。
-
-### 二、 用詞統一性問題
-
-技術報告最忌諱中英夾雜與專有名詞切換，目前報告中有幾處術語在不同段落間搖擺：
-
-- [cite_start]**Expert 與 專家：** 報告中頻繁交替使用「expert」與「專家」 [cite: 82, 83][cite_start]。例如同一段落會出現「expert 差異」與「專家差異」 [cite: 82]。建議在 1.3 節首次提及 Mixture-of-Experts 時標註「(以下簡稱專家)」，其後全篇統一使用中文「專家」，或全篇統一使用斜體 _expert_。
-- [cite_start]**Router 與 路由：** 情況同上，6.1 節提到了「router 負載平衡項」 [cite: 246][cite_start]，但隨後又提到「路由分佈」 [cite: 254]。建議統一為「Router」或「路由器」。
-- [cite_start]**Attention 的大小寫與中英文：** 報告中出現了小寫的「attention」 [cite: 75][cite_start]、首字母大寫的「Attention」 [cite: 315] [cite_start]以及中文的「注意力」 [cite: 182]。請決定一個主要用詞並統一。
-- [cite_start]**Macro Block 的寫法：** 在 5.1 節出現了「macro block」 [cite: 153][cite_start]、首字母大寫的「Macro Block」 [cite: 149][cite_start]，以及在 3.1 節出現了「混合 block」 [cite: 106]。這些應視為同一個專有架構名詞，請統一為「Macro Block」。
-- [cite_start]**程式碼變數直接入文：** 在 6.5 節與 9.4 節中，直接將底層 Kernel 名稱如 `_chunk_scan_fwd_kernel` 與 `_fused_latent_moe_fwd` 寫入內文 [cite: 283, 289]。建議給這些 Kernel 套用 `monospace` (等寬字體) 或加上引號，以區分正常內文與程式碼變數。
-
-### 三、 必須補充與修改的內容 (Missing Content)
-
-- [cite_start]**移除自言自語的 Placeholder：** 3.2 節資料集介紹的最後出現了一句：「註:本節後續可再補充 tokenizer 與詞彙表調整的說明。」 [cite: 109]。這句話絕對不能出現在提交給教授或公開發表的期中報告裡。請直接把 Tokenizer 的細節補上，或者將這句話刪除。
-- [cite_start]**核心證據的缺失 (非常關鍵)：** 你在 9.3.4 節非常誠實地寫道，目前只完成了權重空間層級的實驗，缺乏 validation loss / PPL 以及 matched-quality 的對照 [cite: 419]。身為教授，看到這裡會覺得「故事講了一大半，但少了最致命的一擊」。既然是期中報告，這點可以接受，但你必須在 10.3 節 (Future Work) 中，將「補齊 Validation PPL 與端到端生成品質 (Generation Quality) 評估」列為 Phase 2 的**最絕對優先事項**。
-- [cite_start]**推論優化的數據對照：** 7 節提到了 Apple Silicon 上的圖級融合 (Graph-level fusion) 與雙路徑設計 [cite: 299][cite_start]，並在 7.2 節給出了數學預估 [cite: 304]。但後續的實驗章節 (第 9 章) 卻完全沒有 MLX 後端在 M2 Pro/M 系列晶片上的吞吐量 (tokens/sec) 實測數據。你應該要在第 9 章補上一個 MLX 端的 Prefill/Decode 實際測速表格，才能呼應第 7 章的系統設計。
-
-### 四、 排版與寫作規範
-
-- [cite_start]**圖表標題 (Captions) 缺乏描述：** 學術報告的圖表必須具備「獨立閱讀性」(Self-contained)。例如表 1 [cite: 232] [cite_start]與表 2 [cite: 235] 只有簡單的欄位，卻沒有加上正式的 Table Caption (例如：_表 1：Dense FFN 與 TuckerMoE 之記憶體存取特性比較_)。請為每一份表格加上編號與詳盡的標題說明。
-- [cite_start]**參考文獻格式：** 第 11 節的參考文獻列舉了 15 篇 paper [cite: 508, 531][cite_start]，但格式略顯鬆散，部分文獻的會議名稱與年份換行斷開了（例如 Dao & Gu 的 ICML 2024 被切到了下一行 [cite: 509, 510]）。請確保採用標準的 IEEE 或 APA 格式統一排版。
-
-**總結來說：**
-[cite_start]這是一篇含金量極高的技術報告。把公式裡的英文拿掉、統一全篇的專有名詞、刪除那句忘記拿掉的備註 [cite: 109]，並把 Apple Silicon 的實測跑分補上，這份報告就具備了頂尖會議 Workshop 的水準了。繼續保持這個研究動能！
+去把這幾個細節修一修，我很期待看到最終定稿！如果有哪幾個數學公式不知道怎麼統一比較好，我們可以再來討論。

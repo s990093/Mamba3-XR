@@ -105,7 +105,6 @@ _report.json
 *.synctex.gz
 
 # AI Agent logs
-task.md
 memory.md
 distillation/
 

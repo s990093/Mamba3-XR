@@ -1,0 +1,36 @@
+\documentclass[varwidth=190mm,border=8pt]{standalone}
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage[T1]{fontenc}
+\usepackage[noend]{algpseudocode}
+\algrenewcommand\algorithmicrequire{\textbf{Input:}}
+\algrenewcommand\algorithmicensure{\textbf{Output:}}
+\algrenewcommand\algorithmicrequire{\textbf{Require:}}
+\algrenewcommand\algorithmicensure{\textbf{Ensure:}}
+\algrenewcommand\algorithmicreturn{\textbf{return}}
+\begin{document}
+\begin{minipage}{180mm}
+\small
+\noindent\textbf{Procedure 1} TuckerMoE Forward Pass\par
+\vspace{2pt}\hrule\vspace{4pt}
+\begin{algorithmic}[1]
+\Require $x \in \mathbb{R}^{B\times L\times d_{\mathrm{in}}}$, router $W_r \in \mathbb{R}^{d_{\mathrm{in}}\times E}$
+\Statex \hspace{\algorithmicindent} $U_{\mathrm{in}} \in \mathbb{R}^{d_{\mathrm{in}}\times r_3}$, $U_{\mathrm{exp}} \in \mathbb{R}^{E\times r_1}$
+\Statex \hspace{\algorithmicindent} $\mathcal{G} \in \mathbb{R}^{r_1\times r_3\times r_2}$, $U_{\mathrm{out}} \in \mathbb{R}^{r_2\times d_{\mathrm{out}}}$, $b \in \mathbb{R}^{d_{\mathrm{out}}}$
+\Statex \hspace{\algorithmicindent} temperature schedule $T(\mathrm{step})$
+\Ensure $y \in \mathbb{R}^{B\times L\times d_{\mathrm{out}}}$, $\mathcal{L}_{\mathrm{LB}}$, $\mathcal{L}_{\mathrm{Z}}$
+\State $R \gets x W_r$
+\State $\widehat{R} \gets \operatorname{fast\_scaled\_tanh}(R, 10.0)$
+\State $\mathcal{L}_{\mathrm{Z}} \gets \operatorname{mean}(\operatorname{logsumexp}(\widehat{R}, -1)^2)$
+\State $\widetilde{R} \gets \widehat{R} / T(\mathrm{step})$
+\State $I \gets \operatorname{TopKIndices}(\widetilde{R}, k)$
+\State $P \gets \operatorname{Softmax}(\operatorname{Gather}(\widetilde{R}, I), -1)$
+\State $\mathcal{L}_{\mathrm{LB}} \gets E \sum_{e=1}^{E} \bar{m}_e \bar{p}_e$
+\State $G_{\mathrm{exp}} \gets \operatorname{einsum}(\texttt{'er,rst->est'}, U_{\mathrm{exp}}, \mathcal{G})$
+\State $X_{\mathrm{shared}} \gets \operatorname{RMSNorm}(x U_{\mathrm{in}})$
+\State $X_{\mathrm{core}} \gets \operatorname{FusedLatentMoE}(X_{\mathrm{shared}}, G_{\mathrm{exp}}, I, P)$
+\State $y \gets X_{\mathrm{core}} U_{\mathrm{out}} + b$
+\State \Return $y, \mathcal{L}_{\mathrm{LB}}, \mathcal{L}_{\mathrm{Z}}$
+\end{algorithmic}
+\vspace{4pt}\hrule
+\end{minipage}
+\end{document}

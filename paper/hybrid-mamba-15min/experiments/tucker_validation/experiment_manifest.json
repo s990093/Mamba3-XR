@@ -1,0 +1,112 @@
+{
+  "project": "Hybrid Mamba-TuckerMoE Tucker validation suite",
+  "version": 1,
+  "default_metrics": [
+    "val_loss",
+    "val_ppl",
+    "router_entropy",
+    "dead_expert_ratio",
+    "total_params_m",
+    "active_params_m",
+    "step_time_s",
+    "tok_per_s",
+    "peak_memory_mb"
+  ],
+  "experiments": [
+    {
+      "name": "compression_frontier",
+      "goal": "Compare quality retention across Dense MoE, per-expert SVD, and TuckerMoE at matched compression ratios.",
+      "x_axis": "compression_ratio",
+      "primary_metrics": [
+        "val_ppl",
+        "val_loss"
+      ],
+      "methods": [
+        "dense_moe",
+        "svd_moe",
+        "tucker_moe"
+      ],
+      "grid": {
+        "compression_ratio": [
+          0.30,
+          0.50,
+          0.70,
+          0.82,
+          0.90
+        ]
+      }
+    },
+    {
+      "name": "rank_sensitivity",
+      "goal": "Measure how r1, r2, r3 affect quality, expert specialization, and training stability.",
+      "x_axis": "rank_value",
+      "primary_metrics": [
+        "val_ppl",
+        "router_entropy",
+        "dead_expert_ratio"
+      ],
+      "methods": [
+        "tucker_moe"
+      ],
+      "grid": {
+        "r1": [
+          2,
+          4,
+          8
+        ],
+        "r2": [
+          512,
+          1024,
+          1536
+        ],
+        "r3": [
+          128,
+          256,
+          384
+        ]
+      },
+      "fixed_reference": {
+        "r1": 4,
+        "r2": 1024,
+        "r3": 256
+      }
+    },
+    {
+      "name": "shared_subspace_ablation",
+      "goal": "Separate the benefit of low-rank factorization from the benefit of cross-expert sharing.",
+      "x_axis": "method",
+      "primary_metrics": [
+        "val_ppl",
+        "router_entropy",
+        "dead_expert_ratio"
+      ],
+      "methods": [
+        "tucker_shared",
+        "tucker_unshared",
+        "svd_moe"
+      ]
+    },
+    {
+      "name": "recovery_and_system_gain",
+      "goal": "Evaluate recovery speed after compression and compare deployment efficiency at matched quality.",
+      "x_axis": "finetune_steps",
+      "primary_metrics": [
+        "val_ppl",
+        "tok_per_s",
+        "peak_memory_mb"
+      ],
+      "methods": [
+        "svd_moe",
+        "tucker_moe"
+      ],
+      "grid": {
+        "finetune_steps": [
+          0,
+          1000,
+          5000,
+          10000
+        ]
+      }
+    }
+  ]
+}

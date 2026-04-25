@@ -1,0 +1,786 @@
+:root {
+        --ink: #111827;
+        --ink2: #374151;
+        --ink3: #6b7280;
+        --bg: #f9f8f5;
+        --surface: #ffffff;
+        --surface2: #f3f2ee;
+        --rule: #ddd9d0;
+        --rule2: #e8e5df;
+        --blue: #1e3a5f;
+        --blue-lt: #dde9f7;
+        --blue-md: #2d5a9e;
+        --gold: #b5812a;
+        --gold-lt: #fdf4e3;
+        --red: #c0392b;
+        --green: #1a7a4a;
+        --teal: #0d9488;
+        --sans: "Inter", system-ui, sans-serif;
+        --serif: "Lora", "Times New Roman", serif;
+        --mono: "JetBrains Mono", monospace;
+        --r: 6px;
+        --tr: 600ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+        font-family: var(--sans);
+        font-size: clamp(14px, 1.35vw, 18px);
+        color: var(--ink);
+        background: var(--bg);
+        -webkit-font-smoothing: antialiased;
+      }
+      .shell {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background: var(--surface);
+      }
+      .topbar {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.45rem 3vw;
+        border-bottom: 1px solid var(--rule);
+        font-size: 0.65rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        font-weight: 600;
+        color: var(--ink3);
+      }
+      .topbar .venue {
+        color: var(--blue);
+        letter-spacing: 0.14em;
+      }
+      .top-progress {
+        flex: 0 0 auto;
+        height: 6px;
+        background: linear-gradient(
+          90deg,
+          rgba(30, 58, 95, 0.08) 0%,
+          rgba(13, 148, 136, 0.09) 50%,
+          rgba(26, 122, 74, 0.08) 100%
+        );
+        border-bottom: 1px solid var(--rule2);
+        overflow: hidden;
+      }
+      .top-progress-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(
+          90deg,
+          var(--blue) 0%,
+          var(--blue-md) 45%,
+          var(--teal) 100%
+        );
+        box-shadow: 0 0 10px rgba(30, 58, 95, 0.25);
+        transition: width var(--tr);
+      }
+      .stage {
+        flex: 1;
+        min-height: 0;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* Staggered entrance animations for professional look */
+      @keyframes fadeInUp {
+        0% { opacity: 0; transform: translateY(16px); }
+        100% { opacity: 1; transform: translateY(0); }
+      }
+      .slide.active .inner > * {
+        animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        opacity: 0;
+      }
+      .slide.active .inner > *:nth-child(1) { animation-delay: 0.05s; }
+      .slide.active .inner > *:nth-child(2) { animation-delay: 0.1s; }
+      .slide.active .inner > *:nth-child(3) { animation-delay: 0.15s; }
+      .slide.active .inner > *:nth-child(4) { animation-delay: 0.2s; }
+      .slide.active .inner > *:nth-child(5) { animation-delay: 0.25s; }
+      .slide.active .inner > *:nth-child(6) { animation-delay: 0.3s; }
+      .slide.active .inner > *:nth-child(n+7) { animation-delay: 0.4s; }
+      
+      .slide {
+
+        position: absolute;
+        inset: 0;
+        overflow-y: auto;
+        padding: 2rem 4vw 5rem;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(12px) scale(0.99);
+        transition:
+          opacity var(--tr),
+          transform var(--tr);
+      }
+      .slide.active {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateX(0);
+      }
+      .slide.exit-left {
+        transform: translateY(-12px) scale(0.99);
+        opacity: 0;
+      }
+      .inner {
+        max-width: 100%;
+        margin: 0 auto;
+      }
+      h1.t1 {
+        font-family: var(--serif);
+        font-size: clamp(2rem, 4.2vw, 3.4rem);
+        line-height: 1.1;
+        letter-spacing: -0.025em;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+      }
+      h2.t2 {
+        font-family: var(--serif);
+        font-size: clamp(1.3rem, 2.3vw, 1.9rem);
+        font-weight: 600;
+        letter-spacing: -0.015em;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--blue);
+        margin-bottom: 1rem;
+        color: var(--blue);
+      }
+      h3.t3 {
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--blue);
+        margin-bottom: 0.4rem;
+      }
+      p {
+        line-height: 1.6;
+        color: var(--ink2);
+        margin-bottom: 0.65rem;
+      }
+      p:last-child {
+        margin-bottom: 0;
+      }
+      strong {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      .lead {
+        font-family: var(--serif);
+        font-size: 1.08rem;
+        line-height: 1.5;
+        color: var(--ink);
+        margin-bottom: 0.8rem;
+      }
+      .cols {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.3rem;
+        margin-top: 0.6rem;
+      }
+      .cols3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1rem;
+        margin-top: 0.6rem;
+      }
+      @media (max-width: 700px) {
+        .cols,
+        .cols3 {
+          grid-template-columns: 1fr;
+        }
+      }
+      .box {
+        background: var(--surface2);
+        border: 1px solid var(--rule2);
+        border-radius: var(--r);
+        padding: 0.85rem 1rem;
+      }
+      .box.accent {
+        border-left: 4px solid var(--blue);
+        background: var(--blue-lt);
+        padding-left: 1rem;
+      }
+      .box.gold {
+        border-left: 4px solid var(--gold);
+        background: var(--gold-lt);
+        padding-left: 1rem;
+      }
+      .box.red {
+        border-left: 4px solid var(--red);
+        background: #fdf1f0;
+        padding-left: 1rem;
+      }
+      .box.green {
+        border-left: 4px solid var(--green);
+        background: #edf7f1;
+        padding-left: 1rem;
+      }
+      .box.teal {
+        border-left: 4px solid var(--teal);
+        background: #f0fdfa;
+        padding-left: 1rem;
+      }
+      .tag {
+        display: inline-block;
+        font-size: 0.62rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 0.15rem 0.5rem;
+        border-radius: 2px;
+        background: var(--blue);
+        color: #fff;
+        margin-right: 0.3rem;
+        margin-bottom: 0.15rem;
+      }
+      .tag.gold {
+        background: var(--gold);
+      }
+      .tag.red {
+        background: var(--red);
+      }
+      .tag.teal {
+        background: var(--teal);
+      }
+      ul.b {
+        padding-left: 1.1rem;
+        margin: 0.35rem 0;
+      }
+      ul.b li {
+        padding: 0.18rem 0;
+        color: var(--ink2);
+        line-height: 1.5;
+        font-size: 0.92rem;
+      }
+      ul.b li::marker {
+        color: var(--blue);
+      }
+      ol.n {
+        padding-left: 1.2rem;
+        margin: 0.35rem 0;
+      }
+      ol.n li {
+        padding: 0.18rem 0;
+        color: var(--ink2);
+        line-height: 1.5;
+        font-size: 0.92rem;
+      }
+      /* ── 簡報大綱頁（Outline）── */
+      .outline-page {
+        max-width: 58rem;
+        margin: 0 auto;
+        font-size: clamp(1.02rem, 1.22vw, 1.18rem);
+      }
+      .outline-head .t2 {
+        border-bottom: none;
+        padding-bottom: 0.2rem;
+        margin-bottom: 0.4rem;
+        font-size: clamp(1.5rem, 2.8vw, 2.05rem);
+      }
+      .outline-subline {
+        width: 6rem;
+        height: 5px;
+        border-radius: 2px;
+        margin-bottom: 0.85rem;
+        background: linear-gradient(
+          90deg,
+          var(--blue),
+          var(--teal),
+          var(--green)
+        );
+      }
+      .outline-deck {
+        font-family: var(--serif);
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
+        line-height: 1.65;
+        color: var(--ink2);
+        padding: 1rem 1.2rem 1.05rem;
+        margin-bottom: 1.05rem;
+        border-radius: 10px;
+        border: 1px solid var(--rule2);
+        background: linear-gradient(
+          105deg,
+          var(--blue-lt) 0%,
+          rgba(221, 233, 247, 0.35) 45%,
+          var(--surface) 100%
+        );
+        box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
+      }
+      .outline-deck-main {
+        margin: 0;
+        font-size: clamp(1.06rem, 1.28vw, 1.22rem);
+        line-height: 1.65;
+      }
+      .outline-deck-sub {
+        margin: 0;
+        font-size: clamp(0.95rem, 1.05vw, 1.02rem);
+        color: var(--ink3);
+        line-height: 1.55;
+        padding-top: 0.15rem;
+        border-top: 1px solid rgba(221, 217, 208, 0.9);
+      }
+      .outline-rail {
+        width: 100%;
+        max-width: 50rem;
+        height: 64px;
+        margin: 0 auto 0.85rem;
+        display: block;
+        filter: drop-shadow(0 1px 2px rgba(30, 58, 95, 0.06));
+      }
+      .outline-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.2rem;
+        align-items: stretch;
+        margin-top: 0.15rem;
+      }
+      @media (max-width: 960px) {
+        .outline-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+      .outline-card {
+        position: relative;
+        border-radius: 12px;
+        padding: 1rem 1.05rem 1.15rem;
+        min-height: 100%;
+        background: var(--surface);
+        border: 1px solid var(--rule2);
+        box-shadow:
+          0 2px 16px rgba(30, 58, 95, 0.07),
+          0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+        overflow: hidden;
+        transition:
+          transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
+          box-shadow 0.3s ease;
+      }
+      .outline-card:hover {
+        transform: translateY(-4px);
+        box-shadow:
+          0 12px 32px rgba(30, 58, 95, 0.15),
+          0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+      }
+      .outline-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--oc-accent, var(--blue));
+      }
+      .outline-card::after {
+        content: attr(data-oc);
+        position: absolute;
+        top: 0.55rem;
+        right: 0.65rem;
+        font-family: var(--serif);
+        font-size: 2.1rem;
+        font-weight: 700;
+        line-height: 1;
+        color: var(--oc-accent);
+        opacity: 0.12;
+        pointer-events: none;
+      }
+      .outline-card.oc-a {
+        --oc-accent: #1e3a5f;
+      }
+      .outline-card.oc-b {
+        --oc-accent: #0d9488;
+      }
+      .outline-card.oc-c {
+        --oc-accent: #1a7a4a;
+      }
+      .oc-badge {
+        display: inline-block;
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: #fff;
+        background: var(--oc-accent);
+        padding: 0.26rem 0.62rem;
+        border-radius: 4px;
+        margin-bottom: 0.5rem;
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+      }
+      .outline-card h3.t3 {
+        margin-bottom: 0.55rem;
+        color: var(--oc-accent);
+        letter-spacing: 0.05em;
+        font-size: clamp(0.82rem, 0.95vw, 0.92rem);
+      }
+      .outline-card ol.n {
+        margin: 0;
+        padding-left: 1.35rem;
+      }
+      .outline-card ol.n li {
+        font-size: clamp(0.96rem, 1.12vw, 1.06rem);
+        line-height: 1.55;
+        padding: 0.35rem 0;
+      }
+      .outline-card ol.n li::marker {
+        color: var(--oc-accent);
+        font-weight: 600;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .outline-card {
+          transition: none;
+        }
+        .outline-card:hover {
+          transform: none;
+        }
+      }
+      .eq {
+        background: var(--surface2);
+        border: 1px solid var(--rule2);
+        border-radius: var(--r);
+        padding: 0.6rem 0.9rem;
+        margin: 0.55rem 0;
+        overflow-x: auto;
+        text-align: center;
+      }
+      .eq-label {
+        font-size: 0.65rem;
+        color: var(--ink3);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin-bottom: 0.2rem;
+      }
+      table.j {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.78rem;
+        margin: 0.6rem 0;
+      }
+      table.j th {
+        background: var(--blue);
+        color: #fff;
+        padding: 0.36rem 0.55rem;
+        text-align: left;
+        font-weight: 600;
+        font-size: 0.65rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+      table.j td {
+        border-bottom: 1px solid var(--rule2);
+        padding: 0.32rem 0.55rem;
+        vertical-align: top;
+      }
+      table.j tr:last-child td {
+        border-bottom: none;
+      }
+      table.j tr.hi td {
+        background: var(--blue-lt);
+        font-weight: 600;
+        color: var(--blue);
+      }
+      table.j tr:nth-child(even) td {
+        background: rgba(0, 0, 0, 0.015);
+      }
+      /* 寬表／補充實驗：放大數據格與表頭 */
+      table.j.data-lg {
+        font-size: 0.92rem !important;
+        margin: 0.45rem 0;
+      }
+      table.j.data-lg th {
+        font-size: 0.84rem !important;
+        padding: 0.45rem 0.62rem;
+        letter-spacing: 0.04em;
+      }
+      table.j.data-lg td {
+        padding: 0.42rem 0.62rem;
+      }
+      /* 方法對照表：字級再大一号（欄數少、可讀性優先） */
+      table.j.data-xl {
+        font-size: 1.02rem !important;
+        margin: 0.5rem 0;
+      }
+      table.j.data-xl th {
+        font-size: 0.94rem !important;
+        padding: 0.52rem 0.72rem;
+        letter-spacing: 0.035em;
+      }
+      table.j.data-xl td {
+        padding: 0.48rem 0.72rem;
+        line-height: 1.4;
+      }
+      .up {
+        color: var(--green);
+        font-weight: 700;
+      }
+      .dn {
+        color: var(--red);
+      }
+      .pipe {
+        display: flex;
+        align-items: stretch;
+        gap: 0.5rem;
+        margin: 0.8rem 0;
+        flex-wrap: wrap;
+      }
+      .pipe-s {
+        flex: 1 1 85px;
+        border: 1px solid var(--rule);
+        border-radius: var(--r);
+        padding: 0.5rem 0.4rem;
+        text-align: center;
+        background: var(--surface);
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--blue);
+      }
+      .pipe-s.hi {
+        background: var(--blue);
+        color: #fff;
+        border-color: var(--blue);
+      }
+      .pa {
+        align-self: center;
+        color: var(--ink3);
+        font-size: 1rem;
+      }
+      .stat {
+        display: inline-block;
+        font-family: var(--serif);
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--blue);
+        line-height: 1;
+      }
+      .stat-l {
+        font-size: 0.7rem;
+        color: var(--ink3);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        margin-top: 0.15rem;
+      }
+      .sg {
+        text-align: center;
+        padding: 0.4rem 0.25rem;
+      }
+      .toolbar {
+        flex: 0 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        padding: 0.45rem 3vw;
+        border-top: 1px solid var(--rule);
+        background: rgba(249, 248, 245, 0.95);
+        backdrop-filter: blur(8px);
+      }
+      .nb {
+        font-family: var(--sans);
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        padding: 0.35rem 0.8rem;
+        border: 1.5px solid var(--rule);
+        border-radius: var(--r);
+        background: var(--surface);
+        color: var(--ink2);
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .nb:hover:not(:disabled) {
+        border-color: var(--blue);
+        color: var(--blue);
+      }
+      .nb:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+      }
+      .pw {
+        flex: 1;
+        max-width: 10rem;
+        height: 3px;
+        background: var(--rule2);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+      .pb {
+        height: 100%;
+        background: var(--blue);
+        transition: width var(--tr);
+      }
+      .ct {
+        font-variant-numeric: tabular-nums;
+        font-size: 0.68rem;
+        letter-spacing: 0.1em;
+        color: var(--ink3);
+        min-width: 4.5rem;
+        text-align: right;
+      }
+      .hk {
+        font-size: 0.62rem;
+        color: var(--ink3);
+      }
+      kbd {
+        display: inline-block;
+        font-size: 0.58rem;
+        font-family: var(--mono);
+        border: 1px solid var(--rule);
+        border-radius: 2px;
+        padding: 0.03rem 0.25rem;
+        background: var(--surface);
+        color: var(--ink2);
+      }
+      .cover-wrap {
+        min-height: auto;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        padding-bottom: 0.5rem;
+      }
+      .cm {
+        margin-top: 2rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--rule);
+        font-size: 0.82rem;
+        color: var(--ink3);
+        line-height: 1.65;
+      }
+      .cover-figure {
+        margin: 1rem auto 0;
+        max-width: min(920px, 100%);
+        padding: 0.55rem 0.65rem 0.65rem;
+        background: var(--surface);
+        border: 1px solid var(--rule2);
+        border-radius: 10px;
+        box-shadow: 0 4px 28px rgba(30, 58, 95, 0.08);
+      }
+      .cover-figure img {
+        width: 100%;
+        height: auto;
+        display: block;
+        border-radius: 6px;
+      }
+      .cover-figure figcaption {
+        font-size: clamp(0.72rem, 0.85vw, 0.82rem);
+        color: var(--ink3);
+        margin-top: 0.5rem;
+        line-height: 1.5;
+        text-align: center;
+        padding: 0 0.25rem;
+      }
+      /* 論文主圖（寬圖） */
+      .paper-figure {
+        margin: 0.5rem auto 0;
+        max-width: min(1100px, 100%);
+        padding: 0.5rem 0.65rem 0.7rem;
+        background: var(--surface);
+        border: 1px solid var(--rule2);
+        border-radius: 10px;
+        box-shadow: 0 4px 24px rgba(30, 58, 95, 0.07);
+      }
+      .paper-figure img {
+        width: 100%;
+        height: auto;
+        display: block;
+        border-radius: 6px;
+      }
+      .paper-figure figcaption {
+        font-size: clamp(0.82rem, 0.98vw, 0.95rem);
+        color: var(--ink2);
+        margin-top: 0.65rem;
+        line-height: 1.6;
+        text-align: left;
+        padding: 0 0.2rem 0.15rem;
+      }
+      .paper-figure figcaption strong {
+        color: var(--blue);
+      }
+      .deriv-step {
+        border-left: 3px solid var(--blue);
+        padding: 0.5rem 0.9rem;
+        margin: 0.5rem 0;
+        background: rgba(30, 58, 95, 0.03);
+      }
+      .ds-num {
+        display: inline-block;
+        font-size: 0.65rem;
+        font-weight: 700;
+        background: var(--blue);
+        color: #fff;
+        border-radius: 50%;
+        width: 1.3rem;
+        height: 1.3rem;
+        line-height: 1.3rem;
+        text-align: center;
+        margin-right: 0.3rem;
+      }
+
+      @media print {
+        @page {
+          size: A4 landscape;
+          margin: 0.45in;
+        }
+
+        html,
+        body {
+          height: auto !important;
+          overflow: visible !important;
+          background: #fff !important;
+        }
+
+        .shell {
+          height: auto !important;
+          display: block !important;
+          background: #fff !important;
+        }
+
+        .topbar,
+        .top-progress,
+        .toolbar {
+          display: none !important;
+        }
+
+        .stage {
+          position: static !important;
+          overflow: visible !important;
+          min-height: 0 !important;
+        }
+
+        .slide,
+        .slide.active,
+        .slide.exit-left {
+          position: static !important;
+          inset: auto !important;
+          display: block !important;
+          opacity: 1 !important;
+          visibility: visible !important;
+          pointer-events: auto !important;
+          transform: none !important;
+          transition: none !important;
+          overflow: visible !important;
+          page-break-after: always;
+          break-after: page;
+          padding: 0.4in 0.5in 0.55in !important;
+          min-height: 0 !important;
+        }
+
+        .slide:last-child {
+          page-break-after: auto;
+          break-after: auto;
+        }
+
+        .slide.active .inner > * {
+          animation: none !important;
+          opacity: 1 !important;
+        }
+      }

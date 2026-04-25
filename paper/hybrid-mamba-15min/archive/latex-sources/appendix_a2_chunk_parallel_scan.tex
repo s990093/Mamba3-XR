@@ -1,0 +1,36 @@
+\documentclass[varwidth=190mm,border=8pt]{standalone}
+\usepackage{amsmath,amssymb,mathtools,bm}
+\usepackage[T1]{fontenc}
+\usepackage[noend]{algpseudocode}
+\algrenewcommand\algorithmicrequire{\textbf{Input:}}
+\algrenewcommand\algorithmicensure{\textbf{Output:}}
+\algrenewcommand\algorithmicrequire{\textbf{Require:}}
+\algrenewcommand\algorithmicensure{\textbf{Ensure:}}
+\algrenewcommand\algorithmicreturn{\textbf{return}}
+\begin{document}
+\begin{minipage}{180mm}
+\small
+\noindent\textbf{Procedure 2} Chunk-Parallel Scan (SSD)\par
+\vspace{2pt}\hrule\vspace{4pt}
+\begin{algorithmic}[1]
+\Require $x \in \mathbb{R}^{B\times L\times H\times P}$, $\Delta \in \mathbb{R}^{B\times L\times H}$, $A \in \mathbb{R}^{H\times N}$
+\Ensure $y \in \mathbb{R}^{B\times L\times H\times P}$
+\Statex \textbf{Parameters:} chunk size $C = 64$
+\State $M \gets \lceil L / C \rceil$; partition $(x, \Delta)$ into chunks $\{\mathcal{C}_m\}_{m=1}^{M}$
+\ForAll{$m \in \{1, \dots, M\}$ in parallel}
+  \State $\bar{A}^{(m)}_t \gets \exp(\Delta_t A)$ for all $t \in \mathcal{C}_m$
+  \State $S^{(m)} \gets \operatorname{AssociativeScan}(\bar{A}^{(m)}, x^{(m)})$
+  \State $(\alpha^{(m)}, \beta^{(m)}) \gets \operatorname{ChunkSummary}(S^{(m)})$
+\EndFor
+\State $s^{(1)}_{\mathrm{in}} \gets 0$
+\For{$m \gets 1$ to $M$}
+  \If{$m > 1$}
+    \State $s^{(m)}_{\mathrm{in}} \gets \alpha^{(m-1)} s^{(m-1)}_{\mathrm{in}} + \beta^{(m-1)}$
+  \EndIf
+  \State $y^{(m)} \gets \operatorname{ApplyBoundaryState}(S^{(m)}, s^{(m)}_{\mathrm{in}})$
+\EndFor
+\State \Return $\operatorname{Concat}(y^{(1)}, \dots, y^{(M)})$
+\end{algorithmic}
+\vspace{4pt}\hrule
+\end{minipage}
+\end{document}

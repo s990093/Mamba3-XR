@@ -219,7 +219,7 @@ def main() -> None:
     p.add_argument(
         "--prompt",
         type=str,
-        default="Hello! Write one short sentence about MLX on Apple Silicon.",
+        default="The capital of France is",
     )
     p.add_argument("--synthetic-prompt", action="store_true")
     p.add_argument("--temp", type=float, default=0.8)
@@ -289,6 +289,7 @@ def main() -> None:
         kmoe_r3=256,
         ffn_expand=6,
     )
+    
     model = Mamba3LanguageModel(config, vocab_size)
 
     resolved, kind = resolve_mlx_checkpoint(

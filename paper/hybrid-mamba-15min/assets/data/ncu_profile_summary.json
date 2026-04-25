@@ -1,0 +1,277 @@
+{
+  "report_path": "/Users/hungwei/Desktop/Proj/Mamba3-XR/paper/hybrid-mamba-15min/archive/profiling/ncu_moe_scan_report.ncu-rep",
+  "num_ranges": 1,
+  "num_actions": 135,
+  "device": {
+    "display_name": 0.0,
+    "compute_capability_major": 8.0,
+    "compute_capability_minor": 6.0,
+    "sm_count": 82.0,
+    "memory_bus_width_bits": 384.0,
+    "max_mem_frequency_khz": 9751000.0,
+    "max_gpu_frequency_khz": 1785000.0
+  },
+  "overall": {
+    "total_kernel_time_ms": 9.87568,
+    "total_read_mb": 1281.8536376953125,
+    "total_write_mb": 1106.5419921875,
+    "total_traffic_mb": 2388.3956298828125,
+    "effective_bandwidth_gbps": 253.59411564570743,
+    "weighted_dram_pct": 27.846458869699262,
+    "weighted_memory_pct": 73.8948485155761,
+    "weighted_sm_pct": 45.822141497981754
+  },
+  "kernels": [
+    {
+      "name": "_fused_latent_moe_fwd",
+      "launches": 90,
+      "time_ms": 6.608416,
+      "time_share_pct": 66.91606046368453,
+      "read_mb": 197.93115234375,
+      "write_mb": 52.7589111328125,
+      "traffic_mb": 250.6900634765625,
+      "effective_bandwidth_gbps": 39.777699224746144,
+      "weighted_dram_pct": 4.368037545373188,
+      "weighted_memory_pct": 71.98389678440732,
+      "weighted_sm_pct": 35.971472101929116,
+      "mean_occupancy_pct": 61.83801274643057,
+      "mean_eligible_warps": 0.568203038534271,
+      "mean_stall_mio": 15.319637663960576,
+      "mean_stall_long": 3.180429922692546,
+      "mean_stall_short": 3.3985399058544967,
+      "mean_stall_not_selected": 1.6822956032507466,
+      "launch_variants": [
+        {
+          "thread_count": 131072,
+          "grid_size": 512,
+          "registers_per_thread": 40,
+          "shared_mem_per_block": 3072,
+          "count": 66,
+          "mean_duration_ns": 67129.21212121213,
+          "mean_dram_pct": 4.705655472863136,
+          "mean_sm_pct": 41.64690381858224,
+          "mean_occupancy_pct": 73.22564632226437,
+          "mean_eligible_warps": 0.6908080348199446
+        },
+        {
+          "thread_count": 32768,
+          "grid_size": 256,
+          "registers_per_thread": 40,
+          "shared_mem_per_block": 3072,
+          "count": 16,
+          "mean_duration_ns": 101486.0,
+          "mean_dram_pct": 3.5712173943450645,
+          "mean_sm_pct": 19.72724306769432,
+          "mean_occupancy_pct": 24.81496363179624,
+          "mean_eligible_warps": 0.16508105681065782
+        },
+        {
+          "thread_count": 65536,
+          "grid_size": 512,
+          "registers_per_thread": 40,
+          "shared_mem_per_block": 2048,
+          "count": 8,
+          "mean_duration_ns": 69264.0,
+          "mean_dram_pct": 4.598145276539988,
+          "mean_sm_pct": 38.08364925335584,
+          "mean_occupancy_pct": 41.936133975070334,
+          "mean_eligible_warps": 0.3629557826246914
+        }
+      ],
+      "representative_rules": [
+        {
+          "rule_identifier": "SOLBottleneck",
+          "name": "Bottleneck",
+          "section_identifier": "SpeedOfLight",
+          "title": "High Memory Throughput",
+          "message": "Memory is more heavily utilized than Compute: Look at the @section:MemoryWorkloadAnalysis:Memory Workload Analysis@ section to identify the L1 bottleneck. Check memory replay (coalescing) metrics to make sure you're efficiently utilizing the bytes transferred. Also consider whether it is possible to do more work per memory access (kernel fusion) or whether there are values you can (re)compute."
+        },
+        {
+          "rule_identifier": "IssueSlotUtilization",
+          "name": "Issue Slot Utilization",
+          "section_identifier": "SchedulerStats",
+          "title": "",
+          "message": "Every scheduler is capable of issuing one instruction per cycle, but for this workload each scheduler only issues an instruction every 5.0 cycles. This might leave hardware resources underutilized and may lead to less optimal performance. Out of the maximum of 12 warps per scheduler, this workload allocates an average of 4.84 active warps per scheduler, but only an average of 0.36 warps were eligible per cycle. Eligible warps are the subset of active warps that are ready to issue their next instruction. Every cycle with no eligible warp results in no instruction being issued and the issue slot remains unused. To increase the number of eligible warps, reduce the time the active warps are stalled by inspecting the top stall reasons on the @section:WarpStateStats:Warp State Statistics@ and @section:SourceCounters:Source Counters@ sections."
+        },
+        {
+          "rule_identifier": "AchievedOccupancy",
+          "name": "Achieved Occupancy",
+          "section_identifier": "Occupancy",
+          "title": "",
+          "message": "The difference between calculated theoretical (100.0%) and measured achieved occupancy (41.9%) can be the result of warp scheduling overheads or workload imbalances during the kernel execution. Load imbalances can occur between warps within a block as well as across blocks of the same kernel. See the @url:CUDA Best Practices Guide:https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#occupancy@ for more details on optimizing occupancy."
+        },
+        {
+          "rule_identifier": "CPIStall",
+          "name": "Warp Stall",
+          "section_identifier": "WarpStateStats",
+          "title": "Mio Throttle Stalls",
+          "message": "On average, each warp of this workload spends 9.2 cycles being stalled waiting for the MIO (memory input/output) instruction queue to be not full. This stall reason is high in cases of extreme utilization of the MIO pipelines, which include special math instructions, dynamic branches, as well as shared memory instructions. When caused by shared memory accesses, trying to use fewer but wider loads can reduce pipeline pressure. This stall type represents about 38.0% of the total average of 24.3 cycles between issuing two instructions."
+        },
+        {
+          "rule_identifier": "HighPipeUtilization",
+          "name": "High Pipe Utilization",
+          "section_identifier": "ComputeWorkloadAnalysis",
+          "title": "Low Utilization",
+          "message": "All compute pipelines are under-utilized. Either this workload is very small or it doesn't issue enough warps per scheduler. Check the @section:LaunchStats:Launch Statistics@ and @section:SchedulerStats:Scheduler Statistics@ sections for further details."
+        },
+        {
+          "rule_identifier": "FPInstructions",
+          "name": "FP32/64 Instructions",
+          "section_identifier": "InstructionStats",
+          "title": "FP32 Non-Fused Instructions",
+          "message": "This kernel executes 524288 fused and 917504 non-fused FP32 instructions. By converting pairs of non-fused instructions to their @url:fused:https://docs.nvidia.com/cuda/floating-point/#cuda-and-floating-point@, higher-throughput equivalent, the achieved FP32 performance could be increased by up to 32% (relative to its current performance)."
+        },
+        {
+          "rule_identifier": "MemoryCacheAccessPattern",
+          "name": "Memory Cache Access Pattern",
+          "section_identifier": "MemoryWorkloadAnalysis_Tables",
+          "title": "L1TEX Global Load Access Pattern",
+          "message": "The memory access pattern for global loads from L1TEX might not be optimal. On average, only 30.9 of the 32 bytes transmitted per sector are utilized by each thread. This could possibly be caused by a stride between threads. Check the @section:SourceCounters:Source Counters@ section for uncoalesced global loads."
+        },
+        {
+          "rule_identifier": "SOLFPRoofline",
+          "name": "Roofline Analysis",
+          "section_identifier": "SpeedOfLight_RooflineChart",
+          "title": "Roofline Analysis",
+          "message": "The ratio of peak float (FP32) to double (FP64) performance on this device is 64:1. The workload achieved 3% of this device's FP32 peak performance and 0% of its FP64 peak performance. See the @url:Profiling Guide:https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#roofline@ for more details on roofline analysis."
+        },
+        {
+          "rule_identifier": "SharedMemoryConflicts",
+          "name": "Shared Memory Conflicts",
+          "section_identifier": "MemoryWorkloadAnalysis_Tables",
+          "title": "Shared Load Bank Conflicts",
+          "message": "The memory access pattern for shared loads might not be optimal and causes on average a 6.6 - way bank conflict across all 328704 shared load requests.This results in 1835049 bank conflicts,  which represent 84.81% of the overall 2163740 wavefronts for shared loads. Check the @section:SourceCounters:Source Counters@ section for uncoalesced shared loads."
+        },
+        {
+          "rule_identifier": "UncoalescedSharedAccess",
+          "name": "Uncoalesced Shared Accesses",
+          "section_identifier": "SourceCounters",
+          "title": "",
+          "message": "This kernel has uncoalesced shared accesses resulting in a total of 3686400 excessive wavefronts (85% of the total 4359168 wavefronts). Check the L1 Wavefronts Shared Excessive table for the primary source locations. The @url:CUDA Best Practices Guide:https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#shared-memory-in-matrix-multiplication-c-ab@ has an example on optimizing shared memory accesses."
+        },
+        {
+          "rule_identifier": "WorkloadImbalance",
+          "name": "Workload Imbalance",
+          "section_identifier": "WorkloadDistribution",
+          "title": "SMs Workload Imbalance",
+          "message": "One or more SMs have a much higher number of active cycles than the average number of active cycles. Maximum instance value is 11.08% above the average, while the minimum instance value is 4.90% below the average."
+        }
+      ]
+    },
+    {
+      "name": "_chunk_scan_fwd_kernel",
+      "launches": 45,
+      "time_ms": 3.267264,
+      "time_share_pct": 33.08393953631548,
+      "read_mb": 1083.9224853515625,
+      "write_mb": 1053.7830810546875,
+      "traffic_mb": 2137.70556640625,
+      "effective_bandwidth_gbps": 686.0623298270357,
+      "weighted_dram_pct": 75.33425757051366,
+      "weighted_memory_pct": 77.75996746387159,
+      "weighted_sm_pct": 65.74624963481564,
+      "mean_occupancy_pct": 68.41758948622616,
+      "mean_eligible_warps": 0.6980426143365447,
+      "mean_stall_mio": 16.81650904417354,
+      "mean_stall_long": 7.377348962594666,
+      "mean_stall_short": 3.4180689175851406,
+      "mean_stall_not_selected": 2.2443323665145223,
+      "launch_variants": [
+        {
+          "thread_count": 393216,
+          "grid_size": 3072,
+          "registers_per_thread": 40,
+          "shared_mem_per_block": 5120,
+          "count": 29,
+          "mean_duration_ns": 66434.20689655172,
+          "mean_dram_pct": 82.23785117903574,
+          "mean_sm_pct": 67.43583086478151,
+          "mean_occupancy_pct": 90.89774674049212,
+          "mean_eligible_warps": 0.9243173124168552
+        },
+        {
+          "thread_count": 196608,
+          "grid_size": 768,
+          "registers_per_thread": 64,
+          "shared_mem_per_block": 66560,
+          "count": 8,
+          "mean_duration_ns": 102148.0,
+          "mean_dram_pct": 53.76004393919124,
+          "mean_sm_pct": 63.45081249717021,
+          "mean_occupancy_pct": 16.59595342069006,
+          "mean_eligible_warps": 0.20563230917390612
+        },
+        {
+          "thread_count": 196608,
+          "grid_size": 1536,
+          "registers_per_thread": 64,
+          "shared_mem_per_block": 17408,
+          "count": 8,
+          "mean_duration_ns": 65436.0,
+          "mean_dram_pct": 83.62694242102964,
+          "mean_sm_pct": 63.11800803315964,
+          "mean_occupancy_pct": 38.74865550504818,
+          "mean_eligible_warps": 0.37020713895805707
+        }
+      ],
+      "representative_rules": [
+        {
+          "rule_identifier": "SOLBottleneck",
+          "name": "Bottleneck",
+          "section_identifier": "SpeedOfLight",
+          "title": "High Throughput",
+          "message": "This workload is utilizing greater than 80.0% of the available compute or memory performance of the device. To further improve performance, work will likely need to be shifted from the most utilized to another unit. Start by analyzing DRAM in the @section:MemoryWorkloadAnalysis:Memory Workload Analysis@ section."
+        },
+        {
+          "rule_identifier": "IssueSlotUtilization",
+          "name": "Issue Slot Utilization",
+          "section_identifier": "SchedulerStats",
+          "title": "",
+          "message": "Every scheduler is capable of issuing one instruction per cycle, but for this workload each scheduler only issues an instruction every 4.5 cycles. This might leave hardware resources underutilized and may lead to less optimal performance. Out of the maximum of 12 warps per scheduler, this workload allocates an average of 10.86 active warps per scheduler, but only an average of 0.94 warps were eligible per cycle. Eligible warps are the subset of active warps that are ready to issue their next instruction. Every cycle with no eligible warp results in no instruction being issued and the issue slot remains unused. To increase the number of eligible warps, avoid possible load imbalances due to highly different execution durations per warp. Reducing stalls indicated on the @section:WarpStateStats:Warp State Statistics@ and @section:SourceCounters:Source Counters@ sections can help, too."
+        },
+        {
+          "rule_identifier": "CPIStall",
+          "name": "Warp Stall",
+          "section_identifier": "WarpStateStats",
+          "title": "Mio Throttle Stalls",
+          "message": "On average, each warp of this workload spends 23.5 cycles being stalled waiting for the MIO (memory input/output) instruction queue to be not full. This stall reason is high in cases of extreme utilization of the MIO pipelines, which include special math instructions, dynamic branches, as well as shared memory instructions. When caused by shared memory accesses, trying to use fewer but wider loads can reduce pipeline pressure. This stall type represents about 48.3% of the total average of 48.7 cycles between issuing two instructions."
+        },
+        {
+          "rule_identifier": "HighPipeUtilization",
+          "name": "High Pipe Utilization",
+          "section_identifier": "ComputeWorkloadAnalysis",
+          "title": "Low Utilization",
+          "message": "All compute pipelines are under-utilized. Either this workload is very small or it doesn't issue enough warps per scheduler. Check the @section:LaunchStats:Launch Statistics@ and @section:SchedulerStats:Scheduler Statistics@ sections for further details."
+        },
+        {
+          "rule_identifier": "LaunchConfiguration",
+          "name": "Launch Configuration",
+          "section_identifier": "LaunchStats",
+          "title": "Tail Effect",
+          "message": "A wave of thread blocks is defined as the maximum number of blocks that can be executed in parallel on the target GPU. The number of blocks in a wave depends on the number of multiprocessors and the theoretical occupancy of the kernel. This kernel launch results in 3 full waves and a partial wave of 120 thread blocks. Under the assumption of a uniform execution duration of all thread blocks, this partial wave may account for up to 25.0% of the total runtime of this kernel. Try launching a grid with no partial wave. The overall impact of this tail effect also lessens with the number of full waves executed for a grid. See the @url:Hardware Model:https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#metrics-hw-model@ description for more details on launch configurations."
+        },
+        {
+          "rule_identifier": "MemoryCacheAccessPattern",
+          "name": "Memory Cache Access Pattern",
+          "section_identifier": "MemoryWorkloadAnalysis_Tables",
+          "title": "DRAM Global Load Access Pattern",
+          "message": "The memory access pattern for global loads from DRAM might not be optimal. On average, only 31.1 of the 32 bytes transmitted per sector are utilized by each thread. This applies to the 97.6% of sectors missed in L2. This could possibly be caused by a stride between threads. Check the @section:SourceCounters:Source Counters@ section for uncoalesced global loads."
+        },
+        {
+          "rule_identifier": "SOLFPRoofline",
+          "name": "Roofline Analysis",
+          "section_identifier": "SpeedOfLight_RooflineChart",
+          "title": "Roofline Analysis",
+          "message": "The ratio of peak float (FP32) to double (FP64) performance on this device is 64:1. The workload achieved 4% of this device's FP32 peak performance and 0% of its FP64 peak performance. See the @url:Profiling Guide:https://docs.nvidia.com/nsight-compute/ProfilingGuide/index.html#roofline@ for more details on roofline analysis."
+        },
+        {
+          "rule_identifier": "AchievedOccupancy",
+          "name": "Achieved Occupancy",
+          "section_identifier": "Occupancy",
+          "title": "",
+          "message": "The difference between calculated theoretical (100.0%) and measured achieved occupancy (90.0%) can be the result of warp scheduling overheads or workload imbalances during the kernel execution. Load imbalances can occur between warps within a block as well as across blocks of the same kernel. See the @url:CUDA Best Practices Guide:https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/index.html#occupancy@ for more details on optimizing occupancy."
+        }
+      ]
+    }
+  ]
+}
