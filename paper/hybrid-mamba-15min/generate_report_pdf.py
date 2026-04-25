@@ -43,6 +43,24 @@ MODEL_ARCH_LATEX_TEMPLATE = r"""
 \end{figure}
 """.strip()
 
+FIGURE_A_MD = "![圖 A：TuckerMoE 前向傳播與反向傳播梯度流完整示意](assets/plots/tuckermoe_forward_backward.png)"
+FIGURE_A_LATEX = r"""
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{assets/plots/tuckermoe_forward_backward.png}
+\caption{圖 A：TuckerMoE 前向傳播與反向傳播梯度流完整示意}
+\end{figure}
+""".strip()
+
+FIGURE_B_MD = "![圖 B：Token × Expert 稀疏門控矩陣（九宮格視角）](assets/plots/tucker_sparse_matrix.png)"
+FIGURE_B_LATEX = r"""
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{assets/plots/tucker_sparse_matrix.png}
+\caption{圖 B：Token $\times$ Expert 稀疏門控矩陣（九宮格視角）}
+\end{figure}
+""".strip()
+
 APPENDIX_ALGO_LATEX = {
     "./assets/algorithms/appendix_a1_tuckermoe_forward.png": r"""
 \begin{algorithm}[H]
@@ -279,14 +297,15 @@ def render_svg_from_html(
                     }}
                     """
                 )
+                page.wait_for_timeout(1500)
                 pdf_path = output_path.with_suffix(".pdf")
                 page.pdf(
                     path=str(pdf_path),
                     width=f"{w}px",
                     height=f"{h}px",
                     print_background=True,
-                    prefer_css_page_size=True,
-                    margin={"top": "0", "right": "0", "bottom": "0", "left": "0"},
+                    scale=1.0,
+                    page_ranges="1",
                 )
                 print(f"Rendered vector PDF: {pdf_path.relative_to(PROJECT_DIR)}")
 
@@ -324,6 +343,8 @@ def build_pdf(
         report_text = report_text.replace(
             f"![]({image_path})", f"```{{=latex}}\n{latex_snippet}\n```"
         )
+    report_text = report_text.replace(FIGURE_A_MD, f"```{{=latex}}\n{FIGURE_A_LATEX}\n```")
+    report_text = report_text.replace(FIGURE_B_MD, f"```{{=latex}}\n{FIGURE_B_LATEX}\n```")
     report_text = report_text.replace(
         "./assets/method_flowchart.svg", f"./assets/method_flowchart.{diagram_format}"
     )
