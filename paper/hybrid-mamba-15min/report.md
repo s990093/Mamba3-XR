@@ -1142,7 +1142,7 @@ _圖 7：截至 step 43,529 之 live training 儀表板（資料來源 `train_lo
 
 ## 附錄 A：演算法虛擬碼（Appendix A · Algorithms）
 
-以下四個演算法以正式論文風格的 LaTeX 虛擬碼排版呈現，對應正文中的 TuckerMoE 前向、狀態掃描、路由溫度退火與 TuckerMoE 反向傳播。
+以下四個演算法對應正文中的 TuckerMoE 前向、狀態掃描、路由溫度退火與 TuckerMoE 反向傳播。
 
 ### A.1 Algorithm: TuckerMoE Forward Pass
 
