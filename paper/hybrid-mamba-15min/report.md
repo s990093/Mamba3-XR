@@ -23,17 +23,9 @@ date: "2026年4月"
 > - **方法**：Hybrid Mamba-TuckerMoE 以 $O(1)$ SSM 狀態取代 80% 的 KV 積累，並以 Tucker 三階分解共享跨專家子空間，達成 **82.87%** 整體參數壓縮。
 > - **結果**：~550M 總參數、~230M active/token 的配置，在 M2 Pro 實測 16K 上下文 KV + state 記憶體僅 **14.1 MiB**（8-bit 量化），decode 吞吐 ~68 tok/s，wall-clock 上比 1.5B dense GPT-2 更快達到同等 loss。
 
----
+![Pareto Frontier: 推論成本 vs. 有效模型容量](./assets/plots/pareto_frontier.png)
 
-## 主要貢獻（Main Contributions）
-
-| #   | 貢獻層面            | 核心內容                                                                                                                                                                        | 章節       |
-| --- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| 1   | **架構拓撲**        | 提出 4:1 Mamba-Transformer Macro Block，以固定 SSM 狀態取代大部分 KV 積累，KV 記憶體相較全 Transformer 節省 80%，bf16 下 16K seq KV 低於 1 GiB                                  | §5.1       |
-| 2   | **Tucker 三階 MoE** | 首次將 Tucker 三階分解用於 MoE 專家集合，以共享 $U^{(2)},U^{(3)}$ 捕捉跨專家冗餘；在 82.87% 壓縮率下，Tucker 重建 MSE 低於等參數逐專家 SVD，且附嚴格下界等價保證（§5.4.3 定理） | §5.4       |
-| 3   | **系統實作**        | 以五個 Triton kernel 融合 latent MoE dispatch、chunk-parallel scan 與 logit 穩定化；推論端以圖級融合消除 Apple Silicon 上逐層 decode 的 command buffer 切換開銷                 | §7.4, §8.2 |
-| 4   | **訓練穩定性**      | LayerScale 初始壓縮使 30 層殘差鏈 Jacobian 近似單位陣（初期放大倍率 <1.35），搭配 Z-loss + 溫度餘弦退火，step 38,400 路由健康診斷四項全數通過                                   | §5.5, §7.1 |
-| 5   | **部署驗證**        | MLX 後端在 M2 Pro 量測 prefill ~3,800 tok/s；8-bit 量化後 decode +62%（~68 tok/s）；部署 KV + state 記憶體 14.1–22.3 MiB @512 steps                                             | §9.6       |
+_圖 1：本文研究貢獻的視覺化總覽。推論成本（每 token active 參數量，M）vs. 模型有效容量（dense-equivalent 參數量，M）的 Pareto 前沿圖（雙對數座標）。灰色虛線為 Dense 對角線，對角線以上代表「以更低推論成本獲得更大容量」的 Pareto 優勢區。本模型（紫星）以 230M active 參數達到 2.4B dense-equivalent 容量，推論成本相較同容量 dense 基準降低約 **90%**。基準來源：Mamba (Gu & Dao, 2023)、Mamba-2 (Dao & Gu, 2024)、Pythia (Biderman et al., 2023)、Mixtral (Jiang et al., 2024)、Switch (Fedus et al., 2022)。_
 
 ---
 
@@ -98,11 +90,15 @@ Selective State Space Model（Mamba 系列 [7]）提供了另一條路徑。SSM 
 
 ### 1.4 研究目標與主要貢獻
 
-綜合上述兩條演化路徑，本研究提出將 Mamba-3 主幹與 TuckerMoE 前饋層結合的混合架構，同時解決 (i) 長序列 attention 的計算／記憶體成本與 (ii) 稀疏 MoE 的權重儲存問題。具體貢獻包括：
+綜合上述兩條演化路徑，本研究提出將 Mamba-3 主幹與 TuckerMoE 前饋層結合的混合架構，同時解決 (i) 長序列 attention 的計算／記憶體成本與 (ii) 稀疏 MoE 的權重儲存問題。具體貢獻彙整如下，後續各章節將逐一展開技術細節：
 
-![Pareto Frontier: 推論成本 vs. 有效模型容量](./assets/plots/pareto_frontier.png)
-
-_圖 1：本文研究貢獻的視覺化總覽。推論成本（每 token active 參數量，M）vs. 模型有效容量（dense-equivalent 參數量，M）的 Pareto 前沿圖（雙對數座標）。灰色虛線為 Dense 對角線（active = capacity），對角線以上者即代表「以更低推論成本獲得更大容量」的 Pareto 優勢區。本模型（紫星）以 230M active 參數達到 2.4B dense-equivalent 容量，相較 Mamba-2.8B 與 Pythia-2.8B 的 full-dense 基準，推論成本降低約 90%，同時保留同等量級的模型知識容量。基準數值來源：Mamba (Gu & Dao, 2023)、Mamba-2 (Dao & Gu, 2024)、Pythia (Biderman et al., 2023)、Mixtral (Jiang et al., 2024)、Switch Transformer (Fedus et al., 2022)。_
+| #   | 貢獻層面            | 核心內容                                                                                                                                                                        | 章節       |
+| --- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| 1   | **架構拓撲**        | 提出 4:1 Mamba-Transformer Macro Block，以固定 SSM 狀態取代大部分 KV 積累，KV 記憶體相較全 Transformer 節省 80%，bf16 下 16K seq KV 低於 1 GiB                                  | §5.1       |
+| 2   | **Tucker 三階 MoE** | 首次將 Tucker 三階分解用於 MoE 專家集合，以共享 $U^{(2)},U^{(3)}$ 捕捉跨專家冗餘；在 82.87% 壓縮率下，Tucker 重建 MSE 低於等參數逐專家 SVD，且附嚴格下界等價保證（§5.4.3 定理） | §5.4       |
+| 3   | **系統實作**        | 以五個 Triton kernel 融合 latent MoE dispatch、chunk-parallel scan 與 logit 穩定化；推論端以圖級融合消除 Apple Silicon 上逐層 decode 的 command buffer 切換開銷                 | §7.4, §8.2 |
+| 4   | **訓練穩定性**      | LayerScale 初始壓縮使 30 層殘差鏈 Jacobian 近似單位陣（初期放大倍率 <1.35），搭配 Z-loss + 溫度餘弦退火，step 38,400 路由健康診斷四項全數通過                                   | §5.5, §7.1 |
+| 5   | **部署驗證**        | MLX 後端在 M2 Pro 量測 prefill ~3,800 tok/s；8-bit 量化後 decode +62%（~68 tok/s）；部署 KV + state 記憶體 14.1–22.3 MiB @512 steps                                             | §9.6       |
 
 **拓撲層面**：本研究採取 **4:1 的 Mamba-Transformer 混合比例**，此設計參考並延伸自 Mamba-3 [7]、Jamba 與 Samba 的比例實驗，在長序列記憶體效率與全域回看能力之間取得兼顧。在預設的六個 Macro Block 下，模型擁有 24 個 Mamba block 與 6 個 Transformer block。此配置使 KV Cache 僅與 Transformer 層數成線性關係，而非與總層數同步增長，對比純 Transformer 架構節省約 80% 的 KV 記憶體。
 
