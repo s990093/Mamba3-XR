@@ -38,5 +38,3 @@
 [cite_start]這是一份結構完整、推導扎實且極具技術含金量的報告。架構設計大膽，系統實作落地，數值穩定性（LayerScale）[cite: 476, 480] 與底層效能（MLX/Triton）都照顧到了。直接拿來作為碩士研究提案或研討會論文的核心骨幹，絕對是游刃有餘的。繼續保持這個節奏把 80,000 steps 跑完，非常期待看到最終的 PPL 收斂結果！
 
 帕雷托前沿 必須要錯 然後需要美觀跟 你需要去查用deepsearch做，把相關網址跟資訊放到 最後 跟 畫出該圖表 需要高清
-
-幫我做改 把 method_flowchart.html architecture 轉svg 後 加入generate_report_pdf報告

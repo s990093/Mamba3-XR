@@ -61,6 +61,61 @@ FIGURE_B_LATEX = r"""
 \end{figure}
 """.strip()
 
+PARETO_FIGURE_BLOCK_MD = """![Pareto Frontier: 推論成本 vs. 有效模型容量](./assets/plots/pareto_frontier.png)
+
+_圖 1：本文研究貢獻的視覺化總覽。推論成本（每 token active 參數量，M）vs. 模型有效容量（dense-equivalent 參數量，M）的 Pareto 前沿圖（雙對數座標）。灰色虛線為 Dense 對角線（active = capacity），對角線以上者即代表「以更低推論成本獲得更大容量」的 Pareto 優勢區。本模型（紫星）以 230M active 參數達到 2.4B dense-equivalent 容量，相較 Mamba-2.8B 與 Pythia-2.8B 的 full-dense 基準，推論成本降低約 90%，同時保留同等量級的模型知識容量。基準數值來源：Mamba (Gu & Dao, 2023)、Mamba-2 (Dao & Gu, 2024)、Pythia (Biderman et al., 2023)、Mixtral (Jiang et al., 2024)、Switch Transformer (Fedus et al., 2022)。_"""
+PARETO_FIGURE_LATEX = r"""
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{./assets/plots/pareto_frontier.png}
+\caption{圖 1：本文研究貢獻的視覺化總覽。推論成本（每 token active 參數量，M）vs. 模型有效容量（dense-equivalent 參數量，M）的 Pareto 前沿圖（雙對數座標）。灰色虛線為 Dense 對角線（active = capacity），對角線以上者即代表「以更低推論成本獲得更大容量」的 Pareto 優勢區。本模型（紫星）以 230M active 參數達到 2.4B dense-equivalent 容量，相較 Mamba-2.8B 與 Pythia-2.8B 的 full-dense 基準，推論成本降低約 90\%，同時保留同等量級的模型知識容量。基準數值來源：Mamba (Gu \& Dao, 2023)、Mamba-2 (Dao \& Gu, 2024)、Pythia (Biderman et al., 2023)、Mixtral (Jiang et al., 2024)、Switch Transformer (Fedus et al., 2022)。}
+\end{figure}
+""".strip()
+
+FIGURE_8A_BLOCK_MD = """![Mamba AI Assistant — App 介面預覽](./assets/uiux/iphone_preview.png)
+
+_圖 8a：Mamba AI 助手 iOS 原型介面，呈現待機、處理中、回應三種操作狀態。_"""
+FIGURE_8A_LATEX = r"""
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{./assets/uiux/iphone_preview.png}
+\caption{圖 8a：Mamba AI 助手 iOS 原型介面，呈現待機、處理中、回應三種操作狀態。}
+\end{figure}
+""".strip()
+
+FIGURE_8B_BLOCK_MD = """![端到端系統資料流圖](./assets/uiux/audio_flow.png)
+
+_圖 8b：端到端系統資料流。使用者語音輸入經 Apple Neural Engine 前處理後，由 MLX 後端驅動的 Hybrid Mamba-TuckerMoE 模型進行推論，輸出分兩路：語音合成（TTS）與 UI 狀態更新。_"""
+FIGURE_8B_LATEX = r"""
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{./assets/uiux/audio_flow.png}
+\caption{圖 8b：端到端系統資料流。使用者語音輸入經 Apple Neural Engine 前處理後，由 MLX 後端驅動的 Hybrid Mamba-TuckerMoE 模型進行推論，輸出分兩路：語音合成（TTS）與 UI 狀態更新。}
+\end{figure}
+""".strip()
+
+FIGURE_8C_BLOCK_MD = """![實體情境模擬圖（一）](./assets/uiux/user_story1.png)
+
+_圖 8c：使用情境模擬（一）。iPhone 16 Pro 搭配 MagSafe 旋轉支架，轉化為桌面免持 AI 助手，呈現日常辦公場景下的即時語音問答互動。_"""
+FIGURE_8C_LATEX = r"""
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{./assets/uiux/user_story1.png}
+\caption{圖 8c：使用情境模擬（一）。iPhone 16 Pro 搭配 MagSafe 旋轉支架，轉化為桌面免持 AI 助手，呈現日常辦公場景下的即時語音問答互動。}
+\end{figure}
+""".strip()
+
+FIGURE_8D_BLOCK_MD = """![實體情境模擬圖（二）](./assets/uiux/user_story2.png)
+
+_圖 8d：使用情境模擬（二）。展示不同場景下的裝置擺放與互動方式，說明本應用在有限硬體資源下支援全天候語音查詢的可行性。_"""
+FIGURE_8D_LATEX = r"""
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{./assets/uiux/user_story2.png}
+\caption{圖 8d：使用情境模擬（二）。展示不同場景下的裝置擺放與互動方式，說明本應用在有限硬體資源下支援全天候語音查詢的可行性。}
+\end{figure}
+""".strip()
+
 APPENDIX_ALGO_LATEX = {
     "./assets/algorithms/appendix_a1_tuckermoe_forward.png": r"""
 \begin{algorithm}[H]
@@ -345,6 +400,11 @@ def build_pdf(
         )
     report_text = report_text.replace(FIGURE_A_MD, f"```{{=latex}}\n{FIGURE_A_LATEX}\n```")
     report_text = report_text.replace(FIGURE_B_MD, f"```{{=latex}}\n{FIGURE_B_LATEX}\n```")
+    report_text = report_text.replace(PARETO_FIGURE_BLOCK_MD, f"```{{=latex}}\n{PARETO_FIGURE_LATEX}\n```")
+    report_text = report_text.replace(FIGURE_8A_BLOCK_MD, f"```{{=latex}}\n{FIGURE_8A_LATEX}\n```")
+    report_text = report_text.replace(FIGURE_8B_BLOCK_MD, f"```{{=latex}}\n{FIGURE_8B_LATEX}\n```")
+    report_text = report_text.replace(FIGURE_8C_BLOCK_MD, f"```{{=latex}}\n{FIGURE_8C_LATEX}\n```")
+    report_text = report_text.replace(FIGURE_8D_BLOCK_MD, f"```{{=latex}}\n{FIGURE_8D_LATEX}\n```")
     report_text = report_text.replace(
         "./assets/method_flowchart.svg", f"./assets/method_flowchart.{diagram_format}"
     )
