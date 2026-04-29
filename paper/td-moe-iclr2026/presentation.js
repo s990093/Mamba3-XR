@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const p2 = (n) => String(n).padStart(2, "0");
         function go(d) {
           const nx = Math.max(0, Math.min(N - 1, c + d));
-          if (nx === c) return;
+          if (nx === c && d !== 0) return;
           const prev = c;
           // Exit: current slide leaves toward correct direction
           sl[prev].classList.remove("active");

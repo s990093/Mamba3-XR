@@ -1,0 +1,117 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1020" viewBox="0 0 1600 1020">
+  <defs>
+    <style>
+      .title { font: 700 40px "Arial", "PingFang TC", sans-serif; fill: #111827; }
+      .subtitle { font: 400 22px "Arial", "PingFang TC", sans-serif; fill: #4b5563; }
+      .h { font: 700 22px "Arial", "PingFang TC", sans-serif; fill: #111827; }
+      .body { font: 400 19px "Arial", "PingFang TC", sans-serif; fill: #1f2937; }
+      .small { font: 400 16px "Arial", "PingFang TC", sans-serif; fill: #4b5563; }
+      .mono { font: 500 18px "Menlo", "Consolas", monospace; fill: #111827; }
+      .monoSmall { font: 500 15px "Menlo", "Consolas", monospace; fill: #111827; }
+      .label { font: 700 14px "Arial", "PingFang TC", sans-serif; fill: #ffffff; }
+      .axis { stroke: #d1d5db; stroke-width: 1; }
+      .panel { fill: #ffffff; stroke: #d1d5db; stroke-width: 1.5; rx: 18; }
+      .prompt { fill: #eef2ff; stroke: #c7d2fe; }
+      .assistant { fill: #dcfce7; stroke: #86efac; }
+      .masked { fill: #f3f4f6; stroke: #d1d5db; }
+      .loss { fill: #16a34a; stroke: #15803d; }
+      .role { fill: #fef3c7; stroke: #f59e0b; }
+      .special { fill: #e0f2fe; stroke: #38bdf8; }
+      .arrow { stroke: #6b7280; stroke-width: 2; marker-end: url(#arrow); }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="3" orient="auto" markerUnits="strokeWidth">
+      <path d="M0,0 L0,6 L9,3 z" fill="#6b7280" />
+    </marker>
+  </defs>
+
+  <rect width="1600" height="1020" fill="#f8fafc"/>
+
+  <text x="70" y="70" class="title">ChatML-only SFT Masking and Input-ID Trace</text>
+  <text x="70" y="108" class="subtitle">General SFT learns instruction following first; CoT-SFT later specializes reasoning while preserving the same role boundary grammar.</text>
+
+  <rect x="70" y="145" width="1460" height="185" class="panel"/>
+  <text x="105" y="188" class="h">Serialized training example</text>
+  <text x="105" y="228" class="mono">&lt;|im_start|&gt;user\nWho are you?&lt;|im_end|&gt;\n&lt;|im_start|&gt;assistant\nI am AI.&lt;|im_end|&gt;</text>
+  <text x="105" y="274" class="small">Only the assistant answer span and its terminal &lt;|im_end|&gt; contribute to cross-entropy. User text, role tags, and assistant prefix are conditioning context.</text>
+  <rect x="1138" y="183" width="112" height="38" rx="19" class="masked"/><text x="1164" y="208" class="small">masked</text>
+  <rect x="1268" y="183" width="112" height="38" rx="19" class="loss"/><text x="1294" y="208" class="label">loss</text>
+  <rect x="1398" y="183" width="92" height="38" rx="19" class="special"/><text x="1417" y="208" class="small">special</text>
+
+  <rect x="70" y="360" width="1460" height="380" class="panel"/>
+  <text x="105" y="405" class="h">Model-visible token sequence</text>
+
+  <g transform="translate(105,435)">
+    <rect x="0" y="0" width="118" height="70" rx="12" class="special"/>
+    <text x="18" y="28" class="monoSmall">32000</text>
+    <text x="9" y="53" class="monoSmall">&lt;|im_start|&gt;</text>
+    <rect x="126" y="0" width="88" height="70" rx="12" class="role"/>
+    <text x="146" y="28" class="monoSmall">1792</text>
+    <text x="151" y="53" class="monoSmall">user</text>
+    <rect x="222" y="0" width="70" height="70" rx="12" class="role"/>
+    <text x="242" y="28" class="monoSmall">13</text>
+    <text x="238" y="53" class="monoSmall">\n</text>
+    <rect x="300" y="0" width="104" height="70" rx="12" class="prompt"/>
+    <text x="321" y="28" class="monoSmall">11644</text>
+    <text x="320" y="53" class="monoSmall">▁Who</text>
+    <rect x="412" y="0" width="88" height="70" rx="12" class="prompt"/>
+    <text x="435" y="28" class="monoSmall">526</text>
+    <text x="434" y="53" class="monoSmall">▁are</text>
+    <rect x="508" y="0" width="88" height="70" rx="12" class="prompt"/>
+    <text x="530" y="28" class="monoSmall">366</text>
+    <text x="530" y="53" class="monoSmall">▁you</text>
+    <rect x="604" y="0" width="104" height="70" rx="12" class="prompt"/>
+    <text x="625" y="28" class="monoSmall">29973</text>
+    <text x="651" y="53" class="monoSmall">?</text>
+    <rect x="716" y="0" width="104" height="70" rx="12" class="special"/>
+    <text x="738" y="28" class="monoSmall">32001</text>
+    <text x="728" y="53" class="monoSmall">&lt;|im_end|&gt;</text>
+    <rect x="828" y="0" width="70" height="70" rx="12" class="role"/>
+    <text x="849" y="28" class="monoSmall">13</text>
+    <text x="845" y="53" class="monoSmall">\n</text>
+    <rect x="906" y="0" width="118" height="70" rx="12" class="special"/>
+    <text x="925" y="28" class="monoSmall">32000</text>
+    <text x="915" y="53" class="monoSmall">&lt;|im_start|&gt;</text>
+    <rect x="1032" y="0" width="118" height="70" rx="12" class="role"/>
+    <text x="1053" y="28" class="monoSmall">20255</text>
+    <text x="1050" y="53" class="monoSmall">▁assistant</text>
+    <rect x="1158" y="0" width="70" height="70" rx="12" class="role"/>
+    <text x="1179" y="28" class="monoSmall">13</text>
+    <text x="1175" y="53" class="monoSmall">\n</text>
+
+    <rect x="0" y="105" width="88" height="70" rx="12" class="assistant"/>
+    <text x="23" y="133" class="monoSmall">306</text>
+    <text x="26" y="158" class="monoSmall">▁I</text>
+    <rect x="96" y="105" width="88" height="70" rx="12" class="assistant"/>
+    <text x="118" y="133" class="monoSmall">626</text>
+    <text x="116" y="158" class="monoSmall">▁am</text>
+    <rect x="192" y="105" width="92" height="70" rx="12" class="assistant"/>
+    <text x="211" y="133" class="monoSmall">23869</text>
+    <text x="225" y="158" class="monoSmall">AI</text>
+    <rect x="292" y="105" width="104" height="70" rx="12" class="assistant"/>
+    <text x="313" y="133" class="monoSmall">29889</text>
+    <text x="340" y="158" class="monoSmall">.</text>
+    <rect x="404" y="105" width="104" height="70" rx="12" class="loss"/>
+    <text x="426" y="133" class="monoSmall" fill="#ffffff">32001</text>
+    <text x="415" y="158" class="monoSmall" fill="#ffffff">&lt;|im_end|&gt;</text>
+
+    <line x1="0" y1="205" x2="1228" y2="205" class="axis"/>
+    <rect x="0" y="225" width="1228" height="34" rx="17" class="masked"/>
+    <rect x="0" y="225" width="1228" height="34" rx="17" fill="#f3f4f6" opacity="0.88"/>
+    <rect x="0" y="225" width="1228" height="34" rx="17" fill="none" stroke="#d1d5db"/>
+    <rect x="0" y="273" width="508" height="34" rx="17" class="loss"/>
+    <text x="16" y="249" class="small">Labels before assistant answer are -100</text>
+    <text x="18" y="297" class="label">Labels active here: model learns answer tokens and the stopping token</text>
+    <line x1="405" y1="186" x2="405" y2="272" class="arrow"/>
+    <text x="425" y="224" class="small">terminal token is trained, preventing runaway generation</text>
+  </g>
+
+  <rect x="70" y="785" width="700" height="160" class="panel"/>
+  <text x="105" y="828" class="h">Loss objective</text>
+  <text x="105" y="870" class="mono">L_SFT = - 1 / ΣM_t · Σ M_t log pθ(x_{t+1} | x_≤t)</text>
+  <text x="105" y="907" class="small">M_t = 0 for prompt/role tokens; M_t = 1 for assistant answer and &lt;|im_end|&gt;.</text>
+
+  <rect x="830" y="785" width="700" height="160" class="panel"/>
+  <text x="865" y="828" class="h">Packing audit</text>
+  <text x="865" y="867" class="body">1,032 SFT samples · 248,435 tokens · seq_len = 1024</text>
+  <text x="865" y="901" class="body">0.1% truncation risk · 71.8% effective loss-token ratio · packed into ≈243 steps</text>
+</svg>

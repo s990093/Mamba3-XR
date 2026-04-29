@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figure 1 – Causal Mask Visualization for Multi-turn Dialogue</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;600;700&family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --navy:#0d1b3e;
+  --navy2:#132751;
+  --navy3:#1a3464;
+  --navy-cell:#1c3f7a;
+  --green:#22c55e;
+  --green-cell:#4ade80;
+  --green-bg:#f0fdf4;
+  --green-border:#86efac;
+  --blue-bg:#eff6ff;
+  --blue-border:#bfdbfe;
+  --mask-bg:#dbeafe;
+  --train-bg:#bbf7d0;
+  --white:#ffffff;
+  --gray-50:#f8fafc;
+  --gray-100:#f1f5f9;
+  --gray-200:#e2e8f0;
+  --gray-400:#94a3b8;
+  --gray-500:#64748b;
+  --gray-700:#334155;
+  --gray-800:#1e293b;
+  --text-dark:#0f172a;
+}
+
+html{font-size:14px}
+body{
+  background:#edf0f5;
+  font-family:'Noto Sans TC',sans-serif;
+  color:var(--text-dark);
+  padding:16px;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+.figure-scaler{
+  /* JS will set transform-origin and scale */
+  transform-origin:top left;
+  width:max-content;
+}
+
+.figure{
+  background:white;
+  width:1480px; /* fixed design width */
+  border-radius:4px;
+  border:1px solid #c8d0dc;
+  box-shadow:0 2px 24px rgba(0,0,0,.10);
+  overflow:hidden;
+}
+
+/* HEADER */
+.fig-header{
+  padding:18px 28px 14px;
+  border-bottom:1.5px solid var(--gray-200);
+}
+.fig-title-row{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  margin-bottom:6px;
+}
+.fig-label{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  background:var(--navy);
+  color:#fff;
+  font-weight:700;
+  font-size:13px;
+  padding:5px 12px;
+  border-radius:4px;
+  flex-shrink:0;
+  letter-spacing:.5px;
+}
+.fig-label .num{font-size:15px;}
+.fig-title{
+  font-family:'Source Serif 4',serif;
+  font-size:20px;
+  font-weight:700;
+  color:var(--navy);
+  letter-spacing:-.2px;
+}
+.fig-caption{
+  font-size:12.5px;
+  color:var(--gray-700);
+  line-height:1.6;
+}
+
+/* TOKEN SEQUENCE BAND */
+.seq-band{
+  background:white;
+  padding:14px 28px 0;
+  overflow-x:auto;
+}
+.seq-inner{
+  min-width:980px;
+  position:relative;
+}
+.seq-indices{
+  display:flex;
+  margin-bottom:2px;
+}
+.seq-label-col{
+  width:54px;
+  flex-shrink:0;
+  font-size:10px;
+  font-weight:600;
+  color:var(--gray-500);
+  padding-top:2px;
+}
+.index-strip{
+  display:flex;
+  flex:1;
+  gap:1px;
+}
+.tok-idx{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;
+  color:var(--gray-500);
+  text-align:center;
+  flex:1;
+  min-width:0;
+  height:14px;
+  line-height:14px;
+}
+.seq-row{
+  display:flex;
+  align-items:stretch;
+  margin-bottom:5px;
+}
+.seq-row-label{
+  width:54px;
+  flex-shrink:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  font-size:11px;
+  font-weight:600;
+  color:var(--gray-700);
+  line-height:1.3;
+}
+.token-strip{
+  display:flex;
+  flex:1;
+  gap:1px;
+}
+.tok{
+  font-family:'JetBrains Mono',monospace;
+  font-size:8px;
+  border-radius:2px;
+  padding:3px 1px;
+  text-align:center;
+  flex:1;
+  min-width:0;
+  border:1px solid var(--blue-border);
+  background:var(--mask-bg);
+  color:#1e3a8a;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  line-height:1.4;
+}
+.tok.asst{
+  background:var(--train-bg);
+  border-color:var(--green-border);
+  color:#14532d;
+}
+.tok.ell{
+  background:var(--gray-100);
+  border-color:var(--gray-200);
+  color:var(--gray-500);
+  font-size:11px;
+}
+
+/* BRACKETS */
+.brackets-row{
+  display:flex;
+  margin-left:54px;
+  margin-bottom:10px;
+}
+.brk-group{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.brk-line{
+  width:calc(100% - 4px);
+  height:7px;
+  border-left:1.5px solid var(--gray-500);
+  border-right:1.5px solid var(--gray-500);
+  border-top:1.5px solid var(--gray-500);
+}
+.brk-label{
+  font-size:10px;
+  font-weight:600;
+  text-align:center;
+  margin-top:2px;
+  line-height:1.3;
+}
+.brk-label.u{color:var(--gray-700);}
+.brk-label.a{color:#15803d;}
+.brk-sub{font-size:9px;font-weight:400;color:var(--gray-500);}
+.seq-map-row{
+  margin-left:54px;
+  margin-bottom:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  color:var(--gray-500);
+}
+.seq-map-pill{
+  padding:4px 12px;
+  border-radius:999px;
+  border:1px solid var(--gray-200);
+  background:linear-gradient(180deg,#ffffff 0%,#f8fafc 100%);
+  font-size:8px;
+  font-weight:700;
+  letter-spacing:.5px;
+}
+.seq-map-arrow{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:1px;
+  line-height:1;
+}
+.seq-map-arrow .down{
+  font-size:16px;
+  color:#64748b;
+}
+.seq-map-arrow .diag{
+  font-size:12px;
+  color:#94a3b8;
+}
+
+/* MAIN BODY GRID */
+.fig-body{
+  display:grid;
+  grid-template-columns:220px minmax(620px,1fr) 430px;
+  gap:0;
+}
+
+/* LEFT LEGEND */
+.left-legend{
+  padding:22px 16px 20px 28px;
+  border-right:1px solid var(--gray-200);
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.mask-title-box{
+  background:linear-gradient(135deg,var(--navy) 0%,var(--navy3) 100%);
+  color:#fff;
+  font-size:11px;
+  font-weight:700;
+  padding:7px 10px;
+  border-radius:8px;
+  line-height:1.35;
+  text-align:center;
+}
+.mask-mini{
+  border:1px solid var(--gray-200);
+  border-radius:10px;
+  padding:12px;
+  background:linear-gradient(180deg,#f8fafc 0%,#eef2ff 100%);
+}
+.mini-grid{
+  display:grid;
+  grid-template-columns:repeat(7,1fr);
+  gap:3px;
+  margin-bottom:10px;
+}
+.mini-cell{
+  aspect-ratio:1;
+  border-radius:3px;
+  border:1px solid #d7deea;
+  background:white;
+}
+.mini-cell.on{
+  background:var(--navy-cell);
+  border-color:var(--navy-cell);
+}
+.mini-formula{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  color:#1d4ed8;
+  text-align:center;
+}
+.mini-caption{
+  font-size:9px;
+  color:var(--gray-500);
+  text-align:center;
+  margin-top:4px;
+}
+.legend-stack{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.legend-chip{
+  display:flex;
+  align-items:center;
+  gap:7px;
+  font-size:10px;
+  font-weight:700;
+  color:var(--gray-700);
+}
+.sw{
+  width:18px;height:18px;
+  border-radius:4px;
+  border:1px solid var(--gray-200);
+  flex-shrink:0;
+}
+.sw.dark{background:var(--navy-cell);border-color:var(--navy-cell);}
+.sw.light{background:#fff;}
+.sw.blue{background:#dbeafe;border-color:#93c5fd;}
+.sw.green{background:#bbf7d0;border-color:#86efac;}
+.loss-strip{
+  border:1px solid var(--gray-200);
+  border-radius:10px;
+  overflow:hidden;
+  background:white;
+}
+.loss-strip-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:7px 9px;
+  font-size:9px;
+  font-weight:700;
+}
+.loss-strip-row.user{
+  background:var(--blue-bg);
+  color:#1d4ed8;
+}
+.loss-strip-row.asst{
+  background:var(--green-bg);
+  color:#15803d;
+  border-top:1px solid var(--gray-200);
+}
+
+/* MATRIX PANEL */
+.matrix-panel{
+  padding:16px 18px 22px 18px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:flex-start;
+}
+.matrix-center{
+  width:max-content;
+  margin:0 auto;
+}
+.query-label{
+  font-size:10px;
+  font-weight:600;
+  color:#3b82f6;
+  margin-bottom:4px;
+  padding-left:40px;
+  line-height:1.4;
+}
+.mat-col-header{
+  display:flex;
+  margin-left:40px;
+  margin-bottom:2px;
+}
+.col-hdr{
+  text-align:center;
+  font-size:9.5px;
+  font-weight:700;
+  padding:3px 2px;
+  line-height:1.3;
+  flex-shrink:0;
+}
+.col-hdr.u{background:#dbeafe;color:#1e3a8a;border-radius:2px;}
+.col-hdr.a{background:#dcfce7;color:#14532d;border-radius:2px;}
+.mat-col-sub{
+  display:flex;
+  margin-left:40px;
+  margin-bottom:4px;
+}
+.col-hdr-sub{
+  font-size:9px;
+  font-weight:400;
+  color:var(--gray-500);
+  text-align:center;
+  flex-shrink:0;
+}
+.mat-body{
+  display:flex;
+  align-items:flex-start;
+}
+.y-ticks{
+  width:40px;
+  flex-shrink:0;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+}
+.y-tick-val{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;
+  color:var(--gray-500);
+  text-align:right;
+  padding-right:5px;
+  display:flex;
+  align-items:flex-start;
+  justify-content:flex-end;
+  flex-shrink:0;
+}
+.mat-canvas-wrap{position:relative;}
+#mat{display:block;}
+.x-ticks{
+  position:relative;
+  height:16px;
+}
+.x-tick-val{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;
+  color:var(--gray-500);
+  position:absolute;
+  transform:translateX(-50%);
+  top:2px;
+}
+.x-axis-label{
+  font-size:11px;
+  font-weight:600;
+  color:var(--gray-700);
+  text-align:center;
+  margin-top:10px;
+  margin-left:40px;
+}
+
+/* RIGHT PANEL */
+.right-panel{
+  padding:18px 24px 20px 18px;
+  border-left:1.5px solid var(--gray-200);
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+  align-items:stretch;
+}
+.flow-card{
+  border:1px solid var(--gray-200);
+  border-radius:10px;
+  overflow:hidden;
+  background:white;
+  box-shadow:0 10px 28px rgba(13,27,62,.06);
+  width:100%;
+}
+.flow-card-head{
+  background:linear-gradient(135deg,var(--navy) 0%,var(--navy3) 100%);
+  color:#fff;
+  padding:10px 14px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+}
+.flow-card-head h3{
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:.2px;
+}
+.flow-card-head .count{
+  font-size:10px;
+  font-weight:700;
+  padding:3px 8px;
+  border-radius:999px;
+  background:rgba(255,255,255,.14);
+  border:1px solid rgba(255,255,255,.2);
+}
+.flow-card-body{
+  padding:12px 14px 14px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.format-stage{
+  border:1px solid var(--gray-200);
+  border-radius:14px;
+  background:linear-gradient(180deg,#f8fafc 0%,#eef4ff 100%);
+  padding:12px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.7);
+}
+.format-stage.infer{
+  background:linear-gradient(180deg,#f8fafc 0%,#effcfb 100%);
+}
+.format-shell{
+  border-radius:12px;
+  overflow:hidden;
+  background:#0f172a;
+  border:1px solid #1e293b;
+  box-shadow:0 10px 24px rgba(15,23,42,.18);
+}
+.format-bar{
+  height:24px;
+  background:linear-gradient(90deg,#172554 0%,#0f172a 100%);
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:0 10px;
+}
+.format-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#475569;
+}
+.format-dot.user{background:#60a5fa;}
+.format-dot.asst{background:#4ade80;}
+.format-body{
+  padding:10px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.msg-block{
+  border-radius:10px;
+  padding:8px 10px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:8.5px;
+  line-height:1.65;
+  word-break:break-word;
+}
+.msg-block.user{
+  background:linear-gradient(180deg,rgba(96,165,250,.18) 0%,rgba(59,130,246,.11) 100%);
+  border:1px solid rgba(147,197,253,.45);
+  color:#dbeafe;
+}
+.msg-block.asst{
+  background:linear-gradient(180deg,rgba(74,222,128,.18) 0%,rgba(34,197,94,.10) 100%);
+  border:1px solid rgba(134,239,172,.45);
+  color:#dcfce7;
+}
+.msg-block.prefix{
+  border:1px dashed rgba(94,234,212,.6);
+  color:#ccfbf1;
+}
+.tok-tag{opacity:.92;font-weight:700;}
+.slot{
+  opacity:.82;
+}
+.format-foot{
+  margin-top:10px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  border-top:1px solid rgba(148,163,184,.28);
+  padding-top:9px;
+}
+.foot-tag{
+  font-size:8px;
+  font-weight:700;
+  letter-spacing:.8px;
+  color:var(--gray-500);
+}
+.foot-pill{
+  padding:4px 8px;
+  border-radius:999px;
+  font-size:8px;
+  font-weight:700;
+  border:1px solid var(--gray-200);
+  background:white;
+  color:var(--navy);
+}
+.flow-step{
+  background:linear-gradient(180deg,#f8fafc 0%,#f1f5f9 100%);
+  border:1px solid var(--gray-200);
+  border-radius:10px;
+  padding:10px 11px;
+}
+.flow-step.train-step{
+  border-left:4px solid #2563eb;
+}
+.flow-step.infer-step{
+  border-left:4px solid #14b8a6;
+}
+.step-top{
+  display:flex;
+  align-items:flex-start;
+  gap:8px;
+  margin-bottom:8px;
+}
+.step-icon{
+  font-size:17px;
+  line-height:1;
+  margin-top:1px;
+  flex-shrink:0;
+}
+.step-kicker{
+  font-size:9px;
+  font-weight:700;
+  color:var(--gray-500);
+  letter-spacing:.9px;
+  margin-bottom:2px;
+}
+.step-title{
+  font-size:11.5px;
+  font-weight:700;
+  color:var(--navy);
+  line-height:1.45;
+}
+.step-detail{
+  font-size:10px;
+  color:var(--gray-700);
+  line-height:1.65;
+}
+.code-card{
+  background:#0f172a;
+  color:#dbeafe;
+  border:1px solid #1e293b;
+  border-radius:8px;
+  padding:9px 10px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:8.5px;
+  line-height:1.75;
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+.inline-code{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;
+  color:#1d4ed8;
+}
+.pill-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:2px;
+}
+.pill{
+  display:inline-flex;
+  align-items:center;
+  border-radius:999px;
+  padding:3px 8px;
+  font-size:9px;
+  font-weight:700;
+  line-height:1.2;
+}
+.pill.user{
+  background:var(--blue-bg);
+  color:#1d4ed8;
+  border:1px solid var(--blue-border);
+}
+.pill.asst{
+  background:var(--green-bg);
+  color:#15803d;
+  border:1px solid var(--green-border);
+}
+.prefix-bar{
+  margin-top:4px;
+  padding:6px 8px;
+  border-radius:8px;
+  background:#ecfeff;
+  border:1px dashed #67e8f9;
+  font-size:9px;
+  color:#155e75;
+  font-weight:700;
+}
+.gen-line{
+  display:flex;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:5px;
+  margin-top:2px;
+}
+.gen-token{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;
+  padding:3px 6px;
+  border-radius:999px;
+  border:1px solid #bbf7d0;
+  background:#f0fdf4;
+  color:#166534;
+}
+.gen-arrow{
+  font-size:12px;
+  color:var(--gray-500);
+}
+</style>
+</head>
+<body>
+<div class="figure-scaler" id="scaler">
+<div class="figure">
+
+  <!-- TOKEN SEQUENCE BAND -->
+  <div class="seq-band">
+    <div class="seq-inner">
+      <div class="seq-indices">
+        <div class="seq-label-col"></div>
+        <div class="index-strip" id="index-strip"></div>
+      </div>
+      <div class="seq-row">
+        <div class="seq-row-label">Token<br>序列</div>
+        <div class="token-strip" id="token-strip"></div>
+      </div>
+      <div class="brackets-row" id="brackets-row"></div>
+      <div class="seq-map-row">
+        <div class="seq-map-pill">Token Sequence</div>
+        <div class="seq-map-arrow">
+          <div class="down">↓</div>
+          <div class="diag">↘ ↙</div>
+        </div>
+        <div class="seq-map-pill">Matrix (Query / Key)</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN BODY -->
+  <div class="fig-body">
+
+    <!-- LEFT LEGEND -->
+    <div class="left-legend">
+      <div class="mask-title-box">Causal Mask 矩陣 M</div>
+      <div class="mask-mini">
+        <div class="mini-grid">
+          <div class="mini-cell on"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+          <div class="mini-cell on"></div><div class="mini-cell on"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+          <div class="mini-cell on"></div><div class="mini-cell on"></div><div class="mini-cell on"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+          <div class="mini-cell on"></div><div class="mini-cell on"></div><div class="mini-cell on"></div><div class="mini-cell on"></div><div class="mini-cell"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+          <div class="mini-cell on"></div><div class="mini-cell on"></div><div class="mini-cell on"></div><div class="mini-cell on"></div><div class="mini-cell on"></div><div class="mini-cell"></div><div class="mini-cell"></div>
+          <div class="mini-cell on"></div><div class="mini-cell on"></div><div class="mini-cell on"></div><div class="mini-cell on"></div><div class="mini-cell on"></div><div class="mini-cell on"></div><div class="mini-cell"></div>
+          <div class="mini-cell on"></div><div class="mini-cell on"></div><div class="mini-cell on"></div><div class="mini-cell on"></div><div class="mini-cell on"></div><div class="mini-cell on"></div><div class="mini-cell on"></div>
+        </div>
+        <div class="mini-formula">j ≤ i</div>
+        <div class="mini-caption">◣ only</div>
+      </div>
+      <div class="legend-stack">
+        <div class="legend-chip"><div class="sw dark"></div>1</div>
+        <div class="legend-chip"><div class="sw light"></div>0</div>
+        <div class="legend-chip"><div class="sw blue"></div>-100</div>
+        <div class="legend-chip"><div class="sw green"></div>CE</div>
+      </div>
+      <div class="loss-strip">
+        <div class="loss-strip-row user"><span>User</span><span>-100</span></div>
+        <div class="loss-strip-row asst"><span>Asst</span><span>CE ✓</span></div>
+      </div>
+    </div>
+
+    <!-- MATRIX PANEL -->
+    <div class="matrix-panel">
+      <div class="matrix-center">
+        <div class="query-label">Query / 行<br>（當前位置 i）</div>
+        <div class="mat-col-header" id="mat-col-header"></div>
+        <div class="mat-col-sub" id="mat-col-sub"></div>
+        <div class="mat-body">
+          <div class="y-ticks" id="y-ticks"></div>
+          <div class="mat-canvas-wrap">
+            <canvas id="mat"></canvas>
+            <div id="x-ticks" class="x-ticks"></div>
+          </div>
+        </div>
+        <div class="x-axis-label">Key / 列（歷史位置 j）</div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="right-panel">
+      <div class="flow-card">
+        <div class="flow-card-head">
+          <h3>訓練流程</h3>
+          <div class="count">Train</div>
+        </div>
+        <div class="flow-card-body">
+          <div class="format-stage train">
+            <div class="format-shell">
+              <div class="format-bar">
+                <span class="format-dot user"></span>
+                <span class="format-dot asst"></span>
+                <span class="format-dot"></span>
+              </div>
+              <div class="format-body">
+                <div class="msg-block user"><span class="tok-tag">&lt;|im_start|&gt;user</span><br><span class="slot">...使用者內容...</span><br><span class="tok-tag">&lt;|im_end|&gt;</span></div>
+                <div class="msg-block asst"><span class="tok-tag">&lt;|im_start|&gt;assistant</span><br><span class="slot">...助理答案...</span><br><span class="tok-tag">&lt;|im_end|&gt;</span></div>
+              </div>
+            </div>
+            <div class="format-foot">
+              <div class="foot-tag">FULL TEMPLATE</div>
+              <div class="foot-pill">user + assistant</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flow-card">
+        <div class="flow-card-head">
+          <h3>推論流程</h3>
+          <div class="count">Infer</div>
+        </div>
+        <div class="flow-card-body">
+          <div class="format-stage infer">
+            <div class="format-shell">
+              <div class="format-bar">
+                <span class="format-dot user"></span>
+                <span class="format-dot asst"></span>
+                <span class="format-dot"></span>
+              </div>
+              <div class="format-body">
+                <div class="msg-block user"><span class="tok-tag">&lt;|im_start|&gt;user</span><br><span class="slot">...使用者內容...</span><br><span class="tok-tag">&lt;|im_end|&gt;</span></div>
+                <div class="msg-block asst prefix"><span class="tok-tag">&lt;|im_start|&gt;assistant</span></div>
+              </div>
+            </div>
+            <div class="format-foot">
+              <div class="foot-tag">OPEN PREFIX</div>
+              <div class="foot-pill">assistant continues</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /figure -->
+</div><!-- /scaler -->
+
+<script>
+/* ── Auto-scale to fit viewport ── */
+(function autoScale(){
+  const DESIGN_W = 1480;
+  const PADDING = 32; // body padding × 2
+  function scale(){
+    const avail = window.innerWidth - PADDING;
+    const s = Math.min(1, avail / DESIGN_W);
+    const scaler = document.getElementById('scaler');
+    scaler.style.transform = `scale(${s})`;
+    scaler.style.transformOrigin = 'top left';
+    // Adjust body height so scrollbar matches scaled content
+    const figH = scaler.offsetHeight * s;
+    document.body.style.minHeight = (figH + PADDING) + 'px';
+  }
+  scale();
+  window.addEventListener('resize', scale);
+})();
+</script>
+
+<script>
+'use strict';
+
+/* ─── Two-turn example ─── */
+const SEGS = [
+  { label:'User 1',       sub:'(Mask)',  type:'u', s:0,  e:11 },
+  { label:'Assistant 1',  sub:'(Train)', type:'a', s:12, e:24 },
+  { label:'User 2',       sub:'(Mask)',  type:'u', s:25, e:35 },
+  { label:'Assistant 2',  sub:'(Train)', type:'a', s:36, e:49 },
+];
+const N = 50;
+const CELL = 8;
+
+/* ─── Token row data
+   Format: { t: displayText, a: isAssistant, i: indexLabel|null }
+   Mirrors the image top token strip exactly
+─── */
+const TOKENS = [
+  // ── User Turn 1 (positions 0–11) ──
+  {t:'<|im_start|>', a:false, i:'0'},
+  {t:'user',         a:false, i:'1'},
+  {t:'\\n',          a:false, i:'2'},
+  {t:'How',          a:false, i:'3'},
+  {t:'are',          a:false, i:'4'},
+  {t:'you',          a:false, i:'5'},
+  {t:'?',            a:false, i:'6'},
+  {t:'<|im_end|>',   a:false, i:null},
+  // ellipsis
+  {t:'…',            a:false, i:null, ell:true},
+  // ── Assistant Turn 1 (12–24) ──
+  {t:'<|im_start|>', a:true,  i:'15'},
+  {t:'assistant',    a:true,  i:'16'},
+  {t:'\\n',          a:true,  i:'17'},
+  {t:'I',            a:true,  i:null},
+  {t:'am',           a:true,  i:null},
+  {t:'fine',         a:true,  i:null},
+  {t:'.',            a:true,  i:null},
+  {t:'<|im_end|>',   a:true,  i:null},
+  {t:'…',            a:true,  i:null, ell:true},
+  // ── User Turn 2 (25–35) ──
+  {t:'.',            a:false, i:'28'},
+  {t:'<|im_end|>',   a:false, i:'29'},
+  {t:'<|im_start|>', a:false, i:'30'},
+  {t:'assistant',    a:false, i:'31'},
+  {t:'\\n',          a:false, i:null},
+  {t:'…',            a:false, i:null, ell:true},
+  // ── Assistant Turn 2 (36–49) ──
+  {t:'<|im_start|>', a:true,  i:'29'},
+  {t:'assistant',    a:true,  i:'30'},
+  {t:'\\n',          a:true,  i:'31'},
+  {t:'I',            a:true,  i:null},
+  {t:'can',          a:true,  i:null},
+  {t:'help',         a:true,  i:null},
+  {t:'you',          a:true,  i:null},
+  {t:'\\ol',         a:true,  i:null},
+  {t:'.',            a:true,  i:null},
+  {t:'<|im_end|>',   a:true,  i:null},
+  {t:'…',            a:true,  i:null, ell:true},
+];
+
+/* ─── Build token row ─── */
+(function(){
+  const idxEl = document.getElementById('index-strip');
+  const tokEl = document.getElementById('token-strip');
+  TOKENS.forEach(d=>{
+    const ix = document.createElement('div');
+    ix.className = 'tok-idx';
+    ix.textContent = d.i || '';
+    idxEl.appendChild(ix);
+
+    const tk = document.createElement('div');
+    tk.className = 'tok'+(d.a?' asst':'')+(d.ell?' ell':'');
+    tk.textContent = d.t;
+    tk.title = d.t;
+    tokEl.appendChild(tk);
+  });
+})();
+
+/* ─── Build turn brackets ─── */
+(function(){
+  const row = document.getElementById('brackets-row');
+  const defs = [
+    {label:'User Turn 1',     sub:'(Mask)',  cls:'u', count:SEGS[0].e-SEGS[0].s+1},
+    {label:'Assistant Turn 1',sub:'(Train)', cls:'a', count:SEGS[1].e-SEGS[1].s+1},
+    {label:'User Turn 2',     sub:'(Mask)',  cls:'u', count:SEGS[2].e-SEGS[2].s+1},
+    {label:'Assistant Turn 2',sub:'(Train)', cls:'a', count:SEGS[3].e-SEGS[3].s+1},
+  ];
+  const total = N;
+  defs.forEach(d=>{
+    const pct = (d.count/total)*100;
+    const g = document.createElement('div');
+    g.className = 'brk-group';
+    g.style.cssText = `flex:0 0 ${pct}%;max-width:${pct}%;`;
+    g.innerHTML = `<div class="brk-line"></div>
+      <div class="brk-label ${d.cls}">${d.label}<br><span class="brk-sub">${d.sub}</span></div>`;
+    row.appendChild(g);
+  });
+})();
+
+/* ─── Column headers above matrix ─── */
+(function(){
+  const hdr = document.getElementById('mat-col-header');
+  const sub = document.getElementById('mat-col-sub');
+  SEGS.forEach(seg=>{
+    const w = (seg.e-seg.s+1)*CELL;
+    const h = document.createElement('div');
+    h.className='col-hdr '+seg.type;
+    h.style.width=w+'px';
+    h.textContent=seg.label;
+    hdr.appendChild(h);
+    const s = document.createElement('div');
+    s.className='col-hdr-sub';
+    s.style.width=w+'px';
+    s.textContent=seg.sub;
+    sub.appendChild(s);
+  });
+})();
+
+/* ─── Canvas matrix ─── */
+(function(){
+  const canvas = document.getElementById('mat');
+  const W = N*CELL, H = N*CELL;
+  canvas.width=W; canvas.height=H;
+  canvas.style.width=W+'px'; canvas.style.height=H+'px';
+  const ctx = canvas.getContext('2d');
+
+  function isAsst(i){ return SEGS.filter(s=>s.type==='a').some(s=>i>=s.s&&i<=s.e); }
+
+  // Draw cells
+  for(let r=0;r<N;r++){
+    for(let c=0;c<N;c++){
+      const vis=c<=r;
+      let fill;
+      if(!vis)          fill='#f1f5f9';        // off-white masked
+      else if(isAsst(r))fill='#4ade80';        // green train rows
+      else               fill='#1c3f7a';        // dark navy user rows
+      ctx.fillStyle=fill;
+      ctx.fillRect(c*CELL,r*CELL,CELL-1,CELL-1);
+    }
+  }
+
+  // Dashed white segment divider lines
+  ctx.save();
+  ctx.setLineDash([3,2]);
+  ctx.strokeStyle='rgba(255,255,255,0.7)';
+  ctx.lineWidth=1;
+  SEGS.slice(1).forEach(seg=>{
+    const p=seg.s*CELL;
+    ctx.beginPath();ctx.moveTo(p,0);ctx.lineTo(p,H);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(0,p);ctx.lineTo(W,p);ctx.stroke();
+  });
+  ctx.restore();
+
+  // Green border around each assistant (Train) segment
+  ctx.strokeStyle='#16a34a';
+  ctx.lineWidth=2;
+  ctx.setLineDash([]);
+  SEGS.filter(s=>s.type==='a').forEach(seg=>{
+    const y1=seg.s*CELL, y2=(seg.e+1)*CELL;
+    const x2=(seg.e+1)*CELL;
+    ctx.strokeRect(1,y1+1,x2-2,y2-y1-2);
+  });
+})();
+
+/* ─── Y-axis ticks ─── */
+(function(){
+  const el=document.getElementById('y-ticks');
+  el.style.height=N*CELL+'px';
+  const vals=[0,10,20,30,40];
+  vals.forEach((v,i)=>{
+    const nextPx = i+1<vals.length ? vals[i+1]*CELL : N*CELL;
+    const div=document.createElement('div');
+    div.className='y-tick-val';
+    div.style.height=(nextPx-v*CELL)+'px';
+    div.textContent=v;
+    el.appendChild(div);
+  });
+})();
+
+/* ─── X-axis ticks ─── */
+(function(){
+  const el=document.getElementById('x-ticks');
+  el.style.width=(N*CELL)+'px';
+  [0,10,20,30,40].forEach(v=>{
+    const s=document.createElement('span');
+    s.className='x-tick-val';
+    s.textContent=v;
+    s.style.left=(v*CELL+CELL/2)+'px';
+    el.appendChild(s);
+  });
+})();
+
+</script>
+</body>
+</html>
