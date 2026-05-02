@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>SFT Mask Verification — Multi-turn Boundary</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f9f8f5; --surface: #fff; --border: #d8d4cc;
+      --text: #1a1612; --muted: #6b6460; --accent: #3b2f4a;
+      --green: #1e6b3c; --green-bg: #d4edda;
+      font-family: "Times New Roman", Times, serif;
+    }
+    body { background: var(--bg); color: var(--text); padding: 40px 32px 64px; line-height: 1.65; }
+    .page { max-width: 860px; margin: 0 auto; }
+    h1 { font-size: 20pt; font-weight: 700; text-align: center; color: var(--accent); margin-bottom: 4px; }
+    .subtitle { text-align: center; font-size: 10.5pt; font-style: italic; color: var(--muted); margin-bottom: 36px; }
+    p { font-size: 11pt; margin-bottom: 10px; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 26px 30px; margin-bottom: 24px; }
+    h3 { font-size: 12pt; font-weight: 700; margin: 22px 0 8px; color: var(--accent); }
+
+    table { width: 100%; border-collapse: collapse; font-size: 10.5pt; margin: 14px 0; }
+    thead th {
+      background: var(--accent); color: white;
+      padding: 9px 12px; text-align: left; font-weight: 600; font-size: 10pt;
+    }
+    tbody td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+    tbody tr:nth-child(even) td { background: #f5f3ef; }
+    tbody tr:last-child td { border-bottom: none; }
+    code { font-family: "Courier New", monospace; font-size: 9pt; }
+
+    .pass { display: inline-block; background: var(--green-bg); color: var(--green);
+      border: 1px solid #6dbb8d; border-radius: 3px; padding: 1px 8px;
+      font-size: 9pt; font-weight: 700; }
+    .sample-row td { background: #ede9e0 !important; font-weight: 700; color: var(--accent); }
+
+    .caption { font-size: 9.5pt; color: var(--muted); font-style: italic; text-align: center; margin-top: 10px; }
+
+    ol { margin-left: 22px; font-size: 10.5pt; line-height: 1.85; margin-top: 10px; }
+  </style>
+</head>
+<body>
+<div class="page">
+  <h1>SFT Mask Verification — Multi-turn</h1>
+  <p class="subtitle">Hybrid Mamba-TuckerMoE · check_mask.py results on 3 held-out samples</p>
+
+  <div class="card">
+    <p>
+      The table below presents automated mask verification results.
+      Every sample passes all four structural invariants, confirming that the
+      ChatML-only loss mask is correctly applied across all assistant turns.
+    </p>
+
+    <h3>Sample-level Summary</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Sample</th>
+          <th>Total tokens</th>
+          <th>Supervised</th>
+          <th>Supervised %</th>
+          <th>Turns</th>
+          <th>Result</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Sample #0</td><td>1,014</td><td>675</td><td>66.6 %</td><td>6</td><td><span class="pass">✓ PASS</span></td></tr>
+        <tr><td>Sample #1</td><td>849</td><td>699</td><td>82.3 %</td><td>4</td><td><span class="pass">✓ PASS</span></td></tr>
+        <tr><td>Sample #2</td><td>824</td><td>661</td><td>80.2 %</td><td>3</td><td><span class="pass">✓ PASS</span></td></tr>
+      </tbody>
+    </table>
+
+    <p>Four invariants verified for every turn in every sample:</p>
+    <ol>
+      <li>Header tokens (<code>&lt;|im_start|&gt;</code>, <code>assistant</code>, <code>\n</code>) are fully masked (<code>label = -100</code>).</li>
+      <li>The <em>first</em> answer token is supervised in every turn.</li>
+      <li>The terminal <code>&lt;|im_end|&gt;</code> at the end of each assistant turn is supervised.</li>
+      <li>All assistant turns are found and processed (multi-turn coverage).</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h3>Turn Boundary Detail — Sample #0 (6 turns)</h3>
+    <p>
+      Each row shows the last header-token index and the first supervised answer-token index for one assistant turn.
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>Turn</th>
+          <th>Last header idx</th>
+          <th>First answer idx</th>
+          <th>Context window</th>
+          <th>Header masked</th>
+          <th>Answer supervised</th>
+        </tr>
+      </thead>
+      <tbody id="turns0"></tbody>
+    </table>
+    <p class="caption">Table: Boundary verification for all 6 assistant turns in Sample #0.
+    The transition from <code>label = -100</code> to supervised occurs precisely at the first answer token.</p>
+  </div>
+
+  <div class="card">
+    <h3>Turn Boundary Detail — Sample #1 (4 turns) &amp; Sample #2 (3 turns)</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>Sample</th>
+          <th>Turn</th>
+          <th>Last header idx</th>
+          <th>First answer idx</th>
+          <th>First answer token</th>
+        </tr>
+      </thead>
+      <tbody id="turns12"></tbody>
+    </table>
+  </div>
+</div>
+<script>
+const t0 = [
+  {turn:'1/6', hdr:35, ans:36, ctx:'…&lt;|im_start|&gt; · ass · istant · \\n → As'},
+  {turn:'2/6', hdr:255, ans:256, ctx:'…&lt;|im_start|&gt; · ass · istant · \\n → As'},
+  {turn:'3/6', hdr:421, ans:422, ctx:'…&lt;|im_start|&gt; · ass · istant · \\n → As'},
+  {turn:'4/6', hdr:598, ans:599, ctx:'…&lt;|im_start|&gt; · ass · istant · \\n → As'},
+  {turn:'5/6', hdr:757, ans:758, ctx:'…&lt;|im_start|&gt; · ass · istant · \\n → As'},
+  {turn:'6/6', hdr:907, ans:908, ctx:'…&lt;|im_start|&gt; · ass · istant · \\n → As'},
+];
+const tbody0 = document.getElementById('turns0');
+t0.forEach(r => {
+  tbody0.innerHTML += `<tr>
+    <td>Turn ${r.turn}</td><td>${r.hdr}</td><td>${r.ans}</td>
+    <td style="font-family:'Courier New',monospace;font-size:9pt;">${r.ctx}</td>
+    <td><span class="pass">✓</span></td><td><span class="pass">✓</span></td>
+  </tr>`;
+});
+
+const t12 = [
+  {s:'#1', turn:'1/4', hdr:26, ans:27, tok:'There'},
+  {s:'#1', turn:'2/4', hdr:373, ans:374, tok:"That"},
+  {s:'#1', turn:'3/4', hdr:679, ans:680, tok:'That'},
+  {s:'#1', turn:'4/4', hdr:784, ans:785, tok:'I'},
+  {s:'#2', turn:'1/3', hdr:31, ans:32, tok:'As'},
+  {s:'#2', turn:'2/3', hdr:455, ans:456, tok:'As'},
+  {s:'#2', turn:'3/3', hdr:672, ans:673, tok:'As'},
+];
+const tbody12 = document.getElementById('turns12');
+let lastS = '';
+t12.forEach(r => {
+  if (r.s !== lastS) {
+    tbody12.innerHTML += `<tr class="sample-row"><td colspan="5">Sample ${r.s}</td></tr>`;
+    lastS = r.s;
+  }
+  tbody12.innerHTML += `<tr>
+    <td></td><td>Turn ${r.turn}</td><td>${r.hdr}</td><td>${r.ans}</td>
+    <td><code>'${r.tok}'</code></td>
+  </tr>`;
+});
+</script>
+</body>
+</html>

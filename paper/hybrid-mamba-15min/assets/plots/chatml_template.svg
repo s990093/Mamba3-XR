@@ -1,0 +1,14 @@
+<svg width="400em" height="0.548em" viewBox="0 0 400000 548" preserveAspectRatio="xMinYMin slice"><style>
+
+                    .math-box{
+                      display:flex;
+                      justify-content:center;
+                      align-items:center;
+                      width:100%;
+                      height:100%;
+                      white-space:nowrap;
+                    }
+                    </style><path d="M0 6l6-6h17c12.688 0 19.313.3 20 1 4 4 7.313 8.3 10 13
+ 35.313 51.3 80.813 93.8 136.5 127.5 55.688 33.7 117.188 55.8 184.5 66.5.688
+ 0 2 .3 4 1 18.688 2.7 76 4.3 172 5h399450v120H429l-6-1c-124.688-8-235-61.7
+-331-161C60.687 138.7 32.312 99.3 7 54L0 41V6z"></path></svg>

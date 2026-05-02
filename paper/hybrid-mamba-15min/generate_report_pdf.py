@@ -19,6 +19,10 @@ OUTPUT_PDF = PROJECT_DIR / "report.pdf"
 DIAGRAM_SPECS = (
     ("prototypes/method_flowchart.html", "assets/method_flowchart.svg"),
     ("prototypes/architecture.html", "assets/images/architecture.svg"),
+    ("prototypes/causal_mask.html", "assets/plots/causal_mask.svg"),
+    ("prototypes/sft_loss_mask.html", "assets/plots/sft_loss_mask.svg"),
+    ("prototypes/sft_mask_verification.html", "assets/plots/sft_mask_verification.svg"),
+    ("prototypes/chatml_template.html", "assets/plots/chatml_template.svg"),
 )
 
 METHOD_PIPELINE_MD = "![Method Pipeline](./assets/method_flowchart.svg)"
@@ -113,6 +117,42 @@ FIGURE_8D_LATEX = r"""
 \centering
 \includegraphics[width=\linewidth]{./assets/uiux/user_story2.png}
 \caption{圖 8d：使用情境模擬（二）。展示不同場景下的裝置擺放與互動方式，說明本應用在有限硬體資源下支援全天候語音查詢的可行性。}
+\end{figure}
+""".strip()
+
+CAUSAL_MASK_MD = "![圖 C1：Causal Attention Mask 矩陣（8-token 示例，下三角結構）](./assets/plots/causal_mask.png)"
+CAUSAL_MASK_LATEX = r"""
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{./assets/plots/causal_mask.pdf}
+\caption{圖 C1：Causal Attention Mask 矩陣（8-token 示例，下三角結構）}
+\end{figure}
+""".strip()
+
+SFT_LOSS_MASK_MD = "![圖 C2：SFT Token 級別 Loss Mask 逐 token 可視化](./assets/plots/sft_loss_mask.png)"
+SFT_LOSS_MASK_LATEX = r"""
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{./assets/plots/sft_loss_mask.pdf}
+\caption{圖 C2：SFT Token 級別 Loss Mask 逐 token 可視化}
+\end{figure}
+""".strip()
+
+SFT_VERIFICATION_MD = "![圖 SFT-V 邊界細節：多輪對話邊界驗證與 SFT 標籤對齊](./assets/plots/sft_mask_verification.png)"
+SFT_VERIFICATION_LATEX = r"""
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{./assets/plots/sft_mask_verification.pdf}
+\caption{圖 SFT-V 邊界細節：多輪對話邊界驗證與 SFT 標籤對齊}
+\end{figure}
+""".strip()
+
+CHATML_TEMPLATE_MD = "![圖 C3：ChatML 對話模板與推論前綴可視化](./assets/plots/chatml_template.png)"
+CHATML_TEMPLATE_LATEX = r"""
+\begin{figure}[H]
+\centering
+\includegraphics[width=\linewidth]{./assets/plots/chatml_template.pdf}
+\caption{圖 C3：ChatML 對話模板與推論前綴可視化}
 \end{figure}
 """.strip()
 
@@ -278,36 +318,39 @@ def render_svg_from_html(
                     """
                 )
 
-                svg_markup = page.eval_on_selector("svg", "el => el.outerHTML")
-                svg_markup = sanitize_svg_markup(svg_markup)
-                mjx_css = page.evaluate(
-                    """
-                    () => {
-                      const el = document.querySelector('style#MJX-SVG-styles');
-                      return el ? el.textContent : '';
-                    }
-                    """
-                )
-                shared_css = """
-                .math-box{
-                  display:flex;
-                  justify-content:center;
-                  align-items:center;
-                  width:100%;
-                  height:100%;
-                  white-space:nowrap;
-                }
-                """
-                svg_markup = embed_runtime_svg_styles(svg_markup, f"{mjx_css}\n{shared_css}")
+                has_svg = page.evaluate("() => document.querySelector('svg') !== null && !document.querySelector('.page')")
                 output_path = PROJECT_DIR / svg_rel_path
                 output_path.parent.mkdir(parents=True, exist_ok=True)
-                output_path.write_text(svg_markup + "\n", encoding="utf-8")
-                print(f"Rendered SVG: {output_path.relative_to(PROJECT_DIR)}")
+
+                if has_svg:
+                    svg_markup = page.eval_on_selector("svg", "el => el.outerHTML")
+                    svg_markup = sanitize_svg_markup(svg_markup)
+                    mjx_css = page.evaluate(
+                        """
+                        () => {
+                          const el = document.querySelector('style#MJX-SVG-styles');
+                          return el ? el.textContent : '';
+                        }
+                        """
+                    )
+                    shared_css = """
+                    .math-box{
+                      display:flex;
+                      justify-content:center;
+                      align-items:center;
+                      width:100%;
+                      height:100%;
+                      white-space:nowrap;
+                    }
+                    """
+                    svg_markup = embed_runtime_svg_styles(svg_markup, f"{mjx_css}\n{shared_css}")
+                    output_path.write_text(svg_markup + "\n", encoding="utf-8")
+                    print(f"Rendered SVG: {output_path.relative_to(PROJECT_DIR)}")
 
                 # Also export high-res PNG fallback.
                 png_path = output_path.with_suffix(".png")
-                svg_el = page.locator("svg").first
-                svg_el.screenshot(path=str(png_path), scale="device")
+                target_el = page.locator("svg").first if has_svg else page.locator(".page, body").first
+                target_el.screenshot(path=str(png_path), scale="device")
                 print(f"Rendered PNG: {png_path.relative_to(PROJECT_DIR)}")
 
                 # Export vector PDF directly from source HTML page after MathJax/CSS
@@ -315,43 +358,66 @@ def render_svg_from_html(
                 size = page.evaluate(
                     """
                     () => {
-                      const svg = document.querySelector("svg");
-                      if (!svg) return { w: 1600, h: 900 };
-                      const vb = svg.viewBox && svg.viewBox.baseVal;
-                      if (vb && vb.width > 0 && vb.height > 0) {
-                        return { w: vb.width, h: vb.height };
+                      const isMainSvg = document.querySelector("svg") !== null && !document.querySelector(".page");
+                      if (isMainSvg) {
+                        const svg = document.querySelector("svg");
+                        const vb = svg.viewBox && svg.viewBox.baseVal;
+                        if (vb && vb.width > 0 && vb.height > 0) {
+                          return { w: vb.width, h: vb.height };
+                        }
                       }
-                      const r = svg.getBoundingClientRect();
+                      const el = document.querySelector(".page") || document.body;
+                      const r = el.getBoundingClientRect();
                       return { w: Math.max(1, r.width), h: Math.max(1, r.height) };
                     }
                     """
                 )
                 w = float(size["w"])
                 h = float(size["h"])
-                page.add_style_tag(
-                    content=f"""
-                    @page {{ margin: 0; }}
-                    html, body {{
-                        margin: 0 !important;
-                        padding: 0 !important;
-                        background: #fff !important;
-                    }}
-                    body {{
-                        display: block !important;
-                    }}
-                    .diagram-wrap {{
-                        margin: 0 !important;
-                        padding: 0 !important;
-                        max-width: none !important;
-                    }}
-                    svg {{
-                        width: {w}px !important;
-                        min-width: 0 !important;
-                        height: {h}px !important;
-                        display: block !important;
-                    }}
-                    """
-                )
+                if has_svg:
+                    page.add_style_tag(
+                        content=f"""
+                        @page {{ margin: 0; }}
+                        html, body {{
+                            margin: 0 !important;
+                            padding: 0 !important;
+                            background: #fff !important;
+                        }}
+                        body {{
+                            display: block !important;
+                        }}
+                        .diagram-wrap {{
+                            margin: 0 !important;
+                            padding: 0 !important;
+                            max-width: none !important;
+                        }}
+                        svg {{
+                            width: {w}px !important;
+                            min-width: 0 !important;
+                            height: {h}px !important;
+                            display: block !important;
+                        }}
+                        """
+                    )
+                else:
+                    # For normal HTML, we want to hide everything outside .page and force its height to be 100vh
+                    page.add_style_tag(
+                        content=f"""
+                        @page {{ margin: 0; size: {w}px {h}px; }}
+                        html, body {{
+                            margin: 0 !important;
+                            padding: 0 !important;
+                            background: #f9f8f5 !important;
+                            width: {w}px !important;
+                            height: {h}px !important;
+                            overflow: hidden !important;
+                        }}
+                        .page {{
+                            margin: 0 auto !important;
+                            padding: 32px !important;
+                        }}
+                        """
+                    )
                 page.wait_for_timeout(1500)
                 pdf_path = output_path.with_suffix(".pdf")
                 page.pdf(
@@ -405,6 +471,10 @@ def build_pdf(
     report_text = report_text.replace(FIGURE_8B_BLOCK_MD, f"```{{=latex}}\n{FIGURE_8B_LATEX}\n```")
     report_text = report_text.replace(FIGURE_8C_BLOCK_MD, f"```{{=latex}}\n{FIGURE_8C_LATEX}\n```")
     report_text = report_text.replace(FIGURE_8D_BLOCK_MD, f"```{{=latex}}\n{FIGURE_8D_LATEX}\n```")
+    report_text = report_text.replace(CAUSAL_MASK_MD, f"```{{=latex}}\n{CAUSAL_MASK_LATEX}\n```")
+    report_text = report_text.replace(SFT_LOSS_MASK_MD, f"```{{=latex}}\n{SFT_LOSS_MASK_LATEX}\n```")
+    report_text = report_text.replace(SFT_VERIFICATION_MD, f"```{{=latex}}\n{SFT_VERIFICATION_LATEX}\n```")
+    report_text = report_text.replace(CHATML_TEMPLATE_MD, f"```{{=latex}}\n{CHATML_TEMPLATE_LATEX}\n```")
     report_text = report_text.replace(
         "./assets/method_flowchart.svg", f"./assets/method_flowchart.{diagram_format}"
     )

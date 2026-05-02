@@ -34,7 +34,7 @@
             min-width: 3rem;
             text-align: right;
           "
-          >01 / 30</span
+          >01 / 44</span
         >
       </div>
       <div class="top-progress" aria-hidden="true">
@@ -42,7 +42,7 @@
       </div>
 
       <!-- ═══════════════════════════════════════════ -->
-      <!-- ██  STAGE: 30 SLIDES                     ██ -->
+      <!-- ██  STAGE: slides (see .slide count)     ██ -->
       <!-- ═══════════════════════════════════════════ -->
       <div class="stage" id="stage">
         <!-- ══════════════════════════════════════════════════════════
@@ -318,6 +318,7 @@
                 <ol class="n" start="8">
                   <li>隱藏狀態定義</li>
                   <li>遞迴更新公式</li>
+                  <li>反向傳播與梯度</li>
                   <li>推論優勢</li>
                 </ol>
               </article>
@@ -1043,72 +1044,138 @@
         </section>
 
         <!-- ══════════════════════════════════════════════════════════
-     SLIDE 04 — Softmax Attention 公式
+     SLIDE 04 — Softmax：意義與 QKV（拆頁 1／2）
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="3">
+        <section class="slide" data-idx="4">
           <div class="inner">
-            <h2 class="t2">萬惡的起源：Softmax Attention</h2>
-            <p class="lead">
-              一切故事的起點——<strong>Vaswani et al. (2017)</strong> 提出的
-              Attention 機制，統治了 NLP 長達數年。
+            <h2 class="t2">
+              萬惡的起源：Softmax Attention<span
+                style="
+                  display: inline;
+                  font-family: var(--sans);
+                  font-size: 0.72em;
+                  color: var(--ink3);
+                  font-weight: normal;
+                "
+                >｜壹</span>
+            </h2>
+            <p class="lead" style="font-size: 1rem">
+              <strong>2017 · Transformer</strong>：一層內用 \(q_i,k_j,v_j\)
+              做<strong>軟加權</strong>聚合全序列；<strong>矩陣式與 \(N^2\)</strong>見下頁。
             </p>
 
-            <div class="eq-highlight">
+            <div class="box accent" style="margin-top: 0.4rem; padding: 0.6rem 0.85rem">
+              <h3 class="t3">意義</h3>
+              <p style="font-size: 0.84rem; margin: 0">
+                <strong>問</strong> \(q_i\) · <strong>比</strong> 各 \(k_j\) → softmax 權重 ·
+                <strong>取</strong> \(\{v_j\}\) 加權和 · 非因果時可直視全序列（遮罩另加）。
+              </p>
+            </div>
+
+            <div class="cols3" style="margin-top: 0.5rem; gap: 0.75rem">
+              <div class="box" style="margin: 0; padding: 0.5rem 0.55rem">
+                <h3 class="t3" style="color: var(--blue)">\(Q\)</h3>
+                <p style="font-size: 0.8rem; margin: 0">
+                  當步「問什麼」· \(q_i\) · \(Q \in \mathbb{R}^{N \times d_k}\)
+                </p>
+              </div>
+              <div class="box" style="margin: 0; padding: 0.5rem 0.55rem">
+                <h3 class="t3" style="color: var(--green)">\(K\)</h3>
+                <p style="font-size: 0.8rem; margin: 0">
+                  被比的「標籤」· \(k_j\) · logit \(= q_i^\top k_j\)
+                </p>
+              </div>
+              <div class="box" style="margin: 0; padding: 0.5rem 0.55rem">
+                <h3 class="t3" style="color: var(--teal)">\(V\)</h3>
+                <p style="font-size: 0.8rem; margin: 0">
+                  被讀出的內容· \(v_j\) · \(V \in \mathbb{R}^{N \times d_v}\)
+                </p>
+              </div>
+            </div>
+
+            <div class="deriv-step" style="margin-top: 0.65rem">
+              <span class="ds-num">↳</span>
+              <strong>嵌入 → \(Q,K,V\)</strong>
+              <div class="eq" style="margin: 0.25rem 0 0">
+                \[Q = XW_Q,\; K = XW_K,\; V = XW_V\]
+              </div>
+              <p style="font-size: 0.76rem; color: var(--ink3); margin: 0.25rem 0 0">
+                \(X\)：\(N\) 個 token 向量堆疊；<strong>Multi-head</strong>＝多組 \((W_Q,W_K,W_V)\)
+                平行再拼。
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 04b — Softmax 公式與 N² 瓶頸（拆頁 2／2）
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="5">
+          <div class="inner">
+            <h2 class="t2">
+              萬惡的起源：Softmax Attention<span
+                style="
+                  display: inline;
+                  font-family: var(--sans);
+                  font-size: 0.72em;
+                  color: var(--ink3);
+                  font-weight: normal;
+                "
+                >｜貳·公式與 \(N^2\)</span>
+            </h2>
+            <p class="lead">
+              把上一頁的「問答／鍵值」直覺，收斂成一條矩陣式；<strong>\(QK^T\)</strong>
+              是長序列下記憶體與計算暴增的<strong>第一道關卡</strong>。
+            </p>
+
+            <div class="eq-highlight" style="margin-top: 0.35rem">
               <div class="eq-label">Standard Softmax Attention</div>
               \[\text{Attention}(Q, K, V) =
               \text{softmax}\!\left(\frac{QK^T}{\sqrt{d_k}}\right) V\]
             </div>
+            <p style="font-size: 0.8rem; color: var(--ink3); margin-top: 0.4rem">
+              對第 \(i\) 個位置：softmax 作用在 logits
+              \(\bigl(q_i^\top k_1,\ldots,q_i^\top k_N\bigr)/\sqrt{d_k}\)，得到對 \(\{v_j\}\)
+              的權重；\(\sqrt{d_k}\)
+              <strong>縮放</strong>可避免 \(d_k\) 變大時內積過大、softmax 過尖。
+            </p>
 
-            <div class="cols" style="margin-top: 1rem">
-              <div>
-                <h3 class="t3">公式拆解</h3>
-                <ul class="b">
-                  <li>
-                    \(Q \in \mathbb{R}^{N \times d_k}\)：Query 矩陣，\(N\)
-                    為序列長度
-                  </li>
-                  <li>\(K \in \mathbb{R}^{N \times d_k}\)：Key 矩陣</li>
-                  <li>\(V \in \mathbb{R}^{N \times d_v}\)：Value 矩陣</li>
-                  <li>
-                    \(QK^T\) 產生
-                    <strong style="color: var(--red)">\(N \times N\)</strong>
-                    的注意力矩陣
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h3 class="t3" style="color: var(--red)">致命瓶頸</h3>
-                <div class="box red">
-                  <p>
-                    <strong>矩陣相乘 \(QK^T\)</strong> 強制綁定了 Sequence
-                    Length \(N\)：
-                  </p>
-                  <ul class="b">
-                    <li>
-                      時間複雜度：<strong style="color: var(--red)"
-                        >\(O(N^2 d_k)\)</strong
-                      >
-                    </li>
-                    <li>
-                      空間複雜度：<strong style="color: var(--red)"
-                        >\(O(N^2)\)</strong
-                      >
-                    </li>
-                    <li>
-                      當 \(N = 16\text{k}\) 時，注意力矩陣佔
-                      <strong>~1 GB</strong> (FP16)
-                    </li>
-                  </ul>
-                </div>
-              </div>
+            <div class="box red" style="margin-top: 0.75rem">
+              <h3 class="t3" style="color: var(--red); margin-bottom: 0.35rem">
+                致命瓶頸（為何稱「萬惡」）
+              </h3>
+              <p style="font-size: 0.87rem; margin-bottom: 0.4rem">
+                必須先形成<strong>全配對</strong> logits 矩陣
+                \(\;QK^T\)，shape 為
+                <strong style="color: var(--red)">\(N \times N\)</strong>；序列長度直接平方進複雜度。
+              </p>
+              <ul class="b" style="font-size: 0.84rem">
+                <li>時間：<strong>\(O(N^2 d_k)\)</strong></li>
+                <li>空間：<strong>\(O(N^2)\)</strong>（儲存或反覆進出 attention 區塊）</li>
+                <li>
+                  例：<strong>\(N=16\text{k}\)</strong>、FP16，單此一塊約
+                  <strong>~1 GB</strong> 量級
+                </li>
+              </ul>
             </div>
+
+            <p
+              style="
+                font-size: 0.8rem;
+                color: var(--ink3);
+                margin-top: 0.65rem;
+                font-style: italic;
+              "
+            >
+              下一頁起用圖把 \(Q \times K^T \to N \times N\) 的「爆炸」畫出來。
+            </p>
           </div>
         </section>
 
         <!-- ══════════════════════════════════════════════════════════
      SLIDE 05 — 複雜度災難
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="4">
+        <section class="slide" data-idx="6">
           <div class="inner">
             <h2 class="t2">複雜度災難：\(QK^T\) 的代價</h2>
             <p class="lead">
@@ -1329,7 +1396,7 @@
         <!-- ══════════════════════════════════════════════════════════
      SLIDE 05b — FlashAttention：硬體優化的極限
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="5">
+        <section class="slide" data-idx="7">
           <div class="inner">
             <h2 class="t2">FlashAttention：硬體優化的極限</h2>
             <p class="lead">
@@ -1543,7 +1610,7 @@
         <!-- ══════════════════════════════════════════════════════════
      SLIDE 06 — AR 推論的夢魘
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="6">
+        <section class="slide" data-idx="8">
           <div class="inner">
             <h2 class="t2">推論的夢魘：KV Cache 問題</h2>
             <p class="lead">
@@ -1725,7 +1792,7 @@
         <!-- ══════════════════════════════════════════════════════════
      SLIDE 07 — 核心提問
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="6">
+        <section class="slide" data-idx="9">
           <div class="inner">
             <div class="section-divider">
               <div class="part-num">Core Question</div>
@@ -1806,7 +1873,7 @@
         <!-- ══════════════════════════════════════════════════════════
      SLIDE 08 — Part 2 Divider
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="7">
+        <section class="slide" data-idx="10">
           <div class="inner">
             <div class="section-divider">
               <div class="part-num">Part 2</div>
@@ -1826,7 +1893,7 @@
         <!-- ══════════════════════════════════════════════════════════
      SLIDE 09 — 重新審視 Attention 求和
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="8">
+        <section class="slide" data-idx="11">
           <div class="inner">
             <h2 class="t2">Step 1：重新審視 Attention 公式</h2>
             <p class="lead">
@@ -1880,9 +1947,134 @@
         </section>
 
         <!-- ══════════════════════════════════════════════════════════
+     SLIDE — QK^T & Causal mask (插在 Step 1 與 Step 2 之間)
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="12">
+          <div class="inner">
+            <h2 class="t2">插頁：\(QK^\top\)  logits 與因果遮罩</h2>
+            <p class="lead">
+              自迴歸語言模型裡，第 \(i\) 個<strong> query</strong> \(q_i\)
+              只能與<strong>目前與過去</strong>的<strong> keys</strong>
+              \(\{k_j: j\le i\}\) 計算相似度；未來位置 \(j>i\) 經過遮罩後在
+              softmax 權重為 0。
+            </p>
+
+            <div class="cols" style="margin-top: 0.55rem; align-items: flex-start">
+              <div>
+                <div class="eq-highlight" style="border-color: var(--blue)">
+                  <div class="eq-label" style="color: var(--blue)">
+                    CAUSAL SOFTMAX ATTENTION
+                  </div>
+                  \[
+                    \mathrm{Attn}(Q,K,V)
+                    = \mathrm{softmax}\left(\frac{QK^T}{\sqrt{d_k}} + M\right)\! V
+                  \]
+                  \[
+                    M_{ij}=
+                    \begin{cases}
+                      0 & j \le i \\
+                      -\infty \;\;(\text{masked}) & j > i
+                    \end{cases}
+                  \]
+                </div>
+                <ul class="b" style="font-size: 0.82rem; margin-top: 0.55rem">
+                  <li>
+                    logits：\((QK^T)_{ij} = q_i^T k_j\)。列 \(i\) 對應
+                    \(q_i\)，欄 \(j\) 對應 \(k_j\)。
+                  </li>
+                  <li>
+                    <strong>上三角</strong>（\(j>i\)）在加到 \(M\) 後變為
+                    \(-\infty\)，softmax
+                    對應機率為 0，等價於<strong>從注意力求和中刪除</strong>這些項。
+                  </li>
+                </ul>
+              </div>
+
+              <div class="box accent" style="margin: 0">
+                <h3 class="t3">視覺化：\(QK^\top\) 上套用因果遮罩</h3>
+                <p style="font-size: 0.8rem; color: var(--ink3); margin-bottom: 0.45rem">
+                  底色 =  softmax 仍可見的有效 logit；灰格 = 被設為 \(-\infty\) 的位置。
+                </p>
+                <div class="qk-causal-root" id="qkCausalViz"></div>
+                <div class="qk-causal-legend">
+                  <span class="qk-lg qk-lg-ok"><i></i>有效 \(q_i^\top k_j\)</span>
+                  <span class="qk-lg qk-lg-diag"><i></i>自注意力（對角）</span>
+                  <span class="qk-lg qk-lg-mask"><i></i>未來／遮罩</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <script>
+            (function () {
+              var root = document.getElementById("qkCausalViz");
+              if (!root || root.dataset.built) return;
+              root.dataset.built = "1";
+              var N = 7;
+              var labels = [];
+              for (var t = 1; t <= N; t++) labels.push(String(t));
+
+              var cap = document.createElement("div");
+              cap.className = "qk-causal-caption";
+              cap.innerHTML =
+                "列：<strong>Q</strong>（query \(i\)）　欄：<strong>K</strong>（key \(j\)）　· 矩陣元 \(\approx (QK^T)_{ij}\)";
+              root.appendChild(cap);
+
+              var mat = document.createElement("div");
+              mat.className = "qk-causal-matrix";
+
+              var top = document.createElement("div");
+              top.className = "qk-causal-row qk-causal-row-head";
+              var corner = document.createElement("div");
+              corner.className = "qk-cqk-corner";
+              corner.innerHTML =
+                "<span></span><span class=\"qk-axis\">Q</span><span class=\"qk-vs\">×</span><span class=\"qk-axis\">K</span>";
+              top.appendChild(corner);
+              for (var j = 0; j < N; j++) {
+                var hj = document.createElement("div");
+                hj.className = "qk-cqk-h";
+                hj.textContent = "k" + labels[j];
+                top.appendChild(hj);
+              }
+              mat.appendChild(top);
+
+              for (var i = 0; i < N; i++) {
+                var row = document.createElement("div");
+                row.className = "qk-causal-row";
+
+                var rl = document.createElement("div");
+                rl.className = "qk-cqk-rowlabel";
+                rl.textContent = "q" + labels[i];
+                row.appendChild(rl);
+
+                for (var jj = 0; jj < N; jj++) {
+                  var cell = document.createElement("div");
+                  cell.className = "qk-cqk-cell";
+                  if (jj < i) {
+                    cell.classList.add("qk-past");
+                    cell.textContent = "·";
+                    cell.title = "j<i：納入 attention";
+                  } else if (jj === i) {
+                    cell.classList.add("qk-diag");
+                    cell.textContent = "·";
+                    cell.title = "j=i：自注意力";
+                  } else {
+                    cell.classList.add("qk-masked");
+                    cell.innerHTML = "−∞";
+                    cell.title = "j>i：因果遮罩";
+                  }
+                  row.appendChild(cell);
+                }
+                mat.appendChild(row);
+              }
+              root.appendChild(mat);
+            })();
+          </script>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
      SLIDE 10 — Softmax 的限制
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="9">
+        <section class="slide" data-idx="13">
           <div class="inner">
             <h2 class="t2">Step 2：Softmax 的限制</h2>
             <p class="lead">
@@ -1925,7 +2117,7 @@
         <!-- ══════════════════════════════════════════════════════════
      SLIDE 11 — Kernel Trick
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="10">
+        <section class="slide" data-idx="14">
           <div class="inner">
             <h2 class="t2">Step 3：Kernel Trick（核方法）</h2>
             <p class="lead">
@@ -1990,7 +2182,7 @@
         <!-- ══════════════════════════════════════════════════════════
      SLIDE 12 — 結合律的魔法
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="11">
+        <section class="slide" data-idx="15">
           <div class="inner">
             <h2 class="t2">Step 4：結合律的魔法 ✨</h2>
             <p class="lead">
@@ -2030,6 +2222,50 @@
               v_j^T}{\phi(q_i)^T \displaystyle\sum_{j=1}^{N} \phi(k_j)}\]
             </div>
 
+            <!-- SVG: Associative Property Visualization -->
+            <svg viewBox="0 0 700 160" width="100%" style="font-family: var(--sans); max-width: 48rem; display: block; margin: 1rem auto;" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="qg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#3B82F6"/><stop offset="100%" stop-color="#1E3A8A"/></linearGradient>
+                <linearGradient id="kg" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#059669"/><stop offset="100%" stop-color="#0D9488"/></linearGradient>
+                <linearGradient id="vg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#D97706"/><stop offset="100%" stop-color="#B45309"/></linearGradient>
+                <linearGradient id="ng" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#DC2626"/><stop offset="100%" stop-color="#991B1B"/></linearGradient>
+                <linearGradient id="dg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#10B981"/><stop offset="100%" stop-color="#047857"/></linearGradient>
+              </defs>
+              <!-- Standard: (QK^T)V -->
+              <g transform="translate(10, 30)">
+                <text x="120" y="-10" text-anchor="middle" font-size="12" font-weight="700" fill="#DC2626">Standard: (Q K^T) V</text>
+                <rect x="0" y="10" width="80" height="80" rx="4" fill="url(#ng)" opacity="0.8"/>
+                <text x="40" y="55" text-anchor="middle" font-size="14" fill="#fff" font-weight="700">N × N</text>
+                <text x="100" y="55" text-anchor="middle" font-size="20" fill="#718096">×</text>
+                <rect x="120" y="10" width="40" height="80" rx="4" fill="url(#vg)" opacity="0.8"/>
+                <text x="140" y="55" text-anchor="middle" font-size="14" fill="#fff" font-weight="700">V</text>
+                <text x="195" y="55" text-anchor="middle" font-size="20" fill="#718096">=</text>
+                <rect x="220" y="10" width="40" height="80" rx="4" fill="#E2E8F0" stroke="#94A3B8" stroke-width="2"/>
+                <text x="240" y="55" text-anchor="middle" font-size="12" fill="#475569" font-weight="700">N × d</text>
+                <text x="120" y="115" text-anchor="middle" font-size="11" fill="#DC2626" font-weight="700">先產生巨大的 N×N 矩陣</text>
+              </g>
+
+              <!-- Arrow -->
+              <g transform="translate(320, 75)">
+                <text x="0" y="0" text-anchor="middle" font-size="24" fill="#718096">→</text>
+                <text x="0" y="-15" text-anchor="middle" font-size="10" fill="#1E3A8A" font-weight="700">結合律轉換</text>
+              </g>
+
+              <!-- Linear: Q(K^TV) -->
+              <g transform="translate(380, 30)">
+                <text x="140" y="-10" text-anchor="middle" font-size="12" font-weight="700" fill="#059669">Linear: Q (K^T V)</text>
+                <rect x="0" y="10" width="40" height="80" rx="4" fill="url(#qg)" opacity="0.8"/>
+                <text x="20" y="55" text-anchor="middle" font-size="14" fill="#fff" font-weight="700">Q</text>
+                <text x="60" y="55" text-anchor="middle" font-size="20" fill="#718096">×</text>
+                <rect x="80" y="25" width="50" height="50" rx="4" fill="url(#dg)" opacity="0.8"/>
+                <text x="105" y="55" text-anchor="middle" font-size="14" fill="#fff" font-weight="700">d × d</text>
+                <text x="150" y="55" text-anchor="middle" font-size="20" fill="#718096">=</text>
+                <rect x="170" y="10" width="40" height="80" rx="4" fill="#E2E8F0" stroke="#94A3B8" stroke-width="2"/>
+                <text x="190" y="55" text-anchor="middle" font-size="12" fill="#475569" font-weight="700">N × d</text>
+                <text x="140" y="115" text-anchor="middle" font-size="11" fill="#059669" font-weight="700">只需產生極小的 d×d 矩陣</text>
+              </g>
+            </svg>
+
             <div class="insight">
               <span class="insight-icon">🎯</span>
               <strong>矩陣乘法的結合律：</strong>運算順序從
@@ -2043,7 +2279,7 @@
         <!-- ══════════════════════════════════════════════════════════
      SLIDE 13 — 提取 Query
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="12">
+        <section class="slide" data-idx="16">
           <div class="inner">
             <h2 class="t2">Step 5：提取 Query — 降維打擊</h2>
             <p class="lead">
@@ -2100,7 +2336,7 @@
         <!-- ══════════════════════════════════════════════════════════
      SLIDE 14 — O(N) 達成
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="13">
+        <section class="slide" data-idx="17">
           <div class="inner">
             <h2 class="t2">Step 6：\(O(N)\) 複雜度正式達成 🎉</h2>
             <p class="lead">
@@ -2206,7 +2442,7 @@
         <!-- ══════════════════════════════════════════════════════════
      SLIDE 15 — 特徵映射 φ(x)
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="14">
+        <section class="slide" data-idx="18">
           <div class="inner">
             <h2 class="t2">Step 7：特徵映射 \(\phi(x)\) 的選擇</h2>
             <p class="lead">
@@ -2265,7 +2501,7 @@
         <!-- ══════════════════════════════════════════════════════════
      SLIDE 16 — 雙重視角
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="15">
+        <section class="slide" data-idx="19">
           <div class="inner">
             <h2 class="t2">Step 8：雙重視角 — Training vs. Inference</h2>
             <p class="lead">
@@ -2333,7 +2569,7 @@
         <!-- ══════════════════════════════════════════════════════════
      SLIDE 17 — Part 3 Divider
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="16">
+        <section class="slide" data-idx="20">
           <div class="inner">
             <div class="section-divider">
               <div class="part-num">Part 3</div>
@@ -2356,7 +2592,7 @@
         <!-- ══════════════════════════════════════════════════════════
      SLIDE 18 — Causal Masking
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="17">
+        <section class="slide" data-idx="21">
           <div class="inner">
             <h2 class="t2">因果遮罩（Causal Masking）的影響</h2>
             <p class="lead">
@@ -2398,7 +2634,7 @@
         <!-- ══════════════════════════════════════════════════════════
      SLIDE 19 — 定義隱藏狀態
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="18">
+        <section class="slide" data-idx="22">
           <div class="inner">
             <h2 class="t2">定義 RNN 的隱藏狀態 (Hidden States)</h2>
             <p class="lead">
@@ -2429,19 +2665,23 @@
             </div>
 
             <div class="box accent" style="margin-top: 0.8rem">
-              <strong>直覺理解：</strong>
-              <ul class="b">
+              <strong>直覺理解：數學符號 \(\sum\) 展開的意義</strong>
+              <ul class="b" style="margin-bottom: 0.5rem">
                 <li>
-                  \(S_i\) 是一個 \(d_k \times d_v\)
-                  的「<strong>記憶矩陣</strong>」，累積了從第 1 到第 \(i\) 個
-                  token 的所有 Key-Value 資訊
+                  數學符號 \(\sum\) 只是在告訴你「它的總內容是什麼」，公式 \(S_i = \sum_{j=1}^{i}\phi(k_j)v_j^T\) 是為了嚴謹地定義：當我們走到第 \(i\) 步時，這個 \(S_i\) 裡面「究竟包含了哪些東西」。
+                </li>
+              </ul>
+              <div class="eq-highlight" style="font-size: 0.9rem; padding: 0.6rem; margin-bottom: 0.5rem">
+                <div style="margin-bottom: 0.3rem">第 1 步的定義：\(S_1 = \phi(k_1)v_1^T\)</div>
+                <div style="margin-bottom: 0.3rem">第 2 步的定義：\(S_2 = \phi(k_1)v_1^T + \phi(k_2)v_2^T\)</div>
+                <div>第 3 步的定義：\(S_3 = \phi(k_1)v_1^T + \phi(k_2)v_2^T + \phi(k_3)v_3^T\)</div>
+              </div>
+              <ul class="b" style="margin-top: 0.5rem">
+                <li>
+                  如果你讓電腦照著定義去算，那第 3 步確實要算 3 次，第 100 步就要算 100 次，這依然是<strong>超慢的寫法</strong>。
                 </li>
                 <li>
-                  \(Z_i\) 是一個用來做歸一化的「<strong>計數向量</strong>」
-                </li>
-                <li>
-                  每當新 token
-                  到來，只需要<strong>更新</strong>這兩個狀態，而非重新計算整個序列
+                  每當新 token 到來，我們必須把這個定義轉成<strong>遞迴形式</strong>，只需要更新狀態，而非重新計算整個序列。
                 </li>
               </ul>
             </div>
@@ -2451,7 +2691,7 @@
         <!-- ══════════════════════════════════════════════════════════
      SLIDE 20 — 遞迴更新 (S_i)
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="19">
+        <section class="slide" data-idx="23">
           <div class="inner">
             <h2 class="t2">遞迴更新公式 — 分子 \(S_i\)</h2>
             <p class="lead">
@@ -2514,7 +2754,7 @@
         <!-- ══════════════════════════════════════════════════════════
      SLIDE 21 — 遞迴更新 (Z_i)
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="20">
+        <section class="slide" data-idx="24">
           <div class="inner">
             <h2 class="t2">遞迴更新公式 — 分母 \(Z_i\) 與輸出</h2>
 
@@ -2579,9 +2819,89 @@
         </section>
 
         <!-- ══════════════════════════════════════════════════════════
+     SLIDE — RNN 基本概念（接上頁 pipeline，對照下一頁「真正的 RNN」）
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="25">
+          <div class="inner">
+            <h2 class="t2">先備知識：什麼是 RNN？</h2>
+            <p class="lead">
+              <strong>RNN（Recurrent Neural Network）</strong>用<strong
+                >固定大小的隱狀態</strong
+              >
+              \(h_t\) 在時間上傳遞記憶：每一步讀進新輸入 \(x_t\)，用<strong
+                >同一組</strong
+              >
+              參數更新狀態。下一張投影片會用到這個數學「樣版」來對照 Linear
+              Attention。
+            </p>
+
+            <div class="cols" style="align-items: flex-start; margin-top: 0.5rem">
+              <div class="deriv-step" style="margin: 0">
+                <span class="ds-num">1</span>
+                <strong>一般形式（抽象）</strong>
+                <div class="eq-highlight" style="margin-top: 0.45rem">
+                  <div class="eq-label">RECURRENT UPDATE</div>
+                  \[
+                    h_t \;=\; f_\theta\bigl(h_{t-1},\, x_t\bigr),\qquad
+                    t = 1,2,\ldots,T
+                  \]
+                  \[y_t \;=\; g_\theta\bigl(h_t\bigr)\quad \text{（可有可無的讀出）}\]
+                </div>
+                <ul class="b" style="font-size: 0.82rem; margin-top: 0.5rem">
+                  <li>
+                    \(h_t\)：時間 \(t\) 的<strong>隱狀態</strong>（歷史的壓縮摘要）
+                  </li>
+                  <li>
+                    \(x_t\)：時間 \(t\) 的<strong>輸入</strong>（例如詞向量）</li>
+                  <li>
+                    <strong>遞迴</strong>＝對每個 \(t\) 套用同一規則
+                    \(f_\theta\)：參數不隨長度倍增。
+                  </li>
+                </ul>
+              </div>
+
+              <div class="deriv-step" style="margin: 0">
+                <span class="ds-num">2</span>
+                <strong>經典 Elman／Vanilla RNN（向量式）</strong>
+                <div class="eq" style="margin-top: 0.45rem">
+                  \[
+                    h_t \;=\; \sigma\!\left(W_h h_{t-1} + W_x x_t + b\right)
+                  \]
+                </div>
+                <p style="font-size: 0.82rem; color: var(--ink3); margin-top: 0.35rem">
+                  \(W_h \in \mathbb{R}^{d_h\times d_h}\)、\(W_x \in
+                  \mathbb{R}^{d_h\times d_x}\)、\(b \in \mathbb{R}^{d_h}\)。\(\sigma\)
+                  常見為 \(\tanh\) 或 ReLU（早期文獻也常寫 logistic sigmoid）。
+                </p>
+                <div class="box red" style="margin-top: 0.55rem">
+                  <h3 class="t3" style="color: var(--red)">對照上上頁的 Linear Attention</h3>
+                  <p style="font-size: 0.82rem; margin-bottom: 0">
+                    你已經看到 <strong>\(S_i = S_{i-1} + \phi(k_i)v_i^T\)</strong>、\(Z_i
+                    =
+                    Z_{i-1}+\phi(k_i)\)——形式上就是「舊狀態 + 可由當步輸入算出的<strong
+                      >加性增量</strong
+                    >」；差別在<strong>對照項</strong>
+                    \(\sigma(W_h h_{t-1}+W_x x_t+b)\)：傳統 RNN 的<strong>活化非線性</strong
+                    >會加重 BPTT 的梯度難題，而這裡的增量是<strong>純加法</strong
+                    >（再配合查表式的分母 \(Z_i\) 與讀出）。
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="insight" style="margin-top: 0.65rem">
+              <strong>心智圖：</strong>因果 Linear Attention =
+              「用矩陣狀態 \(\;S,Z\;\) 存記憶 + 線性增量」；把它放在 RNN 的框架裡講，
+              <strong>下一頁</strong
+              >就是「所以它正是（廣義上）某一類 RNN」的正式對照組。
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
      SLIDE 22 — 真正的 RNN 誕生
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="21">
+        <section class="slide" data-idx="26">
           <div class="inner">
             <h2 class="t2">真正的 RNN 誕生！</h2>
             <p class="lead">
@@ -2633,7 +2953,7 @@
         <!-- ══════════════════════════════════════════════════════════
      SLIDE 23 — 推論優勢
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="22">
+        <section class="slide" data-idx="27">
           <div class="inner">
             <h2 class="t2">推論階段的巨大優勢</h2>
             <p class="lead">
@@ -2691,7 +3011,7 @@
         <!-- ══════════════════════════════════════════════════════════
      SLIDE 24 — 小結：雙重性
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="23">
+        <section class="slide" data-idx="28">
           <div class="inner">
             <h2 class="t2">小結：Linear Attention 的雙重性</h2>
             <p class="lead">一個模型，兩種面貌——這正是它的優雅之處。</p>
@@ -2749,9 +3069,139 @@
         </section>
 
         <!-- ══════════════════════════════════════════════════════════
+     SLIDE 24b — 反向傳播的挑戰
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="29">
+          <div class="inner">
+            <h2 class="t2">反向傳播的挑戰：記憶體退化</h2>
+            <p class="lead">
+              如果我們直接對 \(O(N)\) 的 RNN 遞迴更新使用 Pytorch 等框架的 AutoDiff，會發生什麼事？
+            </p>
+
+            <div class="cols">
+              <div class="box red">
+                <h3 class="t3" style="color: var(--red)">❌ AutoDiff 的盲點</h3>
+                <ul class="b">
+                  <li>為了計算梯度，深度學習框架必須保存<strong>所有前向傳播的計算圖 (Computation Graph)</strong>。</li>
+                  <li>這表示模型必須把每個時間步的隱藏狀態 \(S_1, S_2, \dots, S_N\) 全部存在記憶體中。</li>
+                  <li>每個 \(S_i\) 的大小是 \(d_k \times d_v\)。保存 \(N\) 個狀態 → <strong>記憶體消耗變回 \(O(N \cdot d_k d_v)\)！</strong></li>
+                  <li>這摧毀了我們好不容易達成的固定記憶體優勢。</li>
+                </ul>
+              </div>
+              <div class="box green">
+                <h3 class="t3" style="color: var(--green)">✓ 解決方案：自定義梯度</h3>
+                <ul class="b">
+                  <li>放棄自動微分，<strong>手動推導並實作反向傳播公式</strong>。</li>
+                  <li>我們需要一種算法，能像前向傳播一樣，利用<strong>累積和 (Cumulative Sums)</strong> 來計算梯度。</li>
+                  <li>目標：反向傳播也要達成 \(O(N)\) 計算複雜度與 \(O(1)\) 額外記憶體。</li>
+                </ul>
+              </div>
+            </div>
+            <div class="insight" style="margin-top: 1rem">
+              <span class="insight-icon">💡</span>
+              <strong>核心思想：</strong>不僅前向推論要 RNN 化，反向傳播（Backpropagation）也必須設計對應的恆定記憶體演算法，Linear Attention 才能真正處理無限長序列。
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 24c — 梯度公式推導
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="30">
+          <div class="inner">
+            <h2 class="t2">反向傳播：累積和的奇蹟</h2>
+            <p class="lead">
+              Katharopoulos 等人證明了，梯度同樣可以寫成累積和的形式（從 \(N\) 到 \(1\) 反向累積）。
+            </p>
+
+            <div style="font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--ink2)">
+              假設 \(\nabla_{\bar{V}_i} \mathcal{L}\) 是損失函數對分子 \(\bar{V}_i = \phi(q_i)^T S_i\) 的梯度。
+            </div>
+
+            <div class="cols" style="gap: 1rem">
+              <div>
+                <h3 class="t3">1. 對 Query 的梯度</h3>
+                <div class="eq-highlight" style="border-color: var(--blue)">
+                  \[\nabla_{\phi(Q_i)} \mathcal{L} = \nabla_{\bar{V}_i} \mathcal{L} \left( \sum_{j=1}^i \phi(K_j) V_j^T \right)^T = \nabla_{\bar{V}_i} \mathcal{L} \cdot S_i^T\]
+                </div>
+                <ul class="b" style="font-size: 0.8rem">
+                  <li>直接利用前向傳播已經算好的 \(S_i\)。</li>
+                  <li>無需額外累積。</li>
+                </ul>
+              </div>
+              <div>
+                <h3 class="t3">2. 對 Key 與 Value 的梯度</h3>
+                <div class="eq-highlight" style="border-color: var(--teal)">
+                  \[\nabla_{\phi(K_i)} \mathcal{L} = \left( \sum_{j=i}^N \phi(Q_j) \nabla_{\bar{V}_j} \mathcal{L}^T \right) V_i\]
+                  <div style="height: 0.5rem"></div>
+                  \[\nabla_{V_i} \mathcal{L} = \left( \sum_{j=i}^N \phi(Q_j) \nabla_{\bar{V}_j} \mathcal{L}^T \right)^T \phi(K_i)\]
+                </div>
+              </div>
+            </div>
+
+            <div class="box accent" style="margin-top: 1rem">
+              <strong>觀察紅色項：\(\sum_{j=i}^N (\dots)\)</strong><br>
+              這是一個<strong>反向的累積和</strong>！我們只要從序列結尾 \(N\) 一路往回算到 \(1\)，維護一個類似 \(S_i\) 的狀態矩陣即可。完全不需要儲存所有的中間狀態！
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+     SLIDE 24d — Algorithm 1 演算法視覺化
+     ══════════════════════════════════════════════════════════ -->
+        <section class="slide" data-idx="31">
+          <div class="inner">
+            <h2 class="t2">Algorithm 1：雙向 Cumulative Sums</h2>
+            <p class="lead">
+              結合前向與反向，我們得到了一個極度優雅的 \(O(N)\) 演算法。
+            </p>
+
+            <div class="cols">
+              <div class="vs-card good" style="border-left-color: var(--blue)">
+                <h3 class="t3" style="color: var(--blue)">▶ 前向傳播 (Forward Pass)</h3>
+                <div style="background: var(--bg-code); padding: 0.8rem; border-radius: 6px; font-family: var(--mono); font-size: 0.85rem; color: var(--ink1)">
+                  \(S \leftarrow 0\)<br>
+                  <span style="color: var(--blue)">for</span> \(i = 1 \dots N\) <span style="color: var(--blue)">do</span><br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--green)">// 狀態更新</span><br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;\(S \leftarrow S + \phi(K_i) V_i^T\)<br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--green)">// 計算輸出</span><br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;\(\bar{V}_i \leftarrow \phi(Q_i) S\)<br>
+                  <span style="color: var(--blue)">end</span>
+                </div>
+                <div style="margin-top: 0.5rem; font-size: 0.85rem">
+                  📍 從 \(1 \to N\) 掃描，維護狀態 \(S\)。
+                </div>
+              </div>
+              
+              <div class="vs-card good" style="border-left-color: var(--purple)">
+                <h3 class="t3" style="color: var(--purple)">◀ 反向傳播 (Backward Pass)</h3>
+                <div style="background: var(--bg-code); padding: 0.8rem; border-radius: 6px; font-family: var(--mono); font-size: 0.85rem; color: var(--ink1)">
+                  \(\tilde{S} \leftarrow 0\)<br>
+                  <span style="color: var(--purple)">for</span> \(i = N \dots 1\) <span style="color: var(--purple)">do</span><br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--green)">// 狀態更新</span><br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;\(\tilde{S} \leftarrow \tilde{S} + \phi(Q_i) \nabla_{\bar{V}_i}\mathcal{L}^T\)<br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;<span style="color: var(--green)">// 計算梯度</span><br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;\(\nabla_{V_i}\mathcal{L} \leftarrow \tilde{S}^T \phi(K_i)\)<br>
+                  &nbsp;&nbsp;&nbsp;&nbsp;\(\nabla_{\phi(K_i)}\mathcal{L} \leftarrow \tilde{S} V_i\)<br>
+                  <span style="color: var(--purple)">end</span>
+                </div>
+                <div style="margin-top: 0.5rem; font-size: 0.85rem">
+                  📍 從 \(N \to 1\) 反向掃描，維護狀態 \(\tilde{S}\)。
+                </div>
+              </div>
+            </div>
+
+            <div class="insight" style="margin-top: 1rem">
+              <span class="insight-icon">🏆</span>
+              <strong>演算法分析：</strong>兩次掃描即可完成所有計算，時間複雜度 \(O(N \cdot d^2)\)，空間複雜度 \(O(N \cdot d)\)（只需儲存輸出梯度，無需儲存 \(N\) 個 \(d \times d\) 的中間矩陣）。這徹底解決了長序列訓練的 OOM 問題！
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
      SLIDE 25 — Part 4 Divider
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="24">
+        <section class="slide" data-idx="32">
           <div class="inner">
             <div class="section-divider">
               <div class="part-num">Part 4</div>
@@ -2771,7 +3221,7 @@
         <!-- ══════════════════════════════════════════════════════════
      SLIDE 26 — 實驗設定
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="25">
+        <section class="slide" data-idx="33">
           <div class="inner">
             <h2 class="t2">實驗設定 (Datasets &amp; Tasks)</h2>
             <p class="lead">
@@ -2813,7 +3263,7 @@
         <!-- ══════════════════════════════════════════════════════════
      SLIDE 27 — 記憶體消耗對比
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="26">
+        <section class="slide" data-idx="34">
           <div class="inner">
             <h2 class="t2">記憶體消耗與運算速度</h2>
             <p class="lead">
@@ -3106,7 +3556,7 @@
         <!-- ══════════════════════════════════════════════════════════
      SLIDE 28 — 推論吞吐量
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="27">
+        <section class="slide" data-idx="35">
           <div class="inner">
             <h2 class="t2">推論吞吐量 (Throughput)</h2>
             <p class="lead">
@@ -3183,7 +3633,7 @@
         <!-- ══════════════════════════════════════════════════════════
      SLIDE 29 — 效能權衡
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="28">
+        <section class="slide" data-idx="36">
           <div class="inner">
             <h2 class="t2">效能權衡 (Performance Trade-off)</h2>
             <p class="lead">
@@ -3265,7 +3715,7 @@
         <!-- ══════════════════════════════════════════════════════════
      SLIDE 30 — Part 5 Divider: 啟發與未來
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="29">
+        <section class="slide" data-idx="37">
           <div class="inner">
             <div class="section-divider">
               <div class="part-num">Part 5</div>
@@ -3285,7 +3735,7 @@
         <!-- ══════════════════════════════════════════════════════════
      SLIDE 31 — 致命傷：沒有遺忘機制
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="30">
+        <section class="slide" data-idx="38">
           <div class="inner">
             <h2 class="t2">Linear Attention 的致命傷</h2>
             <p class="lead">
@@ -3342,7 +3792,7 @@
         <!-- ══════════════════════════════════════════════════════════
      SLIDE 32 — RetNet + Mamba-1：記憶機制的進化
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="31">
+        <section class="slide" data-idx="39">
           <div class="inner">
             <h2 class="t2">第二階段：記憶機制的進化</h2>
             <p class="lead">
@@ -3452,7 +3902,7 @@
         <!-- ══════════════════════════════════════════════════════════
      SLIDE 33 — Mamba-2 / SSD：理論統一
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="32">
+        <section class="slide" data-idx="40">
           <div class="inner">
             <h2 class="t2">Mamba-2：狀態空間對偶性 (SSD)</h2>
             <p class="lead">
@@ -3567,7 +4017,7 @@
         <!-- ══════════════════════════════════════════════════════════
      SLIDE 34 — Delta Rule + GDN
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="33">
+        <section class="slide" data-idx="41">
           <div class="inner">
             <h2 class="t2">第三階段：Delta Rule 與 Gated Delta Networks</h2>
             <p class="lead">
@@ -3650,7 +4100,7 @@
         <!-- ══════════════════════════════════════════════════════════
      SLIDE — Grand Unification: Test-Time Regression
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="34">
+        <section class="slide" data-idx="42">
           <div class="inner">
             <h2 class="t2">大一統視角：Test-Time Regression (2025)</h2>
             <p class="lead">
@@ -3970,7 +4420,7 @@
         <!-- ══════════════════════════════════════════════════════════
      SLIDE — 終局 & References & Q&A
      ══════════════════════════════════════════════════════════ -->
-        <section class="slide" data-idx="35">
+        <section class="slide" data-idx="43">
           <div class="inner">
             <h2 class="t2">終局：從一篇論文看整個架構演進</h2>
 
@@ -4137,7 +4587,7 @@
         <button class="nb" id="bn">Next →</button>
         <button class="nb" id="bpa">自動播放</button>
         <div class="pw"><div class="pb" id="pg" style="width: 3.3%"></div></div>
-        <span class="ct" id="ct">01 / 30</span>
+        <span class="ct" id="ct">01 / 44</span>
         <span class="hk"
           ><kbd>←</kbd><kbd>→</kbd> 或 <kbd>Space</kbd> 切換</span
         >

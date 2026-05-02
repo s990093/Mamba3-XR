@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ChatML Dialogue Template — Hybrid Mamba-TuckerMoE</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #f9f8f5;
+      --surface:   #ffffff;
+      --border:    #d8d4cc;
+      --text:      #1a1612;
+      --text-muted:#6b6460;
+      --accent:    #3b2f4a;
+      --green:     #1e6b3c;
+      --green-bg:  #d4edda;
+      --blue:      #1a3a5c;
+      --blue-bg:   #d0e3f5;
+      --purple:    #4a2060;
+      --purple-bg: #e8d5f5;
+      --grey-bg:   #e9e6df;
+      --gold:      #6b4e00;
+      --gold-bg:   #fff3cc;
+      --red-bg:    #fde8e8;
+      --red:       #7c2020;
+      font-family: "Times New Roman", Times, serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      padding: 48px 32px 80px;
+      line-height: 1.7;
+    }
+    .page { max-width: 940px; margin: 0 auto; }
+
+    h1 {
+      font-size: 22pt;
+      font-weight: 700;
+      text-align: center;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      text-align: center;
+      font-size: 11pt;
+      font-style: italic;
+      color: var(--text-muted);
+      margin-bottom: 48px;
+    }
+    h2 {
+      font-size: 15pt;
+      font-weight: 700;
+      margin: 44px 0 12px;
+      border-bottom: 1.5px solid var(--border);
+      padding-bottom: 5px;
+      color: var(--accent);
+    }
+    h3 { font-size: 12pt; font-weight: 700; margin: 24px 0 8px; color: var(--blue); }
+    p { font-size: 11pt; margin-bottom: 10px; }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 28px 32px;
+      margin-bottom: 28px;
+    }
+
+    /* ── Chat Bubble ─────────────────────────────────────────── */
+    .chat-wrap { display: flex; flex-direction: column; gap: 10px; margin: 16px 0; }
+
+    .chat-block { display: flex; flex-direction: column; gap: 3px; }
+
+    .chat-label {
+      font-size: 9pt;
+      font-weight: 700;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      padding: 0 2px;
+    }
+    .chat-label.user { color: var(--blue); }
+    .chat-label.assistant { color: var(--green); }
+    .chat-label.inference { color: var(--purple); }
+
+    .chat-bubble {
+      font-family: "Courier New", monospace;
+      font-size: 10pt;
+      padding: 12px 16px;
+      border-radius: 6px;
+      line-height: 1.6;
+      position: relative;
+      white-space: pre-wrap;
+    }
+    .bubble-user {
+      background: var(--blue-bg);
+      border: 1px solid #5fa0d8;
+      color: var(--blue);
+    }
+    .bubble-assistant {
+      background: var(--green-bg);
+      border: 1px solid #6dbb8d;
+      color: var(--green);
+      margin-left: 32px;
+    }
+    .bubble-inference {
+      background: var(--purple-bg);
+      border: 1.5px dashed #9d6dca;
+      color: var(--purple);
+      margin-left: 32px;
+    }
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 1em;
+      background: var(--purple);
+      vertical-align: bottom;
+      border-radius: 2px;
+      animation: blink 1s step-end infinite;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ── Special token chip ───────────────────────────────────── */
+    .sptok {
+      display: inline;
+      background: rgba(0,0,0,.07);
+      border: 1px solid rgba(0,0,0,.12);
+      border-radius: 3px;
+      padding: 0 4px;
+      font-size: 9.5pt;
+      font-family: "Courier New", monospace;
+    }
+
+    /* ── Annotation table ─────────────────────────────────────── */
+    .anno-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 10.5pt;
+      margin: 16px 0;
+    }
+    .anno-table th {
+      background: var(--accent);
+      color: white;
+      padding: 8px 12px;
+      text-align: left;
+      font-weight: 600;
+    }
+    .anno-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .anno-table tr:nth-child(even) td { background: #f5f3ef; }
+    .anno-table tr:last-child td { border-bottom: none; }
+
+    /* ── Assistant data samples ──────────────────────────────── */
+    .samples-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 14px 0;
+    }
+    @media (max-width: 680px) { .samples-grid { grid-template-columns: 1fr; } }
+
+    .sample-card {
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    .sample-header {
+      background: var(--grey-bg);
+      padding: 6px 12px;
+      font-size: 9.5pt;
+      font-weight: 700;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+    .sample-body {
+      padding: 10px 12px;
+      font-family: "Courier New", monospace;
+      font-size: 9pt;
+      color: var(--text);
+      line-height: 1.55;
+      background: white;
+    }
+    .sample-body .sp { color: var(--purple); font-weight: 700; }
+    .sample-body .ans { color: var(--green); }
+    .sample-body .ellipsis { color: var(--text-muted); font-style: italic; }
+
+    /* ── Math ───────────────────────────────────────────────── */
+    .math-block {
+      background: #f3f0ea;
+      border-left: 3px solid var(--accent);
+      border-radius: 0 4px 4px 0;
+      padding: 12px 18px;
+      margin: 14px 0;
+      font-size: 11pt;
+      overflow-x: auto;
+    }
+
+    .caption {
+      font-size: 10pt;
+      color: var(--text-muted);
+      font-style: italic;
+      text-align: center;
+      margin-top: 8px;
+    }
+
+    hr { border: none; border-top: 1px solid var(--border); margin: 36px 0; }
+
+    .badge-masked {
+      display: inline-block;
+      background: var(--grey-bg);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 1px 7px;
+      font-size: 8.5pt;
+      font-family: "Courier New", monospace;
+    }
+    .badge-sup {
+      display: inline-block;
+      background: var(--green-bg);
+      color: var(--green);
+      border: 1px solid #6dbb8d;
+      border-radius: 3px;
+      padding: 1px 7px;
+      font-size: 8.5pt;
+      font-family: "Courier New", monospace;
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"
+    onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]})"></script>
+</head>
+<body>
+<div class="page">
+
+  <h1>ChatML Dialogue Template &amp; Inference Prefix</h1>
+  <p class="subtitle">Hybrid Mamba-TuckerMoE · §7.2 Heterogeneous Data Normalisation</p>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <h2>§ 1 &nbsp; Unified Dialogue Format</h2>
+
+  <div class="card">
+    <p>
+      All heterogeneous data sources are strictly mapped to the same ChatML dialogue syntax.
+      This ensures that every token, regardless of its origin dataset, follows an identical
+      structural grammar — eliminating format drift, role collapse, and multilingual garbage
+      decoding observed in mixed-template experiments.
+    </p>
+
+    <h3>Single-turn Template</h3>
+    <p>
+      For single-turn question-answer pairs the normalised template is:
+    </p>
+
+    <div class="chat-wrap">
+      <div class="chat-block">
+        <div class="chat-label user">User</div>
+        <div class="chat-bubble bubble-user"><span class="sptok">&lt;|im_start|&gt;</span>user
+<em>… user content …</em><span class="sptok">&lt;|im_end|&gt;</span></div>
+      </div>
+      <div class="chat-block">
+        <div class="chat-label assistant">Assistant</div>
+        <div class="chat-bubble bubble-assistant"><span class="sptok">&lt;|im_start|&gt;</span>assistant
+<em>… assistant answer …</em><span class="sptok">&lt;|im_end|&gt;</span></div>
+      </div>
+    </div>
+
+    <h3>Multi-turn Template</h3>
+    <p>
+      Multi-turn dialogues concatenate multiple user–assistant pairs.
+      The model sees the complete history as context but receives gradients
+      only on assistant answer tokens.
+    </p>
+
+    <div class="chat-wrap">
+      <div class="chat-block">
+        <div class="chat-label user">User (Turn 1)</div>
+        <div class="chat-bubble bubble-user"><span class="sptok">&lt;|im_start|&gt;</span>user
+<em>… first question …</em><span class="sptok">&lt;|im_end|&gt;</span></div>
+      </div>
+      <div class="chat-block">
+        <div class="chat-label assistant">Assistant (Turn 1)</div>
+        <div class="chat-bubble bubble-assistant"><span class="sptok">&lt;|im_start|&gt;</span>assistant
+<em>… first answer …</em><span class="sptok">&lt;|im_end|&gt;</span></div>
+      </div>
+      <div class="chat-block">
+        <div class="chat-label user">User (Turn 2)</div>
+        <div class="chat-bubble bubble-user"><span class="sptok">&lt;|im_start|&gt;</span>user
+<em>… follow-up question …</em><span class="sptok">&lt;|im_end|&gt;</span></div>
+      </div>
+      <div class="chat-block">
+        <div class="chat-label assistant">Assistant (Turn 2)</div>
+        <div class="chat-bubble bubble-assistant"><span class="sptok">&lt;|im_start|&gt;</span>assistant
+<em>… second answer …</em><span class="sptok">&lt;|im_end|&gt;</span></div>
+      </div>
+    </div>
+
+    <p class="caption">Figure T-1: ChatML-only dialogue template.
+    <span class="sptok">&lt;|im_start|&gt;</span> (id 32000) opens a role block;
+    <span class="sptok">&lt;|im_end|&gt;</span> (id 32001) closes it and — when
+    following an assistant answer — receives a supervised label so the model
+    learns when to stop generating.</p>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <h2>§ 2 &nbsp; Inference Prefix — Open-ended Completion</h2>
+
+  <div class="card">
+    <p>
+      At inference time we feed only the <em>open assistant prefix</em> and let the
+      model continue generating.  The terminal <code>&lt;|im_end|&gt;</code> token
+      is withheld; the model must predict it to stop:
+    </p>
+
+    <div class="chat-wrap">
+      <div class="chat-block">
+        <div class="chat-label user">User (context)</div>
+        <div class="chat-bubble bubble-user"><span class="sptok">&lt;|im_start|&gt;</span>user
+<em>… user content …</em><span class="sptok">&lt;|im_end|&gt;</span></div>
+      </div>
+      <div class="chat-block">
+        <div class="chat-label inference">Model continues from here ▼</div>
+        <div class="chat-bubble bubble-inference"><span class="sptok">&lt;|im_start|&gt;</span>assistant
+<span class="cursor"></span></div>
+      </div>
+    </div>
+
+    <p style="margin-top:12px;">
+      The dashed purple box marks the <em>open-ended assistant prefix</em>:
+      the model has received the role boundary tokens but no answer content yet,
+      so it must generate the full reply and end with
+      <code>&lt;|im_end|&gt;</code> (id 32001) to signal completion.
+    </p>
+
+    <div class="math-block">
+      $$
+      \underbrace{\texttt{&lt;|im\_start|&gt;}\,\texttt{assistant}\,\texttt{\textbackslash n}}_{\text{prefix (given, not supervised)}}
+      \;\xrightarrow{\text{model generates}}\;
+      \underbrace{w_1\;w_2\;\cdots\;w_T\;\texttt{&lt;|im\_end|&gt;}}_{\text{auto-regressive output}}
+      $$
+    </div>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <h2>§ 3 &nbsp; Representative Assistant Segments</h2>
+
+  <div class="card">
+    <p>
+      The following four segments are drawn from the SFT training pool
+      (<code>mix_a25_u75_cot_hf</code>).  Each begins immediately after the
+      assistant header tokens and ends at <code>&lt;|im_end|&gt;</code>.
+    </p>
+
+    <div class="samples-grid">
+      <div class="sample-card">
+        <div class="sample-header"><span>Segment 1</span><span>UltraChat</span></div>
+        <div class="sample-body">
+<span class="sp">&lt;|im_start|&gt;assistant\n</span><span class="ans">1. Influencer marketing: Companies are collaborating...</span><span class="ellipsis"> …(continues)</span><span class="sp">&lt;|im_end|&gt;</span>
+        </div>
+      </div>
+      <div class="sample-card">
+        <div class="sample-header"><span>Segment 2</span><span>UltraChat</span></div>
+        <div class="sample-body">
+<span class="sp">&lt;|im_start|&gt;assistant\n</span><span class="ans">As an AI language model, I don't have personal opinions...</span><span class="ellipsis"> …</span><span class="sp">&lt;|im_end|&gt;</span>
+        </div>
+      </div>
+      <div class="sample-card">
+        <div class="sample-header"><span>Segment 3</span><span>UltraChat</span></div>
+        <div class="sample-body">
+<span class="sp">&lt;|im_start|&gt;assistant\n</span><span class="ans">As an AI language model, I can say that relying solely on traditional...</span><span class="ellipsis"> …</span><span class="sp">&lt;|im_end|&gt;</span>
+        </div>
+      </div>
+      <div class="sample-card">
+        <div class="sample-header"><span>Segment 4</span><span>UltraChat</span></div>
+        <div class="sample-body">
+<span class="sp">&lt;|im_start|&gt;assistant\n</span><span class="ans">As an AI language model, I can say that keeping up with the latest marketing trends...</span><span class="ellipsis"> …</span><span class="sp">&lt;|im_end|&gt;</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="caption">Figure T-2: Representative assistant segments from the SFT training pool,
+    normalised to ChatML syntax.  Every segment begins with the assistant header
+    (masked, <span class="badge-masked">label = −100</span>) and ends with
+    <code>&lt;|im_end|&gt;</code> (supervised, <span class="badge-sup">label = token_id</span>),
+    ensuring the model learns to generate the stop token in every turn.</p>
+  </div>
+
+  <!-- ════════════════════════════════════════════════════════ -->
+  <h2>§ 4 &nbsp; Token Annotation Summary</h2>
+
+  <div class="card">
+    <table class="anno-table">
+      <thead>
+        <tr>
+          <th>Token / Region</th>
+          <th>Input ID</th>
+          <th>Label</th>
+          <th>Role in SFT</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>&lt;|im_start|&gt;</code></td>
+          <td>32000</td>
+          <td class="badge-masked">−100</td>
+          <td>Opens role block; always masked — model sees it as pure context</td>
+        </tr>
+        <tr>
+          <td><code>user</code> / <code>assistant</code> (role tokens)</td>
+          <td>BPE sub-tokens</td>
+          <td class="badge-masked">−100</td>
+          <td>Role identifier; part of the structural grammar, not the answer</td>
+        </tr>
+        <tr>
+          <td><code>\n</code> (after role)</td>
+          <td>10</td>
+          <td class="badge-masked">−100</td>
+          <td>Delimiter newline; masked along with the header</td>
+        </tr>
+        <tr>
+          <td>User question tokens</td>
+          <td>BPE</td>
+          <td class="badge-masked">−100</td>
+          <td>Context only; gradient flows back through attention / SSM state but no direct loss</td>
+        </tr>
+        <tr>
+          <td>Assistant answer tokens</td>
+          <td>BPE</td>
+          <td class="badge-sup">token_id</td>
+          <td>Primary learning signal — all answer tokens supervised</td>
+        </tr>
+        <tr>
+          <td><code>&lt;|im_end|&gt;</code> (after assistant)</td>
+          <td>32001</td>
+          <td class="badge-sup">32001</td>
+          <td>Stop signal — supervised so the model learns when to stop</td>
+        </tr>
+        <tr>
+          <td><code>[PAD]</code></td>
+          <td>32006</td>
+          <td class="badge-masked">−100</td>
+          <td>Batch-alignment padding; always masked</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="caption">Table T-1: Token-level label assignment during ChatML-only SFT.
+    The invariant that <code>&lt;|im_end|&gt;</code> is always supervised prevents
+    the model from generating indefinitely after an assistant turn.</p>
+  </div>
+
+</div>
+</body>
+</html>
