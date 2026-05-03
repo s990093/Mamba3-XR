@@ -1,0 +1,1054 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Times New Roman", Times, serif;
+        font-size: 13px;
+        background: #fff;
+        color: #111;
+        padding: 28px 32px;
+        line-height: 1.5;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .page-title {
+        font-size: 21px;
+        font-weight: bold;
+        text-align: center;
+        margin-bottom: 8px;
+        letter-spacing: 0.01em;
+      }
+      .page-subtitle {
+        font-size: 12px;
+        text-align: center;
+        color: #444;
+        margin-bottom: 28px;
+        font-style: italic;
+        max-width: 820px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .section-title {
+        font-size: 16px;
+        font-weight: bold;
+        font-style: italic;
+        color: #1a4a8a;
+        margin-bottom: 12px;
+      }
+
+      /* Legend */
+      .legend-box {
+        border: 1.5px solid #777;
+        border-radius: 4px;
+        padding: 10px 14px;
+        font-size: 11px;
+        background: #fafafa;
+        display: inline-block;
+      }
+      .legend-title {
+        font-weight: bold;
+        font-size: 12px;
+        margin-bottom: 7px;
+        text-align: center;
+        font-style: italic;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        margin-bottom: 4px;
+      }
+      .swatch {
+        width: 20px;
+        height: 13px;
+        border: 1px solid #999;
+        flex-shrink: 0;
+        display: inline-block;
+      }
+      .sw-white {
+        background: #fff;
+      }
+      .sw-gray {
+        background: #888;
+      }
+      .sw-green {
+        background: #b6d9b6;
+        border-color: #7ab47a;
+      }
+      .sw-blue {
+        background: #c7daf5;
+        border-color: #7aabdd;
+      }
+      .sw-yellow {
+        background: #f5eab0;
+        border-color: #c8b44a;
+      }
+
+      /* 6.2：勿 width:100% 撐滿 center-wrap，否則匯出 PNG 會含大量左右留白 */
+      .section-62 {
+        margin-bottom: 28px;
+        width: max-content;
+        max-width: 100%;
+      }
+
+      .token-table {
+        border-collapse: collapse;
+        font-size: 11px;
+        width: max-content;
+        max-width: 100%;
+      }
+      .token-table th,
+      .token-table td {
+        border: 1px solid #bbb;
+        padding: 4px 5px;
+        text-align: center;
+        white-space: nowrap;
+      }
+      .token-table th {
+        background: #efefef;
+        font-weight: bold;
+        font-family: "Times New Roman", Times, serif;
+      }
+      .token-table td.rh {
+        background: #efefef;
+        font-weight: bold;
+        text-align: left;
+        padding-left: 8px;
+      }
+      .tc-sp {
+        background: #f5eab0;
+      }
+      .tc-u {
+        background: #dce8fb;
+      }
+      .tc-a {
+        background: #d6ecd6;
+      }
+      .bk-u {
+        background: #dce8fb;
+        font-weight: bold;
+      }
+      .bk-a {
+        background: #b6d9b6;
+        font-weight: bold;
+      }
+
+      .foot-legend {
+        display: flex;
+        justify-content: center;
+        gap: 22px;
+        font-size: 11px;
+        margin-top: 8px;
+        margin-bottom: 20px;
+      }
+
+      /* 6.3 + 6.4：整列寬度收斂為內容寬（避免 legend+矩陣 置中後兩側空框被算進 bbox） */
+      .mid-row {
+        display: flex;
+        gap: 36px;
+        align-items: flex-start;
+        width: max-content;
+        max-width: 100%;
+      }
+
+      /* 6.3 Mask */
+      .mask-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .y-label {
+        writing-mode: vertical-rl;
+        transform: rotate(180deg);
+        font-size: 10px;
+        font-style: italic;
+        color: #555;
+        text-align: center;
+      }
+      .mask-table {
+        border-collapse: collapse;
+        font-size: 9.5px;
+        font-family: "Times New Roman", Times, serif;
+      }
+      .mask-table th,
+      .mask-table td {
+        width: 30px;
+        height: 23px;
+        border: 1px solid #ccc;
+        text-align: center;
+        vertical-align: middle;
+        padding: 0;
+      }
+      .mask-table th {
+        background: #efefef;
+        font-size: 9px;
+      }
+      .mask-table td.rl {
+        background: #efefef;
+        font-weight: bold;
+        font-size: 9px;
+        width: 30px;
+      }
+      .c-w {
+        background: #fff;
+      }
+      .c-g {
+        background: #888;
+      }
+      .c-d {
+        border: none !important;
+        background: transparent !important;
+        font-size: 12px;
+        color: #777;
+      }
+      .ftr-u {
+        background: #dce8fb;
+        font-weight: bold;
+        font-size: 9px;
+        border: 1px solid #aaa;
+        text-align: center;
+        height: 20px;
+      }
+      .ftr-a {
+        background: #b6d9b6;
+        font-weight: bold;
+        font-size: 9px;
+        border: 1px solid #aaa;
+        text-align: center;
+        height: 20px;
+      }
+      .ftr-x {
+        border: none !important;
+        background: transparent !important;
+      }
+
+      /* 6.4 Loss Mask */
+      .loss-inner {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+      }
+      .loss-table {
+        border-collapse: collapse;
+        font-size: 11px;
+        font-family: "Times New Roman", Times, serif;
+      }
+      .loss-table th,
+      .loss-table td {
+        border: 1px solid #bbb;
+        padding: 3px 12px;
+        text-align: center;
+        height: 22px;
+        min-width: 70px;
+      }
+      .loss-table th {
+        background: #efefef;
+        font-weight: bold;
+      }
+      .lc-n {
+        background: #c7daf5;
+      }
+      .lc-v {
+        background: #b6d9b6;
+      }
+      .lc-s {
+        background: #f5eab0;
+      }
+
+      .ann-col {
+        display: flex;
+        flex-direction: column;
+        padding-top: 26px; /* Align with table header height */
+        font-size: 10.5px;
+        font-family: "Times New Roman", Times, serif;
+      }
+      .ann-g {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 0;
+      }
+      .ann-br {
+        display: flex;
+        align-items: center;
+        width: 12px;
+        flex-shrink: 0;
+      }
+      .ann-txt {
+        line-height: 1.2;
+      }
+      .c-blue {
+        color: #1a4a8a;
+        font-weight: bold;
+      }
+      .c-green {
+        color: #1f6b1f;
+        font-weight: bold;
+      }
+
+      /* Bracket SVG helper */
+      .brk-svg {
+        stroke: #444;
+        stroke-width: 1.2;
+        fill: none;
+        stroke-linecap: round;
+      }
+
+      /* 勿用 (…, 100%)：父層 shrink-to-fit 時 % 常退化成視窗寬，匯出圖會被撐成整個 viewport 留白 */
+      .center-wrap {
+        max-width: 1320px;
+        margin: 0 auto;
+        position: relative;
+        padding-bottom: 40px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+      /* 供報告 PNG/PDF export：與 prototypes/causal_mask.html 一致對齊 .page bbox */
+      .page {
+        display: inline-block;
+        margin: 0 auto;
+        width: max-content;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+    <div class="center-wrap">
+      <!-- ── 1.1 Token Sequence ── -->
+      <div class="section-62">
+        <div class="section-title">1.1 Token Sequence and Block Index</div>
+        <table class="token-table">
+          <thead>
+            <tr>
+              <th style="text-align: left; min-width: 100px">Position ID</th>
+              <th>0</th>
+              <th>1</th>
+              <th>2</th>
+              <th>3</th>
+              <th>4</th>
+              <th>5</th>
+              <th>6</th>
+              <th>7</th>
+              <th>8</th>
+              <th>9</th>
+              <th>…</th>
+              <th>…</th>
+              <th>…</th>
+              <th>…</th>
+              <th>N−4</th>
+              <th>N−3</th>
+              <th>N−2</th>
+              <th>N−1</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="rh">Token</td>
+              <td class="tc-sp">&lt;|im_start|&gt;</td>
+              <td class="tc-u">user</td>
+              <td class="tc-u">\n</td>
+              <td class="tc-u">Q</td>
+              <td class="tc-u">1</td>
+              <td class="tc-u">…</td>
+              <td class="tc-u">…</td>
+              <td class="tc-u">?</td>
+              <td class="tc-sp">&lt;|im_end|&gt;</td>
+              <td class="tc-sp">\n &lt;|im_start|&gt;</td>
+              <td class="tc-a">assistant</td>
+              <td class="tc-a">\n</td>
+              <td class="tc-a">…</td>
+              <td class="tc-a">…</td>
+              <td class="tc-a">…</td>
+              <td class="tc-a">…</td>
+              <td class="tc-a">…</td>
+              <td class="tc-sp">&lt;|im_end|&gt;</td>
+            </tr>
+            <tr>
+              <td class="rh">Block Type</td>
+              <td colspan="8" class="bk-u" style="text-align: center">
+                U1 (User)
+              </td>
+              <td colspan="3" class="bk-a" style="text-align: center">
+                A1 (Assistant)
+              </td>
+              <td colspan="2" class="bk-u" style="text-align: center">
+                U2 (User)
+              </td>
+              <td class="bk-a" style="text-align: center">A2</td>
+              <td class="bk-u" style="text-align: center">U3</td>
+              <td class="bk-a" style="text-align: center">A3</td>
+              <td class="bk-u" style="text-align: center">U4</td>
+              <td class="bk-a" style="text-align: center">A4</td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="foot-legend">
+          <div class="legend-item">
+            <span class="swatch sw-blue"></span> User — no loss
+          </div>
+          <div class="legend-item">
+            <span class="swatch sw-green"></span> Assistant — compute loss
+          </div>
+          <div class="legend-item">
+            <span class="swatch sw-yellow"></span> Special Token — compute loss
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 6.3 + 6.4 ── -->
+      <div class="mid-row">
+        <!-- Legend Column -->
+        <div style="flex-shrink: 0; padding-top: 30px">
+          <div
+            class="legend-box"
+            style="width: 240px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05)"
+          >
+            <div class="legend-title">Legend</div>
+            <div class="legend-item">
+              <span class="swatch sw-white"></span> Attention Allowed
+            </div>
+            <div class="legend-item">
+              <span class="swatch sw-gray"></span> Attention Blocked
+            </div>
+            <div
+              style="
+                margin: 8px 0 5px;
+                font-weight: bold;
+                font-style: italic;
+                border-top: 1px solid #ddd;
+                padding-top: 5px;
+              "
+            >
+              Loss Mask System
+            </div>
+            <div class="legend-item">
+              <span class="swatch sw-green"></span> Compute Loss (Label Valid)
+            </div>
+            <div class="legend-item">
+              <span class="swatch sw-blue"></span> Skip Loss (Label = −100)
+            </div>
+            <div class="legend-item">
+              <span class="swatch sw-yellow"></span> Special Token (Compute
+              Loss)
+            </div>
+          </div>
+        </div>
+
+        <!-- 1.2 -->
+        <div>
+          <div class="section-title">
+            1.2 Causal Mask Matrix (Causal Attention Mechanism)
+          </div>
+          <div class="mask-wrapper">
+            <div class="y-label">Query Position (Row)</div>
+            <table class="mask-table">
+              <thead>
+                <tr>
+                  <th style="border: none; background: transparent"></th>
+                  <th>0</th>
+                  <th>1</th>
+                  <th>2</th>
+                  <th>3</th>
+                  <th>4</th>
+                  <th>5</th>
+                  <th>6</th>
+                  <th>7</th>
+                  <th>8</th>
+                  <th>9</th>
+                  <th>10</th>
+                  <th>11</th>
+                  <th class="c-d">…</th>
+                  <th class="c-d">…</th>
+                  <th>N−4</th>
+                  <th>N−3</th>
+                  <th>N−2</th>
+                  <th>N−1</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="rl">0</td>
+                  <td class="c-w"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-d">…</td>
+                  <td class="c-d">…</td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                </tr>
+                <tr>
+                  <td class="rl">1</td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-d">…</td>
+                  <td class="c-d">…</td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                </tr>
+                <tr>
+                  <td class="rl">2</td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-d">…</td>
+                  <td class="c-d">…</td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                </tr>
+                <tr>
+                  <td class="rl">3</td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-d">…</td>
+                  <td class="c-d">…</td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                </tr>
+                <tr>
+                  <td class="rl">4</td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-d">…</td>
+                  <td class="c-d">…</td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                </tr>
+                <tr>
+                  <td class="rl">5</td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-d">…</td>
+                  <td class="c-d">…</td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                </tr>
+                <tr>
+                  <td class="rl">6</td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-d">…</td>
+                  <td class="c-d">…</td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                </tr>
+                <tr>
+                  <td class="rl">7</td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-d">…</td>
+                  <td class="c-d">…</td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                </tr>
+                <tr>
+                  <td class="rl">8</td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-d">…</td>
+                  <td class="c-d">…</td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                </tr>
+                <tr>
+                  <td class="rl">9</td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-d">…</td>
+                  <td class="c-d">…</td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                </tr>
+                <tr>
+                  <td class="rl">10</td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-g"></td>
+                  <td class="c-d">…</td>
+                  <td class="c-d">…</td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                </tr>
+                <tr>
+                  <td class="rl">11</td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-d">…</td>
+                  <td class="c-d">…</td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                </tr>
+                <tr>
+                  <td class="rl">12</td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-d">…</td>
+                  <td class="c-d">…</td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                </tr>
+                <tr>
+                  <td class="c-d" style="text-align: center">⋮</td>
+                  <td class="c-d" colspan="12" style="text-align: center">⋮</td>
+                  <td class="c-d">…</td>
+                  <td class="c-d">…</td>
+                  <td class="c-d" colspan="4" style="text-align: center">⋮</td>
+                </tr>
+                <tr>
+                  <td class="rl">N−4</td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-d">…</td>
+                  <td class="c-d">…</td>
+                  <td class="c-w"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                </tr>
+                <tr>
+                  <td class="rl">N−3</td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-d">…</td>
+                  <td class="c-d">…</td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-g"></td>
+                  <td class="c-g"></td>
+                </tr>
+                <tr>
+                  <td class="rl">N−2</td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-d">…</td>
+                  <td class="c-d">…</td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-g"></td>
+                </tr>
+                <tr>
+                  <td class="rl">N−1</td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-d">…</td>
+                  <td class="c-d">…</td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                  <td class="c-w"></td>
+                </tr>
+                <!-- Block footer alignment with 6.2 -->
+                <tr>
+                  <td class="ftr-x"></td>
+                  <td colspan="8" class="ftr-u">U1</td>
+                  <td colspan="3" class="ftr-a">A1</td>
+                  <td colspan="1" class="ftr-u">U2</td>
+                  <td colspan="1" class="ftr-a">A2</td>
+                  <td class="c-d"></td>
+                  <td colspan="1" class="ftr-u">U3</td>
+                  <td colspan="1" class="ftr-a">A3</td>
+                  <td colspan="1" class="ftr-u">U4</td>
+                  <td colspan="1" class="ftr-a">A4</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- 6.4 -->
+        <div>
+          <div class="section-title">
+            1.3 Loss Mask Vector<br /><em
+              style="font-size: 11px; font-weight: normal"
+              >(Loss computed only within Assistant blocks)</em
+            >
+          </div>
+          <div class="loss-inner">
+            <table class="loss-table">
+              <thead>
+                <tr>
+                  <th>↑ Label ID ↓</th>
+                </tr>
+              </thead>
+              <tbody>
+                <!-- U1: 8 tokens -->
+                <tr>
+                  <td class="lc-n">−100</td>
+                </tr>
+                <tr>
+                  <td class="lc-n">−100</td>
+                </tr>
+                <tr>
+                  <td class="lc-n">−100</td>
+                </tr>
+                <tr>
+                  <td class="lc-n">−100</td>
+                </tr>
+                <tr>
+                  <td class="lc-n">−100</td>
+                </tr>
+                <tr>
+                  <td class="lc-n">−100</td>
+                </tr>
+                <tr>
+                  <td class="lc-n">−100</td>
+                </tr>
+                <tr>
+                  <td class="lc-n">−100</td>
+                </tr>
+                <!-- A1: 3 tokens -->
+                <tr>
+                  <td class="lc-v">Valid</td>
+                </tr>
+                <tr>
+                  <td class="lc-v">Valid</td>
+                </tr>
+                <tr>
+                  <td class="lc-s">Special</td>
+                </tr>
+                <!-- U2: 2 tokens -->
+                <tr>
+                  <td class="lc-n">−100</td>
+                </tr>
+                <tr>
+                  <td class="lc-n">−100</td>
+                </tr>
+                <!-- A2: 1 token -->
+                <tr>
+                  <td class="lc-v">Valid</td>
+                </tr>
+                <!-- U3: 1 token (N-4) -->
+                <tr>
+                  <td class="lc-n">−100</td>
+                </tr>
+                <!-- A3: 1 token (N-3) -->
+                <tr>
+                  <td class="lc-v">Valid</td>
+                </tr>
+                <!-- U4: 1 token (N-2) -->
+                <tr>
+                  <td class="lc-n">−100</td>
+                </tr>
+                <!-- A4: 1 token (N-1) -->
+                <tr>
+                  <td class="lc-s">Special</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div class="ann-col">
+              <!-- U1: 8 rows * 22px = 176px -->
+              <div class="ann-g" style="height: 176px">
+                <div class="ann-br">
+                  <svg
+                    width="12"
+                    height="156"
+                    viewBox="0 0 12 156"
+                    class="brk-svg"
+                  >
+                    <path
+                      d="M10 2 C 2 2, 2 2, 2 10 L 2 73 C 2 78, 0 78, 0 78 C 0 78, 2 78, 2 83 L 2 146 C 2 154, 2 154, 10 154"
+                    />
+                  </svg>
+                </div>
+                <div class="ann-txt">
+                  <div class="c-blue">U1: Skip Loss</div>
+                  <div style="color: #555">(User Block)</div>
+                </div>
+              </div>
+              <!-- A1: 3 rows * 22px = 66px -->
+              <div class="ann-g" style="height: 66px">
+                <div class="ann-br">
+                  <svg
+                    width="12"
+                    height="46"
+                    viewBox="0 0 12 46"
+                    class="brk-svg"
+                  >
+                    <path
+                      d="M10 2 C 2 2, 2 2, 2 6 L 2 18 C 2 23, 0 23, 0 23 C 0 23, 2 23, 2 28 L 2 40 C 2 44, 2 44, 10 44"
+                    />
+                  </svg>
+                </div>
+                <div class="ann-txt">
+                  <div class="c-green">A1: Compute Loss</div>
+                  <div style="color: #555">(Assistant)</div>
+                </div>
+              </div>
+              <!-- U2: 2 rows * 22px = 44px -->
+              <div class="ann-g" style="height: 44px">
+                <div class="ann-br">
+                  <svg
+                    width="12"
+                    height="24"
+                    viewBox="0 0 12 24"
+                    class="brk-svg"
+                  >
+                    <path
+                      d="M10 2 C 2 2, 2 2, 2 4 L 2 7 C 2 12, 0 12, 0 12 C 0 12, 2 12, 2 17 L 2 20 C 2 22, 2 22, 10 22"
+                    />
+                  </svg>
+                </div>
+                <div class="ann-txt"><div class="c-blue">U2: Skip</div></div>
+              </div>
+              <!-- A2: 1 row * 22px = 22px -->
+              <div class="ann-g" style="height: 22px">
+                <div class="ann-br">
+                  <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 12 12"
+                    class="brk-svg"
+                  >
+                    <path
+                      d="M10 1 C 2 1, 2 1, 2 2 L 2 4 C 2 6, 0 6, 0 6 C 0 6, 2 6, 2 8 L 2 10 C 2 11, 2 11, 10 11"
+                    />
+                  </svg>
+                </div>
+                <div class="ann-txt"><div class="c-green">A2: Loss</div></div>
+              </div>
+              <div
+                style="
+                  text-align: center;
+                  color: #999;
+                  font-size: 14px;
+                  height: 18px;
+                  margin: 2px 0;
+                "
+              >
+                ⋮
+              </div>
+              <!-- U3..A4 (Summary for end) 4 rows * 22px = 88px -->
+              <div class="ann-g" style="height: 88px">
+                <div class="ann-br">
+                  <svg
+                    width="12"
+                    height="66"
+                    viewBox="0 0 12 66"
+                    class="brk-svg"
+                  >
+                    <path
+                      d="M10 2 C 2 2, 2 2, 2 8 L 2 28 C 2 33, 0 33, 0 33 C 0 33, 2 33, 2 38 L 2 58 C 2 64, 2 64, 10 64"
+                    />
+                  </svg>
+                </div>
+                <div class="ann-txt">
+                  <div style="font-weight: bold; color: #333">U3–A4 Blocks</div>
+                  <div style="color: #555">(N−4 to N−1)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- /mid-row -->
+    </div>
+    </div>
+  </body>
+</html>
