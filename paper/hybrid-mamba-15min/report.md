@@ -1,7 +1,5 @@
 ---
-title: "Hybrid Mamba-TuckerMoE: Scaling Language Model Capacity under Constant Compute via Tensor Decomposition"
-author:
-  - 賴泓瑋
+title: "Breaking the Memory Wall: Compute-Bound TuckerMoE for Hybrid State Space Models — Mamba-3 + Sparse GQA Transformer with Cross-Expert Tucker MoE"
 date: "2026年5月"
 ---
 
@@ -1678,26 +1676,84 @@ _表 SFT-V-a：樣本層級彙總。_
 
 _表 SFT-V-b：四項結構不變性（列舉為通過／未通過，不以符號標記）。_
 
-| 樣本 | （i）Header（`< | im_start | >`、`assistant`、換行）均為 `label = -100` | （ii）每輪首個 answer token 受監督 | （iii）每輪末尾 `< | im_end | >` 受監督 | （iv）多輪助理區塊全數辨識 |
-| :--- | :-------------- | :------- | :----------------------------------------- | :--------------------------------- | ------------------ | ------ | --------- | -------------------------- |
-| #0   | 通過            | 通過     | 通過                                       | 通過                               |
-| #1   | 通過            | 通過     | 通過                                       | 通過                               |
-| #2   | 通過            | 通過     | 通過                                       | 通過                               |
+```{=latex}
+\begin{table}[H]
+\centering
+\footnotesize
+\renewcommand{\arraystretch}{1.25}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{>{\raggedright\arraybackslash}p{0.07\textwidth}
+                >{\raggedright\arraybackslash}p{0.30\textwidth}
+                >{\raggedright\arraybackslash}p{0.20\textwidth}
+                >{\raggedright\arraybackslash}p{0.20\textwidth}
+                >{\raggedright\arraybackslash}p{0.20\textwidth}}
+\hline
+\textbf{樣本} &
+\textbf{（i）} Header（\texttt{<|im\_start|>}、\texttt{assistant}、換行）均為 \texttt{label = -100} &
+\textbf{（ii）} 每輪首個 answer token 受監督 &
+\textbf{（iii）} 每輪末尾 \texttt{<|im\_end|>} 受監督 &
+\textbf{（iv）} 多輪助理區塊全數辨識 \\
+\hline
+\texttt{\#0} & 通過 & 通過 & 通過 & 通過 \\
+\hline
+\texttt{\#1} & 通過 & 通過 & 通過 & 通過 \\
+\hline
+\texttt{\#2} & 通過 & 通過 & 通過 & 通過 \\
+\hline
+\end{tabular}
+\end{table}
+```
 
 （i）—（iv）語意與 §7.2.3 loss mask 一致：header 不計 loss；須從「第一個實質答案 token」開始計入 CE；終止 token 須受監督以利學會停輸出；對話中所有 `<|im_start|>assistant` 區塊皆須納入驗證範圍。
+
+```{=latex}
+% Keep the subsection title + caption + table together when possible
+\Needspace{18\baselineskip}
+```
 
 ##### 輪次邊界明細 — Sample #0（6 輪）
 
 _表 SFT-V-c：`Last header idx` 為該輪 assistant header 區段之最末 token 索引；`First answer idx` 為該輪第一個受監督答案 token 之索引（應為 `Last header idx + 1`）。語境摘要欄僅截取切詞語境，對應 `\n` 後首答起點。_
 
-| 輪次 | 末個 header token 索引 | 首個受監督 answer 索引 | 語境摘要（切詞語境） | Header 區段不計 CE（−100） | 答案區段受監督                 |
-| ---- | ---------------------: | ---------------------: | -------------------- | -------------------------- | ------------------------------ | --- | --- |
-| 1/6  |                     35 |                     36 | `… <                 | im_start                   | >`、`assistant`、`\n` 後為首答 | 是  | 是  |
-| 2/6  |                    255 |                    256 | 同上結構             | 是                         | 是                             |
-| 3/6  |                    421 |                    422 | 同上結構             | 是                         | 是                             |
-| 4/6  |                    598 |                    599 | 同上結構             | 是                         | 是                             |
-| 5/6  |                    757 |                    758 | 同上結構             | 是                         | 是                             |
-| 6/6  |                    907 |                    908 | 同上結構             | 是                         | 是                             |
+```{=latex}
+\begin{table}[H]
+\centering
+\footnotesize
+\renewcommand{\arraystretch}{1.25}
+\setlength{\tabcolsep}{3pt}
+\setlength{\extrarowheight}{1pt}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+\newcolumntype{C}{>{\centering\arraybackslash}p{0.075\linewidth}}
+\newcolumntype{R}{>{\raggedleft\arraybackslash}p{0.11\linewidth}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}p{0.14\linewidth}}
+\resizebox{\linewidth}{!}{%
+\begin{tabularx}{\linewidth}{C R R L Y Y}
+\hline
+\textbf{輪次} &
+\textbf{末個 header token 索引} &
+\textbf{首個受監督 answer 索引} &
+\textbf{語境摘要（切詞語境）} &
+\textbf{Header 區段不計 CE（$-100$）} &
+\textbf{答案區段受監督} \\
+\hline
+1/6 & 35 & 36 &
+\texttt{...<|im\_start|>}、\texttt{assistant}、換行後為首答 &
+是 & 是 \\
+\hline
+2/6 & 255 & 256 & 同上結構 & 是 & 是 \\
+\hline
+3/6 & 421 & 422 & 同上結構 & 是 & 是 \\
+\hline
+4/6 & 598 & 599 & 同上結構 & 是 & 是 \\
+\hline
+5/6 & 757 & 758 & 同上結構 & 是 & 是 \\
+\hline
+6/6 & 907 & 908 & 同上結構 & 是 & 是 \\
+\hline
+\end{tabularx}%
+}
+\end{table}
+```
 
 ##### 輪次邊界明細 — Sample #1（4 輪）與 Sample #2（3 輪）
 
